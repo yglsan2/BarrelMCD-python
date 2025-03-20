@@ -1,0 +1,9 @@
+PyQt6>=6.4.0
+PyQt6-Qt6>=6.4.0
+PyQt6-sip>=13.4.0
+reportlab>=3.6.8  # Pour l'export PDF
+Pillow>=9.3.0     # Pour le traitement d'images
+cairosvg>=2.7.1   # Pour l'export SVG
+sqlalchemy>=2.0.0
+python-i18n>=0.3.9
+networkx>=3.0
