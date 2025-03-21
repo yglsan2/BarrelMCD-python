@@ -210,513 +210,237 @@ class EntityTemplates:
         return matches / total if total > 0 else 0.0
 
 class DataAnalyzer:
-    """Classe responsable de l'analyse intelligente des données pour générer le MCD."""
-    
     def __init__(self):
-        self.entity_templates = EntityTemplates()
+        """Initialise l'analyseur de données."""
         self.detected_entities = {}
         self.detected_relations = []
-        self.nlp_patterns = {
-            "fr": {
-                "verbes_possession": [
-                    "avoir", "posséder", "contenir", "inclure", "comprendre",
-                    "gérer", "administrer", "superviser", "diriger"
-                ],
-                "verbes_appartenance": [
-                    "appartenir", "faire partie", "dépendre", "être lié",
-                    "être rattaché", "être associé", "être affilié"
-                ],
-                "verbes_composition": [
-                    "composer", "constituer", "former", "regrouper",
-                    "assembler", "structurer", "organiser"
-                ],
-                "verbes_action": [
-                    "créer", "modifier", "supprimer", "consulter",
-                    "valider", "annuler", "traiter", "gérer"
-                ],
-                "indicateurs_temporels": [
-                    "date", "période", "durée", "début", "fin",
-                    "création", "modification", "suppression"
-                ],
-                "indicateurs_etat": [
-                    "statut", "état", "phase", "étape", "niveau",
-                    "progression", "avancement"
-                ],
-                "indicateurs_quantite": [
-                    "nombre", "quantité", "montant", "total", "somme",
-                    "moyenne", "minimum", "maximum"
-                ]
-            }
-        }
+        self.templates = EntityTemplate()
+
+    def analyze_data(self, data: Union[pd.DataFrame, Dict], format_type: str = "csv") -> Dict:
+        """Analyse des données pour générer un modèle conceptuel.
         
-        self.entity_patterns = {
-            "acteur": {
-                "keywords": ["utilisateur", "client", "employé", "personne"],
-                "attributes": ["id", "nom", "prénom", "email", "téléphone"],
-                "actions": ["créer", "modifier", "supprimer", "consulter"]
-            },
-            "document": {
-                "keywords": ["facture", "commande", "devis", "contrat"],
-                "attributes": ["numéro", "date", "montant", "statut"],
-                "actions": ["générer", "valider", "annuler"]
-            },
-            "produit": {
-                "keywords": ["article", "bien", "service", "item"],
-                "attributes": ["référence", "nom", "prix", "stock"],
-                "actions": ["ajouter", "modifier", "supprimer"]
-            }
-        }
-        
-        self.relation_patterns = {
-            "possession": ["avoir", "posséder", "détenir"],
-            "composition": ["contenir", "inclure", "composer"],
-            "action": ["créer", "modifier", "gérer", "utiliser"],
-            "association": ["participer", "appartenir", "travailler"]
-        }
-        
-        self.cardinality_patterns = {
-            "one_to_one": [
-                r"unique", r"exclusif", r"seul", r"un et un seul"
-            ],
-            "one_to_many": [
-                r"plusieurs", r"multiple", r"tous les", r"chaque"
-            ],
-            "many_to_many": [
-                r"plusieurs .* plusieurs", r"multiple .* multiple"
-            ]
-        }
-        
-        self.business_rules = {
-            "commerce": {
-                "entites_obligatoires": ["client", "produit", "commande"],
-                "relations_typiques": [
-                    ("client", "commande", "MANY_TO_ONE"),
-                    ("produit", "commande", "MANY_TO_MANY")
-                ],
-                "attributs_calcules": {
-                    "commande": ["montant_total", "nombre_articles"],
-                    "produit": ["stock_disponible", "prix_ttc"]
-                }
-            },
-            "rh": {
-                "entites_obligatoires": ["employe", "departement", "poste"],
-                "relations_typiques": [
-                    ("employe", "departement", "MANY_TO_ONE"),
-                    ("employe", "poste", "MANY_TO_ONE")
-                ],
-                "attributs_calcules": {
-                    "departement": ["nombre_employes", "masse_salariale"],
-                    "employe": ["anciennete", "conges_restants"]
-                }
-            }
-        }
-        
-        self.semantic_patterns = {
-            "n_ary_indicators": {
-                "verbs": ["participe", "implique", "relie", "connecte", "associe", "intervient"],
-                "prepositions": ["entre", "parmi", "avec", "pour"],
-                "conjunctions": ["et", "ou", "ainsi que", "comme"],
-                "quantifiers": ["plusieurs", "multiples", "divers", "différents"]
-            },
-            "temporal_patterns": {
-                "sequence": ["avant", "après", "pendant", "durant", "lors de"],
-                "frequency": ["toujours", "jamais", "parfois", "souvent"],
-                "duration": ["pendant", "durant", "pour", "jusqu'à"]
-            },
-            "business_rules": {
-                "commerce": {
-                    "mandatory_entities": ["Client", "Produit", "Commande", "Facture"],
-                    "typical_relations": {
-                        "Commande_Produit_Client": {
-                            "type": "n_ary",
-                            "entities": ["Commande", "Produit", "Client"],
-                            "attributes": ["quantite", "prix_unitaire", "date_commande"]
-                        }
-                    }
-                },
-                "medical": {
-                    "mandatory_entities": ["Patient", "Medecin", "Consultation", "Traitement"],
-                    "typical_relations": {
-                        "Prescription_Patient_Medicament": {
-                            "type": "n_ary",
-                            "entities": ["Patient", "Medicament", "Medecin"],
-                            "attributes": ["dosage", "frequence", "duree"]
-                        }
-                    }
-                },
-                "education": {
-                    "mandatory_entities": ["Etudiant", "Cours", "Professeur", "Note"],
-                    "typical_relations": {
-                        "Evaluation_Etudiant_Cours": {
-                            "type": "n_ary",
-                            "entities": ["Etudiant", "Cours", "Professeur"],
-                            "attributes": ["note", "date_evaluation", "commentaire"]
-                        }
-                    }
-                }
-            }
-        }
-        
-    def analyze_data(self, data: Any, format_type: str = "json") -> Dict:
-        """Analyse les données et génère un MCD."""
-        # Réinitialiser les détections
+        Args:
+            data: Données à analyser (DataFrame ou dictionnaire)
+            format_type: Type de format des données ("csv" ou "json")
+            
+        Returns:
+            Dict: Modèle conceptuel détecté
+        """
+        # Réinitialiser l'état
         self.detected_entities = {}
         self.detected_relations = []
-
-        # Convertir les données en dictionnaire
-        data_dict = self._convert_to_dict(data, format_type)
-
-        # Analyser la structure
-        self._analyze_structure(data_dict)
-
-        # Valider le modèle
-        self._validate_model()
-
-        return {
-            "entities": self.detected_entities,
-            "relations": self.detected_relations
-        }
-
-    def _convert_to_dict(self, data: Any, format_type: str) -> Dict:
-        """Convertit les données dans un format dictionnaire."""
+        
+        # Convertir en DataFrame si nécessaire
         if format_type == "json":
-            if isinstance(data, str):
-                return json.loads(data)
-            return data
-        elif format_type == "xml":
-            if isinstance(data, str):
-                root = ET.fromstring(data)
-            else:
-                root = data
-            return self._xml_to_dict(root)
+            data_dict = data
+            for entity_name, value in data_dict.items():
+                # Normaliser le nom de l'entité (singulier)
+                entity_name = self._normalize_entity_name(entity_name)
+                if isinstance(value, list) and len(value) > 0:
+                    self._analyze_entity(entity_name, value[0])
         else:
-            raise ValueError(f"Format non supporté: {format_type}")
-
-    def _xml_to_dict(self, element: ET.Element) -> Dict:
-        """Convertit un élément XML en dictionnaire."""
-        result = {}
-        for child in element:
-            if len(child) > 0:
-                if child.tag in result:
-                    if not isinstance(result[child.tag], list):
-                        result[child.tag] = [result[child.tag]]
-                    result[child.tag].append(self._xml_to_dict(child))
-                else:
-                    result[child.tag] = self._xml_to_dict(child)
+            if isinstance(data, pd.DataFrame):
+                self._analyze_dataframe(data)
             else:
-                result[child.tag] = child.text
-        return result
-
-    def _analyze_structure(self, data: Dict) -> None:
-        """Analyse la structure des données."""
-        for key, value in data.items():
-            if isinstance(value, list) and len(value) > 0:
-                # C'est probablement une collection d'entités
-                entity_name = key.rstrip('s')  # Enlever le 's' final si présent
-                self._analyze_entity(entity_name, value[0])
-            elif isinstance(value, dict):
-                # C'est soit une entité unique, soit un objet imbriqué
-                self._analyze_entity(key, value)
-
+                raise ValueError("Format de données non supporté")
+        
         # Détecter les relations
         self._detect_relations(data)
+        
+        # Construire le modèle final
+        return {
+            "entities": self.detected_entities,
+            "relations": self.detected_relations,
+            "hierarchies": [rel for rel in self.detected_relations if rel["type"] == "INHERITANCE"]
+        }
 
     def _analyze_entity(self, name: str, data: Dict) -> None:
-        """Analyse une entité et ses attributs."""
+        """Analyse une entité et ses attributs.
+        
+        Args:
+            name: Nom de l'entité
+            data: Données de l'entité
+        """
         if name not in self.detected_entities:
+            # Créer l'entité
             entity = {
                 "name": name,
                 "attributes": [],
                 "primary_key": []
             }
-
+            
+            # Détecter le template correspondant
+            template = self.templates.find_matching_template(name, list(data.keys()))
+            if template:
+                entity.update(template)
+            
             # Analyser les attributs
             for attr_name, attr_value in data.items():
                 attribute = self._analyze_attribute(attr_name, attr_value)
-                if attribute:
-                    entity["attributes"].append(attribute)
-                    if "id" in attr_name.lower() or attr_name.lower() == "id":
-                        entity["primary_key"].append(attr_name)
-
+                entity["attributes"].append(attribute)
+                if "PRIMARY KEY" in attribute["constraints"]:
+                    entity["primary_key"].append(attribute["name"])
+            
             self.detected_entities[name] = entity
 
-    def _analyze_attribute(self, name: Union[str, List[str]], value: Any = None) -> Dict:
+    def _analyze_attribute(self, name_or_words: Union[str, List[str]], value: Any = None) -> Dict:
         """Analyse un attribut pour déterminer son type et ses contraintes.
         
         Args:
-            name: Nom de l'attribut ou liste de mots-clés
+            name_or_words: Nom de l'attribut ou liste de mots-clés
             value: Valeur de l'attribut (optionnel)
             
         Returns:
-            Dict: Informations sur l'attribut
+            Dict: Informations sur l'attribut avec:
+                - name: Nom normalisé de l'attribut
+                - type: Type de données (DECIMAL, INTEGER, VARCHAR, etc.)
+                - constraints: Liste des contraintes (PRIMARY KEY, NOT NULL, etc.)
+                - size: Taille spécifique pour les types VARCHAR/CHAR
+                - enum_values: Valeurs possibles pour les types énumérés
         """
-        # Si name est une liste, utiliser le premier mot comme nom
-        if isinstance(name, list):
-            name = name[0]
+        # Normaliser l'entrée
+        if isinstance(name_or_words, list):
+            name = name_or_words[0]
+            words = name_or_words
+        else:
+            name = name_or_words
+            words = [name]
             
-        # Initialiser les informations de l'attribut
+        # Normaliser le nom
+        name = self._normalize_attribute_name(name)
+        
+        # Initialiser les informations
         attr_info = {
             "name": name,
-            "type": "string",  # Type par défaut
-            "constraints": []
+            "type": "VARCHAR(255)",  # Type par défaut avec taille
+            "constraints": [],
+            "size": None,
+            "enum_values": None
         }
         
-        # Détecter le type à partir du nom
-        if "_id" in name.lower() or name.lower().endswith("id"):
-            attr_info["type"] = "integer"
-            attr_info["constraints"].append("NOT NULL")
-            if name.lower() == "id":
-                attr_info["constraints"].append("PRIMARY KEY")
-        elif "date" in name.lower():
-            attr_info["type"] = "date"
-        elif "prix" in name.lower() or "montant" in name.lower():
-            attr_info["type"] = "DECIMAL"  # En majuscules pour correspondre au test
+        # Détecter le type à partir des mots-clés
+        if any(word in name for word in ["prix", "montant", "total", "cout", "price", "amount"]):
+            attr_info["type"] = "DECIMAL(10,2)"
             attr_info["constraints"].append("CHECK (value >= 0)")
-        elif "email" in name.lower():
-            attr_info["type"] = "string"
+        elif any(word in name for word in ["id", "code", "reference"]):
+            attr_info["type"] = "INTEGER"
+            attr_info["constraints"].append("NOT NULL")
+            if name == "id":
+                attr_info["constraints"].append("PRIMARY KEY")
+        elif any(word in name for word in ["date", "created", "updated", "deleted"]):
+            attr_info["type"] = "DATETIME"
+        elif any(word in name for word in ["email", "mail"]):
+            attr_info["type"] = "VARCHAR(100)"
             attr_info["constraints"].append("UNIQUE")
+        elif any(word in name for word in ["description", "commentaire", "contenu", "content"]):
+            attr_info["type"] = "TEXT"
+        elif any(word in name for word in ["actif", "valide", "active", "valid", "enabled"]):
+            attr_info["type"] = "BOOLEAN"
+            attr_info["constraints"].extend([
+                "NOT NULL",
+                "DEFAULT 'OUI'",
+                "CHECK (value IN ('OUI', 'NON'))"
+            ])
+        elif any(word in name for word in ["status", "etat", "state"]):
+            attr_info["type"] = "ENUM('ACTIF', 'INACTIF', 'EN_ATTENTE')"
+            attr_info["enum_values"] = ["ACTIF", "INACTIF", "EN_ATTENTE"]
         
         # Affiner le type à partir de la valeur si fournie
         if value is not None:
             if isinstance(value, bool):
-                attr_info["type"] = "boolean"
+                attr_info["type"] = "BOOLEAN"
+                attr_info["constraints"].extend([
+                    "NOT NULL",
+                    "DEFAULT 'OUI'",
+                    "CHECK (value IN ('OUI', 'NON'))"
+                ])
             elif isinstance(value, int):
-                attr_info["type"] = "integer"
+                if attr_info["type"] != "DECIMAL(10,2)":  # Ne pas écraser DECIMAL
+                    attr_info["type"] = "INTEGER"
             elif isinstance(value, float):
-                attr_info["type"] = "DECIMAL"  # En majuscules pour correspondre au test
+                attr_info["type"] = "DECIMAL(10,2)"
             elif isinstance(value, str):
                 try:
                     pd.to_datetime(value)
-                    attr_info["type"] = "date"
+                    attr_info["type"] = "DATETIME"
                 except:
-                    attr_info["type"] = "string"
+                    # Ajuster la taille du VARCHAR en fonction de la longueur maximale
+                    max_length = len(value)
+                    if max_length > 255:
+                        attr_info["type"] = "TEXT"
+                    else:
+                        attr_info["type"] = f"VARCHAR({max(255, max_length)})"
+                        attr_info["size"] = max(255, max_length)
+        
+        # Ajouter des contraintes supplémentaires
+        if name.endswith("_id"):
+            referenced_table = self._extract_referenced_table(name)
+            if referenced_table:
+                attr_info["constraints"].append(f"FOREIGN KEY REFERENCES {referenced_table}(id)")
         
         return attr_info
 
-    def _detect_relations(self, data: Union[pd.DataFrame, Dict]) -> List[Dict]:
-        """Détecte les relations entre les entités à partir des données.
+    def _normalize_entity_name(self, name: str) -> str:
+        """Normalise le nom d'une entité.
         
         Args:
-            data: DataFrame ou dictionnaire contenant les données
+            name: Nom à normaliser
             
         Returns:
-            List[Dict]: Liste des relations détectées
+            str: Nom normalisé
         """
-        relations = []
+        # Mettre au singulier
+        if name.endswith('s'):
+            name = name[:-1]
         
-        # Convertir le dictionnaire en DataFrame si nécessaire
+        # Convertir en minuscules
+        name = name.lower()
+        
+        # Supprimer les caractères spéciaux
+        name = re.sub(r'[^a-z0-9_]', '', name)
+        
+        return name
+
+    def _detect_relations(self, data: Union[pd.DataFrame, Dict]) -> None:
+        """Détecte les relations entre les entités.
+        
+        Args:
+            data: Données à analyser
+        """
         if isinstance(data, dict):
-            # Créer un DataFrame pour chaque entité
-            dfs = {}
-            for key, value in data.items():
-                if isinstance(value, list):
-                    df = pd.DataFrame(value)
-                    dfs[key] = df
-                elif isinstance(value, dict):
-                    df = pd.DataFrame([value])
-                    dfs[key] = df
-            
-            # Analyser les relations entre les DataFrames
-            for key1, df1 in dfs.items():
-                for key2, df2 in dfs.items():
-                    if key1 >= key2:
-                        continue
-                        
-                    # Analyser chaque paire de colonnes
-                    for col1 in df1.columns:
-                        for col2 in df2.columns:
-                            # Extraire les noms d'entités
-                            entity1 = self._extract_entity_name(col1)
-                            entity2 = self._extract_entity_name(col2)
-                            
-                            if entity1 and entity2:
-                                # Vérifier si c'est une relation de clé étrangère
-                                if col1.endswith('_id') and col1[:-3] == col2.lower():
-                                    relation = {
-                                        "source": entity2,
-                                        "target": entity1,
+            # Analyser les relations dans les données JSON
+            for entity_name, values in data.items():
+                entity_name = self._normalize_entity_name(entity_name)
+                if isinstance(values, list) and len(values) > 0:
+                    for value in values:
+                        # Détecter les clés étrangères
+                        for attr_name in value.keys():
+                            if attr_name.endswith('_id'):
+                                target_entity = attr_name[:-3]
+                                if target_entity in self.detected_entities:
+                                    self.detected_relations.append({
+                                        "name": f"has_{target_entity}",
+                                        "source": entity_name,
+                                        "target": target_entity,
                                         "type": "ONE_TO_MANY",
-                                        "attributes": []
-                                    }
-                                    relations.append(relation)
-                                elif col2.endswith('_id') and col2[:-3] == col1.lower():
-                                    relation = {
-                                        "source": entity1,
-                                        "target": entity2,
-                                        "type": "ONE_TO_MANY",
-                                        "attributes": []
-                                    }
-                                    relations.append(relation)
+                                        "source_cardinality": "1",
+                                        "target_cardinality": "*"
+                                    })
         else:
-            # Analyser directement le DataFrame
-            for col1 in data.columns:
-                for col2 in data.columns:
-                    if col1 >= col2:
-                        continue
-                        
-                    # Extraire les noms d'entités
-                    entity1 = self._extract_entity_name(col1)
-                    entity2 = self._extract_entity_name(col2)
-                    
-                    if entity1 and entity2:
-                        # Vérifier si c'est une relation de clé étrangère
-                        if col1.endswith('_id') and col1[:-3] == col2.lower():
-                            relation = {
-                                "source": entity2,
-                                "target": entity1,
-                                "type": "ONE_TO_MANY",
-                                "attributes": []
-                            }
-                            relations.append(relation)
-                        elif col2.endswith('_id') and col2[:-3] == col1.lower():
-                            relation = {
-                                "source": entity1,
-                                "target": entity2,
-                                "type": "ONE_TO_MANY",
-                                "attributes": []
-                            }
-                            relations.append(relation)
-        
-        return relations
-
-    def detect_n_ary_relations(self, text: str) -> List[Dict]:
-        """Détecte les relations n-aires dans un texte.
-        
-        Args:
-            text: Texte à analyser
-            
-        Returns:
-            List[Dict]: Liste des relations n-aires détectées
-        """
-        relations = []
-        
-        # Patterns pour détecter les relations n-aires
-        patterns = [
-            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:relie|lie|connecte|associe)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))",
-            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:est lié|est associé|est connecté)\s+(?:à|avec)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))",
-            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:contient|inclut|comprend)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))"
-        ]
-        
-        # Analyser le texte avec chaque pattern
-        for pattern in patterns:
-            matches = re.finditer(pattern, text, re.IGNORECASE)
-            for match in matches:
-                # Extraire les entités
-                entities = []
-                for group in match.groups():
-                    if group:
-                        # Capitaliser le nom de l'entité
-                        entity = group[0].upper() + group[1:].lower()
-                        if entity not in entities:
-                            entities.append(entity)
-                
-                if len(entities) >= 3:
-                    relation = {
-                        "entities": entities,
-                        "type": "N_ARY",
-                        "attributes": []
-                    }
-                    
-                    # Extraire les attributs de la relation
-                    attr_pattern = r"(?:avec|ayant|possédant)\s+(?:une|un|le|la|les)\s+(\w+)(?:\s+et\s+(?:une|un|le|la|les)\s+(\w+))*"
-                    attr_match = re.search(attr_pattern, text[match.end():], re.IGNORECASE)
-                    if attr_match:
-                        attributes = [a for a in attr_match.groups() if a is not None]
-                        relation["attributes"] = attributes
-                    
-                    relations.append(relation)
-        
-        return relations
-
-    def _validate_model(self) -> None:
-        """Valide le modèle généré."""
-        # Vérifier que chaque entité a une clé primaire
-        for entity_name, entity in self.detected_entities.items():
-            if not entity["primary_key"]:
-                # Ajouter une clé primaire par défaut
-                entity["attributes"].insert(0, {
-                    "name": "id",
-                    "type": "integer",
-                    "nullable": False
-                })
-                entity["primary_key"] = ["id"]
-
-        # Vérifier les relations
-        valid_relations = []
-        for relation in self.detected_relations:
-            if (relation["source"] in self.detected_entities and
-                relation["target"] in self.detected_entities):
-                valid_relations.append(relation)
-        self.detected_relations = valid_relations
-
-    def _analyze_database_schema(self, schema: Dict):
-        """Analyse le schéma de la base de données."""
-        # Implémentation de l'analyse du schéma
-        pass  # Placeholder, implémentation réelle nécessaire
-
-    def _consolidate_results(self) -> Dict:
-        """Consolide les résultats de l'analyse."""
-        mcd_structure = {
-            "entities": {},
-            "relations": []
-        }
-        
-        # 1. Consolider les entités
-        for name, entity in self.detected_entities.items():
-            # Vérifier si l'entité peut être fusionnée avec une autre
-            if self._should_merge_entity(entity):
-                self._merge_entity(entity, mcd_structure["entities"])
-            else:
-                mcd_structure["entities"][name] = entity
-                
-        # 2. Consolider les relations
-        for relation in self.detected_relations:
-            if self._is_valid_relation(relation, mcd_structure["entities"]):
-                mcd_structure["relations"].append(relation)
-                
-        return mcd_structure
-        
-    def _should_merge_entity(self, entity: Dict) -> bool:
-        """Détermine si une entité devrait être fusionnée."""
-        # Si l'entité a peu d'attributs et beaucoup de clés étrangères
-        if len(entity["attributes"]) <= 3 and len(entity["foreign_keys"]) >= 2:
-            return True
-            
-        # Si l'entité semble être une table de liaison
-        if all(self._is_potential_foreign_key(attr["name"]) for attr in entity["attributes"]):
-            return True
-            
-        return False
-        
-    def _merge_entity(self, entity: Dict, existing_entities: Dict):
-        """Fusionne une entité avec une entité existante ou crée une relation."""
-        if len(entity["foreign_keys"]) == 2:
-            # Créer une relation many-to-many
-            self.detected_relations.append({
-                "source": entity["foreign_keys"][0]["referenced_table"],
-                "target": entity["foreign_keys"][1]["referenced_table"],
-                "type": "MANY_TO_MANY",
-                "through": entity["name"]
-            })
-        else:
-            # Ajouter les attributs à l'entité principale
-            main_entity = self._find_main_entity(entity, existing_entities)
-            if main_entity:
-                main_entity["attributes"].extend(entity["attributes"])
-                
-    def _find_main_entity(self, entity: Dict, existing_entities: Dict) -> Dict:
-        """Trouve l'entité principale pour une fusion."""
-        for fk in entity["foreign_keys"]:
-            referenced_table = fk["referenced_table"]
-            if referenced_table in existing_entities:
-                return existing_entities[referenced_table]
-        return None
-        
-    def _is_valid_relation(self, relation: Dict, entities: Dict) -> bool:
-        """Vérifie si une relation est valide."""
-        return (relation["source"] in entities and 
-                relation["target"] in entities and
-                relation["source"] != relation["target"])
+            # Analyser les relations dans le DataFrame
+            for col in data.columns:
+                if col.endswith('_id'):
+                    target_entity = col[:-3]
+                    source_entity = self._detect_source_entity(data, col)
+                    if source_entity and target_entity in self.detected_entities:
+                        self.detected_relations.append({
+                            "name": f"has_{target_entity}",
+                            "source": source_entity,
+                            "target": target_entity,
+                            "type": "ONE_TO_MANY",
+                            "source_cardinality": "1",
+                            "target_cardinality": "*"
+                        })
 
     def _normalize_attribute_name(self, name: str) -> str:
         """Normalise le nom d'un attribut pour la détection de patterns."""
