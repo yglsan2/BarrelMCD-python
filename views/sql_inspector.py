@@ -246,26 +246,27 @@ class SQLInspector:
         return constraint if constraint["type"] and constraint["columns"] else None
 
     def validate_schema(self) -> List[Dict]:
-        """Valide le schéma et retourne une liste de problèmes."""
+        """Valide le schéma de la base de données.
+        
+        Returns:
+            List[Dict]: Liste des problèmes trouvés
+        """
         issues = []
-
-        # Vérifier les conventions de nommage
+        
+        # Valider les conventions de nommage
         issues.extend(self._validate_naming_conventions())
-
-        # Vérifier les types de données
+        
+        # Valider les types de données
         issues.extend(self._validate_data_types())
-
-        # Vérifier les clés primaires
-        issues.extend(self._validate_primary_keys())
-
-        # Vérifier les contraintes NULL
+        
+        # Valider les contraintes NULL
         issues.extend(self._validate_null_constraints())
-
-        # Vérifier la couverture des index
-        issues.extend(self._validate_index_coverage())
-
+        
+        # Valider les clés étrangères
+        issues.extend(self._validate_foreign_keys())
+        
         return issues
-
+    
     def _validate_naming_conventions(self) -> List[Dict]:
         """Valide les conventions de nommage.
         
@@ -329,20 +330,6 @@ class SQLInspector:
         
         return issues
 
-    def _validate_primary_keys(self) -> List[Dict]:
-        """Valide les clés primaires."""
-        issues = []
-        
-        for table_name, table in self.schema["tables"].items():
-            if not table["primary_key"]:
-                issues.append({
-                    "type": "primary_key",
-                    "table": table_name,
-                    "message": "La table doit avoir une clé primaire"
-                })
-        
-        return issues
-
     def _validate_null_constraints(self) -> List[Dict]:
         """Valide les contraintes NULL."""
         issues = []
@@ -370,71 +357,21 @@ class SQLInspector:
         
         return issues
 
-    def _validate_index_coverage(self) -> List[Dict]:
-        """Valide la couverture des index."""
+    def _validate_foreign_keys(self) -> List[Dict]:
+        """Valide les clés étrangères."""
         issues = []
         
-        for table_name, table in self.schema["tables"].items():
-            # Vérifier les clés étrangères
-            for fk in self.schema["foreign_keys"]:
-                if fk["table"] == table_name and not self._has_index(table_name, fk["columns"][0]):
-                    issues.append({
-                        "type": "missing_index",
-                        "table": table_name,
-                        "column": fk["columns"][0],
-                        "message": "Les clés étrangères devraient avoir un index"
-                    })
-            
-            # Vérifier les colonnes fréquemment utilisées dans les filtres
-            filter_columns = self._identify_filter_columns(table)
-            for column in filter_columns:
-                if not self._has_index(table_name, column):
-                    issues.append({
-                        "type": "missing_index",
-                        "table": table_name,
-                        "column": column,
-                        "message": "Les colonnes fréquemment filtrées devraient avoir un index"
-                    })
+        for fk in self.schema["foreign_keys"]:
+            if fk["table"] == fk["referenced_table"]:
+                issues.append({
+                    "type": "recursive_foreign_key",
+                    "severity": "warning",
+                    "message": f"La clé étrangère {fk['columns'][0]} vers {fk['referenced_table']} est récursive",
+                    "table": fk["table"],
+                    "column": fk["columns"][0]
+                })
         
         return issues
-
-    def _has_index(self, table_name: str, column_name: str) -> bool:
-        """Vérifie si une colonne a un index."""
-        table = self.schema["tables"].get(table_name)
-        if not table:
-            return False
-
-        # Vérifier les index explicites
-        for constraint in self.schema["constraints"]:
-            if (constraint["table"] == table_name and
-                constraint["type"] == "INDEX" and
-                column_name in constraint["columns"]):
-                return True
-
-        # Les clés primaires ont implicitement un index
-        if column_name in table["primary_key"]:
-            return True
-
-        return False
-
-    def _identify_filter_columns(self, table: Dict) -> List[str]:
-        """Identifie les colonnes susceptibles d'être utilisées dans des filtres."""
-        filter_columns = []
-        
-        for column in table["columns"]:
-            # Colonnes de statut
-            if any(word in column["name"].lower() for word in ["status", "etat", "type", "categorie"]):
-                filter_columns.append(column["name"])
-            
-            # Colonnes de date
-            if column["type"].upper() in ["DATE", "TIMESTAMP"]:
-                filter_columns.append(column["name"])
-            
-            # Colonnes booléennes
-            if column["type"].upper() == "BOOLEAN":
-                filter_columns.append(column["name"])
-        
-        return filter_columns
 
     def suggest_optimizations(self) -> List[Dict]:
         """Suggère des optimisations pour le schéma.
