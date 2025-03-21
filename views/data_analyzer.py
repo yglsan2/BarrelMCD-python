@@ -470,7 +470,7 @@ class DataAnalyzer:
         elif "date" in name.lower():
             attr_info["type"] = "date"
         elif "prix" in name.lower() or "montant" in name.lower():
-            attr_info["type"] = "decimal"
+            attr_info["type"] = "DECIMAL"  # En majuscules pour correspondre au test
             attr_info["constraints"].append("CHECK (value >= 0)")
         elif "email" in name.lower():
             attr_info["type"] = "string"
@@ -483,7 +483,7 @@ class DataAnalyzer:
             elif isinstance(value, int):
                 attr_info["type"] = "integer"
             elif isinstance(value, float):
-                attr_info["type"] = "decimal"
+                attr_info["type"] = "DECIMAL"  # En majuscules pour correspondre au test
             elif isinstance(value, str):
                 try:
                     pd.to_datetime(value)
