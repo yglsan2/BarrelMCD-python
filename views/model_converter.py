@@ -46,7 +46,7 @@ class ModelConverter:
         
         # Convertir les entités en classes
         for entity_name, entity in model["entities"].items():
-            class_name = entity_name.capitalize()
+            class_name = entity_name.lower()  # Garder le nom en minuscules
             uml["classes"][class_name] = {
                 "name": class_name,
                 "attributes": [],
@@ -66,8 +66,8 @@ class ModelConverter:
         # Convertir les relations en associations et généralisations
         for relation in model.get("relations", []):
             if relation["type"] == "INHERITANCE":
-                parent = relation["parent"].capitalize()
-                child = relation["child"].capitalize()
+                parent = relation["parent"].lower()  # Garder le nom en minuscules
+                child = relation["child"].lower()  # Garder le nom en minuscules
                 
                 if parent in uml["classes"] and child in uml["classes"]:
                     uml["generalizations"].append({
@@ -75,8 +75,8 @@ class ModelConverter:
                         "child": child
                     })
             else:
-                source = relation["source"].capitalize()
-                target = relation["target"].capitalize()
+                source = relation["source"].lower()  # Garder le nom en minuscules
+                target = relation["target"].lower()  # Garder le nom en minuscules
                 
                 if source in uml["classes"] and target in uml["classes"]:
                     uml["associations"].append({
