@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Tuple, Any, Optional
+from typing import Dict, List, Set, Tuple, Any, Optional, Union
 import pandas as pd
 import numpy as np
 from collections import defaultdict
@@ -419,7 +419,7 @@ class DataAnalyzer:
                 self._analyze_entity(key, value)
 
         # Détecter les relations
-        self._detect_relationships()
+        self._detect_relations(data)
 
     def _analyze_entity(self, name: str, data: Dict) -> None:
         """Analyse une entité et ses attributs."""
@@ -440,94 +440,191 @@ class DataAnalyzer:
 
             self.detected_entities[name] = entity
 
-    def _analyze_attribute(self, name: str, value: Any) -> Optional[Dict]:
-        """Analyse un attribut et détermine son type."""
-        if value is None:
-            return None
-
-        attr_type = "string"
-        if isinstance(value, bool):
-            attr_type = "boolean"
-        elif isinstance(value, int):
-            attr_type = "integer"
-        elif isinstance(value, float):
-            attr_type = "decimal"
-        elif isinstance(value, str):
-            if re.match(r'^\d{4}-\d{2}-\d{2}', value):
-                attr_type = "date"
-            elif re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', value):
-                attr_type = "datetime"
-            elif re.match(r'^\d+\.\d+$', value):
-                attr_type = "decimal"
-            elif re.match(r'^\d+$', value):
-                attr_type = "integer"
-
-        return {
+    def _analyze_attribute(self, name: Union[str, List[str]], value: Any = None) -> Dict:
+        """Analyse un attribut pour déterminer son type et ses contraintes.
+        
+        Args:
+            name: Nom de l'attribut ou liste de mots-clés
+            value: Valeur de l'attribut (optionnel)
+            
+        Returns:
+            Dict: Informations sur l'attribut
+        """
+        # Si name est une liste, utiliser le premier mot comme nom
+        if isinstance(name, list):
+            name = name[0]
+            
+        # Initialiser les informations de l'attribut
+        attr_info = {
             "name": name,
-            "type": attr_type,
-            "nullable": True
+            "type": "string",  # Type par défaut
+            "constraints": []
         }
+        
+        # Détecter le type à partir du nom
+        if "_id" in name.lower() or name.lower().endswith("id"):
+            attr_info["type"] = "integer"
+            attr_info["constraints"].append("NOT NULL")
+            if name.lower() == "id":
+                attr_info["constraints"].append("PRIMARY KEY")
+        elif "date" in name.lower():
+            attr_info["type"] = "date"
+        elif "prix" in name.lower() or "montant" in name.lower():
+            attr_info["type"] = "decimal"
+            attr_info["constraints"].append("CHECK (value >= 0)")
+        elif "email" in name.lower():
+            attr_info["type"] = "string"
+            attr_info["constraints"].append("UNIQUE")
+        
+        # Affiner le type à partir de la valeur si fournie
+        if value is not None:
+            if isinstance(value, bool):
+                attr_info["type"] = "boolean"
+            elif isinstance(value, int):
+                attr_info["type"] = "integer"
+            elif isinstance(value, float):
+                attr_info["type"] = "decimal"
+            elif isinstance(value, str):
+                try:
+                    pd.to_datetime(value)
+                    attr_info["type"] = "date"
+                except:
+                    attr_info["type"] = "string"
+        
+        return attr_info
 
-    def _detect_relationships(self) -> None:
-        """Détecte les relations entre les entités."""
-        # Réinitialiser les relations détectées
-        self.detected_relations = []
-
-        # Parcourir toutes les entités
-        for entity_name, entity in self.detected_entities.items():
-            for attr in entity["attributes"]:
-                # Détecter les clés étrangères
-                if "_id" in attr["name"].lower():
-                    referenced_entity = attr["name"].lower().replace("_id", "")
-                    if referenced_entity in self.detected_entities:
-                        relation = {
-                            "name": f"rel_{entity_name}_{referenced_entity}",
-                            "source": referenced_entity,
-                            "target": entity_name,
-                            "type": "ONE_TO_MANY",
-                            "source_cardinality": "1",
-                            "target_cardinality": "*"
-                        }
-                        self.detected_relations.append(relation)
-
-    def detect_n_ary_relations(self, text: str) -> List[Dict]:
-        """Détecte les relations n-aires dans un texte."""
+    def _detect_relations(self, data: Union[pd.DataFrame, Dict]) -> List[Dict]:
+        """Détecte les relations entre les entités à partir des données.
+        
+        Args:
+            data: DataFrame ou dictionnaire contenant les données
+            
+        Returns:
+            List[Dict]: Liste des relations détectées
+        """
         relations = []
         
-        # Nettoyer et normaliser le texte
-        text = text.lower()
-        text = re.sub(r'[^\w\s,]', '', text)
-        
-        # Chercher les motifs de relation n-aire
-        words = text.split()
-        for i, word in enumerate(words):
-            if word == "relie":
-                # Chercher les entités reliées
-                entities = []
-                attributes = []
-                
-                # Chercher avant "relie"
-                if i > 0:
-                    entities.append(words[i-1].capitalize())
-                
-                # Chercher après "relie"
-                for j in range(i+1, len(words)):
-                    if words[j] in ["et", ",", "avec"]:
+        # Convertir le dictionnaire en DataFrame si nécessaire
+        if isinstance(data, dict):
+            # Créer un DataFrame pour chaque entité
+            dfs = {}
+            for key, value in data.items():
+                if isinstance(value, list):
+                    df = pd.DataFrame(value)
+                    dfs[key] = df
+                elif isinstance(value, dict):
+                    df = pd.DataFrame([value])
+                    dfs[key] = df
+            
+            # Analyser les relations entre les DataFrames
+            for key1, df1 in dfs.items():
+                for key2, df2 in dfs.items():
+                    if key1 >= key2:
                         continue
-                    if words[j] == "une":
-                        # C'est probablement un attribut qui suit
-                        if j+1 < len(words):
-                            attributes.append(words[j+1])
-                    else:
-                        # C'est probablement une entité
-                        entities.append(words[j].capitalize())
+                        
+                    # Analyser chaque paire de colonnes
+                    for col1 in df1.columns:
+                        for col2 in df2.columns:
+                            # Extraire les noms d'entités
+                            entity1 = self._extract_entity_name(col1)
+                            entity2 = self._extract_entity_name(col2)
+                            
+                            if entity1 and entity2:
+                                # Vérifier si c'est une relation de clé étrangère
+                                if col1.endswith('_id') and col1[:-3] == col2.lower():
+                                    relation = {
+                                        "source": entity2,
+                                        "target": entity1,
+                                        "type": "ONE_TO_MANY",
+                                        "attributes": []
+                                    }
+                                    relations.append(relation)
+                                elif col2.endswith('_id') and col2[:-3] == col1.lower():
+                                    relation = {
+                                        "source": entity1,
+                                        "target": entity2,
+                                        "type": "ONE_TO_MANY",
+                                        "attributes": []
+                                    }
+                                    relations.append(relation)
+        else:
+            # Analyser directement le DataFrame
+            for col1 in data.columns:
+                for col2 in data.columns:
+                    if col1 >= col2:
+                        continue
+                        
+                    # Extraire les noms d'entités
+                    entity1 = self._extract_entity_name(col1)
+                    entity2 = self._extract_entity_name(col2)
+                    
+                    if entity1 and entity2:
+                        # Vérifier si c'est une relation de clé étrangère
+                        if col1.endswith('_id') and col1[:-3] == col2.lower():
+                            relation = {
+                                "source": entity2,
+                                "target": entity1,
+                                "type": "ONE_TO_MANY",
+                                "attributes": []
+                            }
+                            relations.append(relation)
+                        elif col2.endswith('_id') and col2[:-3] == col1.lower():
+                            relation = {
+                                "source": entity1,
+                                "target": entity2,
+                                "type": "ONE_TO_MANY",
+                                "attributes": []
+                            }
+                            relations.append(relation)
+        
+        return relations
+
+    def detect_n_ary_relations(self, text: str) -> List[Dict]:
+        """Détecte les relations n-aires dans un texte.
+        
+        Args:
+            text: Texte à analyser
+            
+        Returns:
+            List[Dict]: Liste des relations n-aires détectées
+        """
+        relations = []
+        
+        # Patterns pour détecter les relations n-aires
+        patterns = [
+            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:relie|lie|connecte|associe)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))",
+            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:est lié|est associé|est connecté)\s+(?:à|avec)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))",
+            r"(?:une|un|le|la|les)\s+(\w+)\s+(?:contient|inclut|comprend)\s+(?:un|une|le|la|les)\s+(\w+)(?:\s*,\s*(?:un|une|le|la|les)\s+(\w+))*(?:\s+et\s+(?:un|une|le|la|les)\s+(\w+))"
+        ]
+        
+        # Analyser le texte avec chaque pattern
+        for pattern in patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                # Extraire les entités
+                entities = []
+                for group in match.groups():
+                    if group:
+                        # Capitaliser le nom de l'entité
+                        entity = group[0].upper() + group[1:].lower()
+                        if entity not in entities:
+                            entities.append(entity)
                 
-                if len(entities) >= 2:
-                    relations.append({
-                        "name": f"rel_{'_'.join(entities)}",
+                if len(entities) >= 3:
+                    relation = {
                         "entities": entities,
-                        "attributes": attributes
-                    })
+                        "type": "N_ARY",
+                        "attributes": []
+                    }
+                    
+                    # Extraire les attributs de la relation
+                    attr_pattern = r"(?:avec|ayant|possédant)\s+(?:une|un|le|la|les)\s+(\w+)(?:\s+et\s+(?:une|un|le|la|les)\s+(\w+))*"
+                    attr_match = re.search(attr_pattern, text[match.end():], re.IGNORECASE)
+                    if attr_match:
+                        attributes = [a for a in attr_match.groups() if a is not None]
+                        relation["attributes"] = attributes
+                    
+                    relations.append(relation)
         
         return relations
 
@@ -807,4 +904,85 @@ class DataAnalyzer:
                     
                 return name
                 
-        return "relation"  # Nom par défaut 
+        return "relation"  # Nom par défaut
+
+    def _extract_entity_name(self, column_name: str) -> str:
+        """Extrait le nom de l'entité à partir du nom de la colonne.
+        
+        Args:
+            column_name: Nom de la colonne
+            
+        Returns:
+            str: Nom de l'entité
+        """
+        # Supprimer les suffixes courants
+        suffixes = ["_id", "_ref", "_fk", "_key", "_code", "_no", "_num"]
+        for suffix in suffixes:
+            if column_name.endswith(suffix):
+                return column_name[:-len(suffix)]
+        
+        # Supprimer les préfixes courants
+        prefixes = ["id_", "ref_", "fk_", "key_", "code_", "no_", "num_"]
+        for prefix in prefixes:
+            if column_name.startswith(prefix):
+                return column_name[len(prefix):]
+        
+        return column_name
+
+    def _analyze_attribute(self, words: List[str]) -> Dict:
+        """Analyse les mots pour déterminer les caractéristiques d'un attribut.
+        
+        Args:
+            words: Liste des mots à analyser
+            
+        Returns:
+            Dict: Informations sur l'attribut
+        """
+        # Normaliser les mots
+        words = [w.lower() for w in words]
+        
+        # Déterminer le type
+        type_mapping = {
+            "integer": "INTEGER",
+            "int": "INTEGER",
+            "decimal": "DECIMAL",
+            "float": "DECIMAL",
+            "double": "DECIMAL",
+            "boolean": "BOOLEAN",
+            "bool": "BOOLEAN",
+            "string": "VARCHAR",
+            "str": "VARCHAR",
+            "text": "TEXT",
+            "date": "DATE",
+            "datetime": "DATETIME",
+            "timestamp": "DATETIME"
+        }
+        
+        attr_type = "VARCHAR"  # Type par défaut
+        for word in words:
+            if word in type_mapping:
+                attr_type = type_mapping[word]
+                break
+        
+        # Déterminer les contraintes
+        constraints = {
+            "primary_key": False,
+            "unique": False,
+            "not_null": False
+        }
+        
+        # Vérifier les contraintes
+        if any(word in ["id", "identifiant", "code", "reference"] for word in words):
+            constraints["primary_key"] = True
+            constraints["not_null"] = True
+            constraints["unique"] = True
+        elif any(word in ["unique", "distinct"] for word in words):
+            constraints["unique"] = True
+        elif any(word in ["not_null", "required", "obligatoire"] for word in words):
+            constraints["not_null"] = True
+        
+        return {
+            "name": words[0],
+            "type": attr_type,
+            "constraints": constraints
+        } 

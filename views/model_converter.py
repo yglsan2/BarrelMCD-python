@@ -20,7 +20,7 @@ class ModelConverter:
     def convert_model(self, source_model: Dict, conversion_type: ConversionType) -> Dict:
         """Convertit un modèle d'un format à un autre."""
         if conversion_type == ConversionType.MCD_TO_UML:
-            return self._convert_to_uml(source_model)
+            return self.convert_to_uml(source_model, conversion_type)
         elif conversion_type == ConversionType.MCD_TO_MLD:
             return self._convert_to_mld(source_model)
         elif conversion_type == ConversionType.MLD_TO_SQL:
@@ -28,53 +28,63 @@ class ModelConverter:
         else:
             raise ValueError(f"Type de conversion non supporté: {conversion_type}")
         
-    def _convert_to_uml(self, mcd: Dict) -> Dict:
-        """Convertit un MCD en diagramme de classes UML."""
+    def convert_to_uml(self, model: Dict, conversion_type: ConversionType) -> Dict:
+        """Convertit un modèle vers UML.
+        
+        Args:
+            model: Modèle à convertir
+            conversion_type: Type de conversion
+            
+        Returns:
+            Dict: Modèle UML
+        """
         uml = {
-            "classes": [],
+            "classes": {},
             "associations": [],
             "generalizations": []
         }
         
         # Convertir les entités en classes
-        for entity_name, entity in mcd["entities"].items():
-            uml_class = {
-                "name": entity["name"],
+        for entity_name, entity in model["entities"].items():
+            class_name = entity_name.capitalize()
+            uml["classes"][class_name] = {
+                "name": class_name,
                 "attributes": [],
                 "methods": []
             }
             
             # Convertir les attributs
             for attr in entity["attributes"]:
-                uml_attr = {
+                visibility = "+" if attr.get("primary_key", False) else "-"
+                uml_type = self._convert_type_to_uml(attr["type"])
+                uml["classes"][class_name]["attributes"].append({
                     "name": attr["name"],
-                    "type": self._convert_type_to_uml(attr["type"]),
-                    "visibility": "-"  # private par défaut
-                }
-                if "primary_key" in attr and attr["primary_key"]:
-                    uml_attr["visibility"] = "+"  # public pour les clés primaires
-                uml_class["attributes"].append(uml_attr)
-            
-            uml["classes"].append(uml_class)
+                    "type": uml_type,
+                    "visibility": visibility
+                })
         
-        # Convertir les relations
-        for relation in mcd["relations"]:
+        # Convertir les relations en associations et généralisations
+        for relation in model.get("relations", []):
             if relation["type"] == "INHERITANCE":
-                uml["generalizations"].append({
-                    "parent": relation["parent"],
-                    "child": relation["child"]
-                })
-            else:
-                source_card = relation.get("source_cardinality", self.default_cardinalities[relation["type"]][0])
-                target_card = relation.get("target_cardinality", self.default_cardinalities[relation["type"]][1])
+                parent = relation["parent"].capitalize()
+                child = relation["child"].capitalize()
                 
-                uml["associations"].append({
-                    "name": relation["name"],
-                    "source": relation["source"],
-                    "target": relation["target"],
-                    "source_cardinality": source_card,
-                    "target_cardinality": target_card
-                })
+                if parent in uml["classes"] and child in uml["classes"]:
+                    uml["generalizations"].append({
+                        "parent": parent,
+                        "child": child
+                    })
+            else:
+                source = relation["source"].capitalize()
+                target = relation["target"].capitalize()
+                
+                if source in uml["classes"] and target in uml["classes"]:
+                    uml["associations"].append({
+                        "source": source,
+                        "target": target,
+                        "source_cardinality": relation.get("source_cardinality", "1"),
+                        "target_cardinality": relation.get("target_cardinality", "1")
+                    })
         
         return uml
         
