@@ -15,4 +15,4 @@ line_length = 88
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=barrel_mcd --cov-report=term-missing" 
+addopts = "-v" 

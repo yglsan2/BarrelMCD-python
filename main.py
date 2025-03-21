@@ -1,25 +1,23 @@
-import sys
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-from views import MobileWindow
+import sys
+from PyQt5.QtWidgets import QApplication
+from views.main_window import MainWindow
 
 def main():
-    """Point d'entrée de l'application"""
+    """Point d'entrée principal de l'application."""
     app = QApplication(sys.argv)
     
-    # Configuration de l'application
-    app.setApplicationName("Barrel MCD")
-    app.setApplicationVersion("1.0.0")
-    app.setOrganizationName("Barrel")
-    app.setOrganizationDomain("barrel-mcd.com")
+    # Appliquer le style moderne
+    app.setStyle("Fusion")
     
-    # Création de la fenêtre principale
-    window = MobileWindow()
+    # Créer et afficher la fenêtre principale
+    window = MainWindow()
     window.show()
     
-    # Lancement de l'application
-    sys.exit(app.exec())
+    # Lancer la boucle d'événements
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()

@@ -241,7 +241,7 @@ class DiagramCanvas(QGraphicsView):
     def mousePressEvent(self, event):
         """Gère les événements de clic"""
         try:
-            if event.button() == Qt.MouseButton.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
                 scene_pos = self.mapToScene(event.position().toPoint())
                 
                 # Aide contextuelle pour les éléments
@@ -268,14 +268,14 @@ class DiagramCanvas(QGraphicsView):
                         self.scene.clearSelection()
                         
                 # Mode relation
-                elif self.current_mode == "add_relation":
+            elif self.current_mode == "add_relation":
                     item = self.scene.itemAt(scene_pos, self.transform())
                     if item and isinstance(item, Entity):
                         if not self.relation_source:
                             self.relation_source = item
                             self.relation_line = self.scene.addLine(
-                                scene_pos.x(), scene_pos.y(),
-                                scene_pos.x(), scene_pos.y(),
+                            scene_pos.x(), scene_pos.y(),
+                            scene_pos.x(), scene_pos.y(),
                                 QPen(QColor(52, 152, 219), 2, Qt.PenStyle.DashLine)
                             )
                             self.feedback_manager.show_tooltip(
@@ -294,7 +294,7 @@ class DiagramCanvas(QGraphicsView):
                 e,
                 "Erreur lors du traitement du clic"
             )
-            
+                
     def mouseMoveEvent(self, event):
         """Gère les événements de mouvement"""
         try:
@@ -481,7 +481,7 @@ class DiagramCanvas(QGraphicsView):
                     "La suppression pourrait être instable"
                 )
                 
-            self.scene.removeItem(item)
+        self.scene.removeItem(item)
             self.diagram_modified.emit()
             
         except Exception as e:
