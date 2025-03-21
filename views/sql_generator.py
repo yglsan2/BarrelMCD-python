@@ -311,18 +311,31 @@ class SQLGenerator(QObject):
         
         # Colonnes de la table
         columns = []
+        
+        # Ajouter l'ID auto-incrémenté si pas de clé primaire définie
+        if not any(attr.is_primary_key for attr in entity.attributes):
+            id_type = {
+                SQLDialect.MYSQL: "INT AUTO_INCREMENT",
+                SQLDialect.POSTGRESQL: "SERIAL",
+                SQLDialect.SQLITE: "INTEGER PRIMARY KEY AUTOINCREMENT",
+                SQLDialect.ORACLE: "NUMBER GENERATED ALWAYS AS IDENTITY",
+                SQLDialect.SQLSERVER: "INT IDENTITY(1,1)"
+            }
+            columns.append(f"    id {id_type[self.dialect]} PRIMARY KEY")
+        
+        # Ajouter les autres colonnes
         for attr in entity.attributes:
             # Nettoyer le nom de la colonne
             attr.name = self._sanitize_identifier(attr.name)
             column_def = self._get_column_definition(attr)
             columns.append(column_def)
         
-        # Ajouter les contraintes de clé primaire
+        # Ajouter les contraintes de clé primaire si des attributs sont marqués comme PK
         pk_attrs = [attr for attr in entity.attributes if attr.is_primary_key]
         if pk_attrs:
             pk_names = [attr.name for attr in pk_attrs]
             pk_constraint = self.sql_templates[self.dialect]["primary_key"].format(
-                name=f"{table_name}_pk",
+                name=table_name,
                 columns=", ".join(pk_names)
             )
             columns.append(pk_constraint)
@@ -341,9 +354,19 @@ class SQLGenerator(QObject):
                 comment = self.sql_templates[self.dialect]["comment"].format(
                     table=table_name,
                     column=attr.name,
-                    comment=attr.comment
+                    comment=attr.comment.replace("'", "''")  # Échapper les apostrophes
                 )
                 file.write(comment + "\n")
+                
+        # Ajouter les index pour les colonnes uniques
+        for attr in entity.attributes:
+            if attr.is_unique and not attr.is_primary_key:
+                idx = self.sql_templates[self.dialect]["index"].format(
+                    name=f"idx_{table_name}_{attr.name}",
+                    table=table_name,
+                    columns=attr.name
+                )
+                file.write(idx + "\n")
     
     def _get_column_definition(self, attr: Attribute) -> str:
         """Génère la définition d'une colonne SQL à partir d'un attribut.
@@ -601,24 +624,74 @@ class SQLGenerator(QObject):
             file: Fichier ouvert en écriture
             association: Association à convertir en contraintes
         """
-        # Récupérer les clés primaires des entités
-        source_pk = [attr.name for attr in association.source.attributes if attr.is_primary_key]
-        target_pk = [attr.name for attr in association.target.attributes if attr.is_primary_key]
+        # Nettoyer les noms des tables
+        source_table = self._sanitize_identifier(association.source.name)
+        target_table = self._sanitize_identifier(association.target.name)
         
-        if not source_pk or not target_pk:
-            return
-        
-        # Nom de la contrainte
-        constraint_name = f"fk_{association.source.name}_{association.target.name}"
-        
-        # Écrire la contrainte de clé étrangère
-        fk_constraint = self.sql_templates[self.dialect]["foreign_key"].format(
-            table=association.source.name,
-            name=constraint_name,
-            columns=", ".join(source_pk),
-            ref_table=association.target.name,
-            ref_columns=", ".join(target_pk)
-        )
-        
-        file.write(f"\n-- Contrainte de clé étrangère pour {association.name}\n")
-        file.write(fk_constraint + "\n") 
+        # Gérer les relations many-to-many
+        if association.is_many_to_many():
+            # Créer une table de jonction
+            junction_table = self._sanitize_identifier(f"{source_table}_{target_table}")
+            
+            # Colonnes de la table de jonction
+            columns = [
+                f"{source_table}_id {self._get_sql_type({'type': 'INTEGER'})} NOT NULL",
+                f"{target_table}_id {self._get_sql_type({'type': 'INTEGER'})} NOT NULL",
+                f"PRIMARY KEY ({source_table}_id, {target_table}_id)"
+            ]
+            
+            # Ajouter les attributs de l'association
+            for attr in association.attributes:
+                columns.append(self._get_column_definition(attr))
+            
+            # Créer la table de jonction
+            table_def = self.sql_templates[self.dialect]["create_table"].format(
+                name=junction_table,
+                columns=",\n".join(columns)
+            )
+            file.write(f"\n-- Table de jonction {junction_table}\n")
+            file.write(table_def + "\n")
+            
+            # Ajouter les contraintes de clés étrangères
+            fk1 = self.sql_templates[self.dialect]["foreign_key"].format(
+                table=junction_table,
+                name=f"fk_{junction_table}_{source_table}",
+                columns=f"{source_table}_id",
+                ref_table=source_table,
+                ref_columns="id"
+            )
+            file.write(fk1 + "\n")
+            
+            fk2 = self.sql_templates[self.dialect]["foreign_key"].format(
+                table=junction_table,
+                name=f"fk_{junction_table}_{target_table}",
+                columns=f"{target_table}_id",
+                ref_table=target_table,
+                ref_columns="id"
+            )
+            file.write(fk2 + "\n")
+            
+        else:
+            # Relation one-to-many ou one-to-one
+            if association.foreign_key:
+                fk = self.sql_templates[self.dialect]["foreign_key"].format(
+                    table=target_table,
+                    name=f"fk_{target_table}_{source_table}",
+                    columns=association.foreign_key,
+                    ref_table=source_table,
+                    ref_columns=association.primary_key
+                )
+                file.write(fk + "\n")
+                
+                # Ajouter un index sur la clé étrangère
+                idx = self.sql_templates[self.dialect]["index"].format(
+                    name=f"idx_{target_table}_{association.foreign_key}",
+                    table=target_table,
+                    columns=association.foreign_key
+                )
+                file.write(idx + "\n")
+                
+                # Ajouter une contrainte UNIQUE pour les relations one-to-one
+                if association.is_one_to_one():
+                    unique = f"ALTER TABLE {target_table} ADD CONSTRAINT uk_{target_table}_{association.foreign_key} UNIQUE ({association.foreign_key});"
+                    file.write(unique + "\n")
