@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - flexible_arrow</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>flexible_arrow</a></li>
+            <li><a href='#Entity'>Entity</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module flexible_arrow</h1>
+<h2>Classes</h2>
+<div class='class' id='FlexibleArrow'>
+<h3>FlexibleArrow</h3>
+<div class='class-description'>
+Représente une flèche flexible entre deux éléments
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='FlexibleArrow.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>target</li>
+</ul>
+</div>
+<div class='method' id='FlexibleArrow.generate_cardinality_visual'>
+<h5>generate_cardinality_visual</h5>
+<div class='method-description'>
+Génère un visuel SVG des cardinalités MCD et leur conversion en MLD
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>output_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FlexibleArrow.boundingRect'>
+<h5>boundingRect</h5>
+<div class='method-description'>
+Retourne la zone englobante de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>QRectF</p>
+</div>
+<div class='method' id='FlexibleArrow.paint'>
+<h5>paint</h5>
+<div class='method-description'>
+Dessine la flèche avec effets visuels
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>option</li>
+<li>widget</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow._draw_cardinalities'>
+<h5>_draw_cardinalities</h5>
+<div class='method-description'>
+Dessine les cardinalités sur la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>control_points</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow._get_mid_point'>
+<h5>_get_mid_point</h5>
+<div class='method-description'>
+Calcule le point milieu de la courbe de Bézier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>control_points</li>
+</ul>
+<h6>Retourne</h6>
+<p>QPointF</p>
+</div>
+<div class='method' id='FlexibleArrow._get_normal_at_point'>
+<h5>_get_normal_at_point</h5>
+<div class='method-description'>
+Calcule la normale à la courbe au point donné
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>control_points</li>
+<li>point</li>
+</ul>
+<h6>Retourne</h6>
+<p>QPointF</p>
+</div>
+<div class='method' id='FlexibleArrow._get_arrow_path'>
+<h5>_get_arrow_path</h5>
+<div class='method-description'>
+Crée le chemin de la flèche avec lissage
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>control_points</li>
+</ul>
+<h6>Retourne</h6>
+<p>QPainterPath</p>
+</div>
+<div class='method' id='FlexibleArrow._calculate_control_points'>
+<h5>_calculate_control_points</h5>
+<div class='method-description'>
+Calcule les points de contrôle pour la courbe de Bézier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source_pos</li>
+<li>target_pos</li>
+</ul>
+<h6>Retourne</h6>
+<p>list</p>
+</div>
+<div class='method' id='FlexibleArrow._calculate_arrow_points'>
+<h5>_calculate_arrow_points</h5>
+<div class='method-description'>
+Calcule les points pour la pointe de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>end</li>
+<li>control</li>
+</ul>
+<h6>Retourne</h6>
+<p>list</p>
+</div>
+<div class='method' id='FlexibleArrow.setStyle'>
+<h5>setStyle</h5>
+<div class='method-description'>
+Définit le style de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>style</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.reverse'>
+<h5>reverse</h5>
+<div class='method-description'>
+Inverse le sens de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.setCardinality'>
+<h5>setCardinality</h5>
+<div class='method-description'>
+Définit les cardinalités de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>target</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.cycleSourceCardinality'>
+<h5>cycleSourceCardinality</h5>
+<div class='method-description'>
+Change cycliquement la cardinalité source
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.cycleTargetCardinality'>
+<h5>cycleTargetCardinality</h5>
+<div class='method-description'>
+Change cycliquement la cardinalité cible
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.setAvailableCardinalities'>
+<h5>setAvailableCardinalities</h5>
+<div class='method-description'>
+Définit les cardinalités disponibles
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>cardinalities</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.hoverEnterEvent'>
+<h5>hoverEnterEvent</h5>
+<div class='method-description'>
+Gère l'entrée du curseur
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.hoverLeaveEvent'>
+<h5>hoverLeaveEvent</h5>
+<div class='method-description'>
+Gère la sortie du curseur
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.mouseDoubleClickEvent'>
+<h5>mouseDoubleClickEvent</h5>
+<div class='method-description'>
+Gère le double-clic sur la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.to_dict'>
+<h5>to_dict</h5>
+<div class='method-description'>
+Convertit la flèche en dictionnaire pour la sauvegarde
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+<div class='method' id='FlexibleArrow.from_dict'>
+<h5>from_dict</h5>
+<div class='method-description'>
+Crée une flèche à partir d'un dictionnaire
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>cls</li>
+<li>data</li>
+<li>source</li>
+<li>target</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='FlexibleArrow.get_mld_rules'>
+<h5>get_mld_rules</h5>
+<div class='method-description'>
+Retourne les règles MLD pour la relation
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+<div class='method' id='FlexibleArrow.generate_mld_sql'>
+<h5>generate_mld_sql</h5>
+<div class='method-description'>
+Génère le SQL pour la création des tables selon les règles MLD
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FlexibleArrow.to_mld'>
+<h5>to_mld</h5>
+<div class='method-description'>
+Convertit la relation en format MLD
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

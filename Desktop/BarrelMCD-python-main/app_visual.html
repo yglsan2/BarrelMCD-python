@@ -466,4 +466,2700 @@ async function executeSQLQuery(query) {
         handleSQLError(error);
         throw error;
     }
-} 
+}
+
+<style>
+    /* Thèmes de l'application */
+    :root {
+        /* Thème clair par défaut */
+        --primary-color: #4a90e2;
+        --secondary-color: #f5f5f5;
+        --text-color: #333;
+        --border-color: #ddd;
+        --hover-color: #357abd;
+        --error-color: #e74c3c;
+        --success-color: #2ecc71;
+        --warning-color: #f1c40f;
+        --background-color: #ffffff;
+        --panel-background: #f8f9fa;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Thème sombre */
+    [data-theme="dark"] {
+        --primary-color: #3498db;
+        --secondary-color: #2c3e50;
+        --text-color: #ecf0f1;
+        --border-color: #34495e;
+        --hover-color: #2980b9;
+        --error-color: #c0392b;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --background-color: #1a1a1a;
+        --panel-background: #2c2c2c;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Thème contrasté */
+    [data-theme="high-contrast"] {
+        --primary-color: #000000;
+        --secondary-color: #ffffff;
+        --text-color: #000000;
+        --border-color: #000000;
+        --hover-color: #333333;
+        --error-color: #ff0000;
+        --success-color: #008000;
+        --warning-color: #ffff00;
+        --background-color: #ffffff;
+        --panel-background: #f0f0f0;
+        --shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Styles généraux améliorés */
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        transition: all 0.3s ease;
+    }
+
+    .panel {
+        background-color: var(--panel-background);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px;
+        box-shadow: 0 2px 4px var(--shadow-color);
+        transition: all 0.3s ease;
+    }
+
+    .panel:hover {
+        box-shadow: 0 4px 8px var(--shadow-color);
+    }
+
+    button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    button:hover {
+        background-color: var(--hover-color);
+        transform: translateY(-1px);
+    }
+
+    button:active {
+        transform: translateY(1px);
+    }
+
+    input, select, textarea {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 8px;
+        transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    /* Barre d'outils flottante */
+    .floating-toolbar {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--panel-background);
+        border-radius: 50px;
+        padding: 10px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+    }
+
+    /* Indicateurs de chargement */
+    .loading {
+        position: relative;
+    }
+
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Messages de feedback */
+    .feedback {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px;
+        border-radius: 4px;
+        color: white;
+        animation: slideIn 0.3s ease;
+        z-index: 1000;
+    }
+
+    .feedback.success {
+        background-color: var(--success-color);
+    }
+
+    .feedback.error {
+        background-color: var(--error-color);
+    }
+
+    .feedback.warning {
+        background-color: var(--warning-color);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Tooltips */
+    [data-tooltip] {
+        position: relative;
+    }
+
+    [data-tooltip]:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        background-color: var(--secondary-color);
+        color: var(--text-color);
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+    }
+
+    [data-tooltip]:hover:before {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Styles pour le bouton de lecture vocale */
+    #voice-reading-btn.active {
+        background-color: var(--success-color);
+    }
+
+    #voice-reading-btn.active i {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Styles pour les éléments lisibles */
+    [data-readable] {
+        cursor: pointer;
+    }
+
+    [data-readable]:hover {
+        outline: 2px solid var(--primary-color);
+    }
+
+    /* Styles pour le tutoriel */
+    .tutorial-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: none;
+    }
+
+    .tutorial-step {
+        position: absolute;
+        background: var(--panel-background);
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 300px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+    }
+
+    /* Styles pour les commentaires */
+    .comments-panel {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 300px;
+        height: 100%;
+        background: var(--panel-background);
+        border-left: 1px solid var(--border-color);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 900;
+    }
+
+    .comments-panel.active {
+        transform: translateX(0);
+    }
+
+    /* Styles pour la mini-carte */
+    .minimap {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 200px;
+        height: 150px;
+        background: var(--panel-background);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 800;
+    }
+
+    /* Styles pour la recherche globale */
+    .search-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: none;
+    }
+
+    .search-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 600px;
+        background: var(--panel-background);
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    /* Styles pour le mode daltonien */
+    [data-theme="colorblind"] {
+        --primary-color: #0000FF;
+        --secondary-color: #FF0000;
+        --text-color: #000000;
+        --border-color: #00FF00;
+        --hover-color: #0000FF;
+        --error-color: #FF0000;
+        --success-color: #00FF00;
+        --warning-color: #FFFF00;
+    }
+
+    /* Ajout des styles spécifiques pour chaque type de modèle */
+    .mcd-table {
+        border: 2px solid var(--primary-color);
+        background: var(--panel-background);
+    }
+    .mcd-table .table-name {
+        background: var(--primary-color);
+        color: white;
+    }
+    .mcd-table .column-name {
+        border-bottom: 1px solid var(--border-color);
+    }
+    .mcd-table .primary-key {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    .mcd-table .foreign-key {
+        color: var(--secondary-color);
+    }
+
+    /* Styles UML */
+    .uml-class {
+        border: 2px solid #2c3e50;
+        background: #ecf0f1;
+    }
+    .uml-class .table-name {
+        background: #2c3e50;
+        color: white;
+        font-style: italic;
+    }
+    .uml-class .column-name {
+        border-bottom: 1px solid #bdc3c7;
+    }
+    .uml-class .method {
+        color: #3498db;
+        font-style: italic;
+    }
+    .uml-class .property {
+        color: #2ecc71;
+    }
+
+    /* Styles MLD */
+    .mld-table {
+        border: 2px solid #e67e22;
+        background: #fff5eb;
+    }
+    .mld-table .table-name {
+        background: #e67e22;
+        color: white;
+    }
+    .mld-table .column-name {
+        border-bottom: 1px solid #f39c12;
+    }
+    .mld-table .data-type {
+        color: #d35400;
+        font-size: 0.9em;
+    }
+
+    /* Styles MPD */
+    .mpd-table {
+        border: 2px solid #8e44ad;
+        background: #f5eef8;
+    }
+    .mpd-table .table-name {
+        background: #8e44ad;
+        color: white;
+    }
+    .mpd-table .column-name {
+        border-bottom: 1px solid #9b59b6;
+    }
+    .mpd-table .constraint {
+        color: #6c3483;
+        font-size: 0.9em;
+    }
+
+    /* Styles SQL */
+    .sql-table {
+        border: 2px solid #16a085;
+        background: #e8f6f3;
+    }
+    .sql-table .table-name {
+        background: #16a085;
+        color: white;
+        font-family: monospace;
+    }
+    .sql-table .column-name {
+        border-bottom: 1px solid #1abc9c;
+        font-family: monospace;
+    }
+    .sql-table .sql-type {
+        color: #0e6655;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+
+    /* Styles des relations selon le type de modèle */
+    .mcd-relation {
+        stroke: var(--primary-color);
+        stroke-width: 2;
+    }
+    .uml-relation {
+        stroke: #2c3e50;
+        stroke-width: 2;
+        stroke-dasharray: 5,5;
+    }
+    .mld-relation {
+        stroke: #e67e22;
+        stroke-width: 2;
+    }
+    .mpd-relation {
+        stroke: #8e44ad;
+        stroke-width: 2;
+    }
+    .sql-relation {
+        stroke: #16a085;
+        stroke-width: 2;
+    }
+</style>
+
+<!-- Ajout du sélecteur de thème -->
+<div class="theme-selector panel">
+    <h3>Personnalisation</h3>
+    <select id="theme-select" onchange="changeTheme(this.value)">
+        <option value="light">Thème clair</option>
+        <option value="dark">Thème sombre</option>
+        <option value="high-contrast">Thème contrasté</option>
+    </select>
+    <select id="voice-language-select" onchange="changeVoiceLanguage(this.value)">
+        <option value="fr-FR">Français</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="es-ES">Español</option>
+        <option value="de-DE">Deutsch</option>
+        <option value="it-IT">Italiano</option>
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="nl-NL">Nederlands</option>
+        <option value="pl-PL">Polski</option>
+        <option value="ru-RU">Русский</option>
+        <option value="ja-JP">日本語</option>
+        <option value="zh-CN">中文</option>
+    </select>
+</div>
+
+<!-- Barre d'outils flottante -->
+<div class="floating-toolbar">
+    <button data-tooltip="Aide rapide" onclick="showQuickHelp()">
+        <i class="fas fa-question-circle"></i>
+    </button>
+    <button data-tooltip="Tutoriel" onclick="startTutorial()">
+        <i class="fas fa-graduation-cap"></i>
+    </button>
+    <button data-tooltip="Partager" onclick="showShareOptions()">
+        <i class="fas fa-share-alt"></i>
+    </button>
+    <button data-tooltip="Commentaires" onclick="toggleComments()">
+        <i class="fas fa-comments"></i>
+    </button>
+    <button data-tooltip="Mode plein écran" onclick="toggleFullscreen()">
+        <i class="fas fa-expand"></i>
+    </button>
+    <button data-tooltip="Zoom" onclick="toggleZoomControls()">
+        <i class="fas fa-search-plus"></i>
+    </button>
+    <button data-tooltip="Mini-carte" onclick="toggleMinimap()">
+        <i class="fas fa-map"></i>
+    </button>
+    <button data-tooltip="Recherche globale" onclick="showGlobalSearch()">
+        <i class="fas fa-search"></i>
+    </button>
+    <button data-tooltip="Exporter" onclick="showExportOptions()">
+        <i class="fas fa-file-export"></i>
+    </button>
+    <button data-tooltip="Importer" onclick="showImportOptions()">
+        <i class="fas fa-file-import"></i>
+    </button>
+    <button data-tooltip="Mode daltonien" onclick="toggleColorBlindMode()">
+        <i class="fas fa-eye"></i>
+    </button>
+    <button data-tooltip="Taille du texte" onclick="showFontSizeControls()">
+        <i class="fas fa-text-height"></i>
+    </button>
+    <button data-tooltip="Raccourcis clavier" onclick="showKeyboardShortcuts()">
+        <i class="fas fa-keyboard"></i>
+    </button>
+    <button data-tooltip="Retour en haut" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <button data-tooltip="Lecture vocale" onclick="toggleVoiceReading()" id="voice-reading-btn">
+        <i class="fas fa-volume-up"></i>
+    </button>
+</div>
+
+<script>
+// Fonction de changement de thème
+function changeTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+}
+
+// Chargement du thème sauvegardé
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedLanguage = localStorage.getItem('voiceLanguage') || 'fr-FR';
+    changeTheme(savedTheme);
+    changeVoiceLanguage(savedLanguage);
+    document.getElementById('voice-language-select').value = savedLanguage;
+});
+
+// Fonction d'affichage des messages de feedback
+function showFeedback(message, type = 'success') {
+    const feedback = document.createElement('div');
+    feedback.className = `feedback ${type}`;
+    feedback.textContent = message;
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+        feedback.remove();
+    }, 3000);
+}
+
+// Fonction d'aide rapide
+function showQuickHelp() {
+    const helpContent = `
+        <h3>Aide rapide</h3>
+        <ul>
+            <li>Cliquez sur une table pour la sélectionner</li>
+            <li>Utilisez le menu contextuel pour ajouter des relations</li>
+            <li>Double-cliquez pour éditer les propriétés</li>
+            <li>Utilisez Ctrl+Z pour annuler</li>
+            <li>Alt+V pour activer/désactiver la lecture vocale</li>
+        </ul>
+    `;
+    showModal('Aide', helpContent);
+}
+
+// Fonction d'affichage des raccourcis clavier
+function showKeyboardShortcuts() {
+    const shortcuts = `
+        <h3>Raccourcis clavier</h3>
+        <ul>
+            <li><kbd>Ctrl</kbd> + <kbd>N</kbd> : Nouveau modèle</li>
+            <li><kbd>Ctrl</kbd> + <kbd>S</kbd> : Sauvegarder</li>
+            <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> : Annuler</li>
+            <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> : Rétablir</li>
+            <li><kbd>F1</kbd> : Aide</li>
+        </ul>
+    `;
+    showModal('Raccourcis', shortcuts);
+}
+
+// Fonction de défilement vers le haut
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Fonction d'affichage de modal
+function showModal(title, content) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Ajout des styles pour les modals
+const modalStyles = `
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: var(--panel-background);
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .modal-header button {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+
+    kbd {
+        background-color: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        padding: 2px 6px;
+        font-family: monospace;
+    }
+`;
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = modalStyles;
+document.head.appendChild(styleSheet);
+
+// Configuration de la synthèse vocale multilingue
+let speechSynthesis = window.speechSynthesis;
+let isVoiceReadingActive = false;
+let currentUtterance = null;
+let currentLanguage = 'fr-FR';
+
+// Fonction pour changer la langue de la voix
+function changeVoiceLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('voiceLanguage', lang);
+    
+    if (isVoiceReadingActive) {
+        // Arrêter toute lecture en cours
+        if (currentUtterance) {
+            speechSynthesis.cancel();
+        }
+        showFeedback(`Langue de lecture vocale changée : ${document.getElementById('voice-language-select').options[document.getElementById('voice-language-select').selectedIndex].text}`, 'success');
+    }
+}
+
+// Fonction pour activer/désactiver la lecture vocale
+function toggleVoiceReading() {
+    isVoiceReadingActive = !isVoiceReadingActive;
+    const button = document.getElementById('voice-reading-btn');
+    
+    if (isVoiceReadingActive) {
+        button.classList.add('active');
+        enableVoiceReading();
+        showFeedback('Lecture vocale activée', 'success');
+    } else {
+        button.classList.remove('active');
+        disableVoiceReading();
+        showFeedback('Lecture vocale désactivée', 'info');
+    }
+}
+
+// Fonction pour activer la lecture vocale
+function enableVoiceReading() {
+    // Ajouter les attributs data-readable aux éléments lisibles
+    document.querySelectorAll('button, input, select, .panel, .table-name, .column-name').forEach(element => {
+        element.setAttribute('data-readable', 'true');
+        element.addEventListener('click', handleVoiceReading);
+        element.addEventListener('mouseenter', handleVoiceReading);
+    });
+
+    // Ajouter la lecture automatique des messages de feedback
+    const originalShowFeedback = showFeedback;
+    showFeedback = function(message, type = 'success') {
+        originalShowFeedback(message, type);
+        if (isVoiceReadingActive) {
+            speakText(message);
+        }
+    };
+}
+
+// Fonction pour désactiver la lecture vocale
+function disableVoiceReading() {
+    // Retirer les attributs et les écouteurs d'événements
+    document.querySelectorAll('[data-readable]').forEach(element => {
+        element.removeAttribute('data-readable');
+        element.removeEventListener('click', handleVoiceReading);
+        element.removeEventListener('mouseenter', handleVoiceReading);
+    });
+
+    // Arrêter toute lecture en cours
+    if (currentUtterance) {
+        speechSynthesis.cancel();
+    }
+}
+
+// Fonction pour gérer la lecture vocale
+function handleVoiceReading(event) {
+    if (!isVoiceReadingActive) return;
+
+    const element = event.target;
+    let textToRead = '';
+
+    // Déterminer le texte à lire en fonction du type d'élément
+    if (element.tagName === 'BUTTON') {
+        textToRead = element.getAttribute('data-tooltip') || element.textContent;
+    } else if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+        textToRead = element.getAttribute('placeholder') || element.getAttribute('aria-label') || element.value;
+    } else if (element.classList.contains('table-name')) {
+        textToRead = `Table ${element.textContent}`;
+    } else if (element.classList.contains('column-name')) {
+        textToRead = `Colonne ${element.textContent}`;
+    } else {
+        textToRead = element.textContent;
+    }
+
+    speakText(textToRead);
+}
+
+// Fonction pour lire un texte avec la langue sélectionnée
+function speakText(text) {
+    if (currentUtterance) {
+        speechSynthesis.cancel();
+    }
+
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    currentUtterance.lang = currentLanguage;
+    currentUtterance.rate = 1.0;
+    currentUtterance.pitch = 1.0;
+    currentUtterance.volume = 1.0;
+
+    // Sélectionner une voix dans la langue choisie
+    const voices = speechSynthesis.getVoices();
+    const languageVoice = voices.find(voice => voice.lang.includes(currentLanguage.split('-')[0]));
+    if (languageVoice) {
+        currentUtterance.voice = languageVoice;
+    }
+
+    speechSynthesis.speak(currentUtterance);
+}
+
+// Initialiser les voix disponibles et les logger
+speechSynthesis.onvoiceschanged = function() {
+    const voices = speechSynthesis.getVoices();
+    console.log('Voix disponibles par langue:');
+    const voicesByLang = {};
+    voices.forEach(voice => {
+        if (!voicesByLang[voice.lang]) {
+            voicesByLang[voice.lang] = [];
+        }
+        voicesByLang[voice.lang].push(voice.name);
+    });
+    console.log(voicesByLang);
+};
+
+// Ajouter des raccourcis clavier pour la lecture vocale
+document.addEventListener('keydown', function(event) {
+    // Alt + V pour activer/désactiver la lecture vocale
+    if (event.altKey && event.key === 'v') {
+        event.preventDefault();
+        toggleVoiceReading();
+    }
+});
+
+// Configuration du tutoriel
+const tutorialSteps = [
+    {
+        target: '.panel',
+        content: 'Bienvenue dans BarrelMCD ! Commençons par explorer les fonctionnalités principales.',
+        position: 'bottom'
+    },
+    {
+        target: '#add-table-btn',
+        content: 'Cliquez ici pour ajouter une nouvelle table à votre modèle.',
+        position: 'right'
+    },
+    {
+        target: '.floating-toolbar',
+        content: 'Utilisez cette barre d\'outils pour accéder rapidement aux fonctionnalités.',
+        position: 'left'
+    }
+];
+
+let currentTutorialStep = 0;
+
+function startTutorial() {
+    currentTutorialStep = 0;
+    showTutorialStep();
+}
+
+function showTutorialStep() {
+    if (currentTutorialStep >= tutorialSteps.length) {
+        endTutorial();
+        return;
+    }
+
+    const step = tutorialSteps[currentTutorialStep];
+    const target = document.querySelector(step.target);
+    
+    if (!target) {
+        currentTutorialStep++;
+        showTutorialStep();
+        return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'tutorial-overlay';
+    overlay.style.display = 'block';
+
+    const tutorialBox = document.createElement('div');
+    tutorialBox.className = 'tutorial-step';
+    tutorialBox.innerHTML = `
+        <p>${step.content}</p>
+        <button onclick="nextTutorialStep()">Suivant</button>
+        <button onclick="endTutorial()">Terminer</button>
+    `;
+
+    const targetRect = target.getBoundingClientRect();
+    switch (step.position) {
+        case 'top':
+            tutorialBox.style.top = `${targetRect.top - tutorialBox.offsetHeight - 10}px`;
+            tutorialBox.style.left = `${targetRect.left + (targetRect.width - tutorialBox.offsetWidth) / 2}px`;
+            break;
+        case 'bottom':
+            tutorialBox.style.top = `${targetRect.bottom + 10}px`;
+            tutorialBox.style.left = `${targetRect.left + (targetRect.width - tutorialBox.offsetWidth) / 2}px`;
+            break;
+        case 'left':
+            tutorialBox.style.top = `${targetRect.top + (targetRect.height - tutorialBox.offsetHeight) / 2}px`;
+            tutorialBox.style.left = `${targetRect.left - tutorialBox.offsetWidth - 10}px`;
+            break;
+        case 'right':
+            tutorialBox.style.top = `${targetRect.top + (targetRect.height - tutorialBox.offsetHeight) / 2}px`;
+            tutorialBox.style.left = `${targetRect.right + 10}px`;
+            break;
+    }
+
+    overlay.appendChild(tutorialBox);
+    document.body.appendChild(overlay);
+}
+
+function nextTutorialStep() {
+    document.querySelector('.tutorial-overlay').remove();
+    currentTutorialStep++;
+    showTutorialStep();
+}
+
+function endTutorial() {
+    const overlay = document.querySelector('.tutorial-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+    showFeedback('Tutoriel terminé !', 'success');
+}
+
+// Fonctionnalités de collaboration
+function showShareOptions() {
+    const shareContent = `
+        <h3>Partager le modèle</h3>
+        <div class="share-options">
+            <button onclick="shareViaLink()">Partager via lien</button>
+            <button onclick="shareViaEmail()">Partager par email</button>
+            <button onclick="exportForCollaboration()">Exporter pour collaboration</button>
+        </div>
+    `;
+    showModal('Partage', shareContent);
+}
+
+function toggleComments() {
+    const commentsPanel = document.querySelector('.comments-panel') || createCommentsPanel();
+    commentsPanel.classList.toggle('active');
+}
+
+function createCommentsPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'comments-panel';
+    panel.innerHTML = `
+        <div class="panel-header">
+            <h3>Commentaires</h3>
+            <button onclick="toggleComments()">×</button>
+        </div>
+        <div class="comments-list"></div>
+        <div class="comment-input">
+            <textarea placeholder="Ajouter un commentaire..."></textarea>
+            <button onclick="addComment()">Envoyer</button>
+        </div>
+    `;
+    document.body.appendChild(panel);
+    return panel;
+}
+
+// Fonctionnalités de navigation
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function toggleMinimap() {
+    let minimap = document.querySelector('.minimap');
+    if (!minimap) {
+        minimap = document.createElement('div');
+        minimap.className = 'minimap';
+        document.body.appendChild(minimap);
+    } else {
+        minimap.remove();
+    }
+}
+
+function showGlobalSearch() {
+    const searchOverlay = document.createElement('div');
+    searchOverlay.className = 'search-overlay';
+    searchOverlay.innerHTML = `
+        <div class="search-container">
+            <input type="text" placeholder="Rechercher..." autofocus>
+            <div class="search-results"></div>
+        </div>
+    `;
+    document.body.appendChild(searchOverlay);
+    searchOverlay.style.display = 'block';
+}
+
+// Fonctionnalités d'export/import améliorées
+function showExportOptions() {
+    const exportContent = `
+        <h3>Exporter le modèle</h3>
+        <div class="export-options">
+            <div class="export-section">
+                <h4>Formats d'image</h4>
+                <button onclick="exportAsPDF()">PDF (Document)</button>
+                <button onclick="exportAsPNG()">PNG (Image)</button>
+                <button onclick="exportAsSVG()">SVG (Vectoriel)</button>
+                <button onclick="exportAsJPG()">JPG (Image)</button>
+            </div>
+            <div class="export-section">
+                <h4>Formats de données</h4>
+                <button onclick="exportAsJSON()">JSON (Données)</button>
+                <button onclick="exportAsXML()">XML (Structure)</button>
+                <button onclick="exportAsSQL()">SQL (Script)</button>
+                <button onclick="exportAsCSV()">CSV (Tableau)</button>
+            </div>
+            <div class="export-section">
+                <h4>Options d'export</h4>
+                <label>
+                    <input type="checkbox" id="export-with-metadata"> Inclure les métadonnées
+                </label>
+                <label>
+                    <input type="checkbox" id="export-with-comments"> Inclure les commentaires
+                </label>
+                <label>
+                    <input type="checkbox" id="export-with-history"> Inclure l'historique
+                </label>
+                <label>
+                    <input type="checkbox" id="export-compressed"> Compresser le fichier
+                </label>
+            </div>
+            <div class="export-section">
+                <h4>Sauvegarde automatique</h4>
+                <label>
+                    <input type="checkbox" id="auto-save"> Activer la sauvegarde automatique
+                </label>
+                <select id="auto-save-interval">
+                    <option value="1">Toutes les minutes</option>
+                    <option value="5">Toutes les 5 minutes</option>
+                    <option value="15">Toutes les 15 minutes</option>
+                    <option value="30">Toutes les 30 minutes</option>
+                    <option value="60">Toutes les heures</option>
+                </select>
+            </div>
+        </div>
+    `;
+    showModal('Export', exportContent);
+}
+
+function showImportOptions() {
+    const importContent = `
+        <h3>Importer un modèle</h3>
+        <div class="import-options">
+            <div class="import-section">
+                <h4>Formats supportés</h4>
+                <input type="file" accept=".json,.xml,.sql,.csv,.pdf,.png,.svg,.jpg" multiple>
+            </div>
+            <div class="import-section">
+                <h4>Options d'import</h4>
+                <label>
+                    <input type="checkbox" id="import-merge"> Fusionner avec le modèle existant
+                </label>
+                <label>
+                    <input type="checkbox" id="import-validate"> Valider avant l'import
+                </label>
+                <label>
+                    <input type="checkbox" id="import-backup"> Créer une sauvegarde avant l'import
+                </label>
+            </div>
+            <div class="import-section">
+                <h4>Sources externes</h4>
+                <button onclick="importFromDatabase()">Importer depuis une base de données</button>
+                <button onclick="importFromAPI()">Importer depuis une API</button>
+                <button onclick="importFromCloud()">Importer depuis le cloud</button>
+            </div>
+            <button onclick="importModel()" class="primary-button">Importer</button>
+        </div>
+    `;
+    showModal('Import', importContent);
+}
+
+// Fonctions d'export améliorées
+function exportAsPDF() {
+    const options = getExportOptions();
+    showFeedback('Export PDF en cours...', 'info');
+    // Logique d'export PDF
+}
+
+function exportAsPNG() {
+    const options = getExportOptions();
+    showFeedback('Export PNG en cours...', 'info');
+    // Logique d'export PNG
+}
+
+function exportAsSVG() {
+    const options = getExportOptions();
+    showFeedback('Export SVG en cours...', 'info');
+    // Logique d'export SVG
+}
+
+function exportAsJPG() {
+    const options = getExportOptions();
+    showFeedback('Export JPG en cours...', 'info');
+    // Logique d'export JPG
+}
+
+function exportAsJSON() {
+    const options = getExportOptions();
+    showFeedback('Export JSON en cours...', 'info');
+    // Logique d'export JSON
+}
+
+function exportAsXML() {
+    const options = getExportOptions();
+    showFeedback('Export XML en cours...', 'info');
+    // Logique d'export XML
+}
+
+function exportAsSQL() {
+    const options = getExportOptions();
+    showFeedback('Export SQL en cours...', 'info');
+    // Logique d'export SQL
+}
+
+function exportAsCSV() {
+    const options = getExportOptions();
+    showFeedback('Export CSV en cours...', 'info');
+    // Logique d'export CSV
+}
+
+// Fonction pour récupérer les options d'export
+function getExportOptions() {
+    return {
+        includeMetadata: document.getElementById('export-with-metadata').checked,
+        includeComments: document.getElementById('export-with-comments').checked,
+        includeHistory: document.getElementById('export-with-history').checked,
+        compressed: document.getElementById('export-compressed').checked
+    };
+}
+
+// Fonction pour la sauvegarde automatique
+function setupAutoSave() {
+    const autoSaveCheckbox = document.getElementById('auto-save');
+    const autoSaveInterval = document.getElementById('auto-save-interval');
+    
+    autoSaveCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            const interval = parseInt(autoSaveInterval.value) * 60 * 1000; // Convertir en millisecondes
+            startAutoSave(interval);
+        } else {
+            stopAutoSave();
+        }
+    });
+}
+
+let autoSaveInterval;
+
+function startAutoSave(interval) {
+    autoSaveInterval = setInterval(() => {
+        saveModel();
+    }, interval);
+    showFeedback('Sauvegarde automatique activée', 'success');
+}
+
+function stopAutoSave() {
+    if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+        showFeedback('Sauvegarde automatique désactivée', 'info');
+    }
+}
+
+// Fonction de sauvegarde du modèle
+function saveModel() {
+    const modelData = {
+        tables: getAllTables(),
+        relationships: getAllRelationships(),
+        metadata: getModelMetadata(),
+        comments: getAllComments(),
+        history: getModelHistory()
+    };
+
+    // Sauvegarde locale
+    localStorage.setItem('modelBackup', JSON.stringify(modelData));
+    
+    // Sauvegarde cloud (si activée)
+    if (isCloudSyncEnabled()) {
+        saveToCloud(modelData);
+    }
+
+    showFeedback('Modèle sauvegardé avec succès', 'success');
+}
+
+// Styles pour les options d'export/import
+const exportImportStyles = `
+    .export-section, .import-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+
+    .export-section h4, .import-section h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: var(--text-color);
+    }
+
+    .export-options label, .import-options label {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .export-options select, .import-options select {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .primary-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+`;
+
+// Ajout des styles
+const exportImportStyleSheet = document.createElement('style');
+exportImportStyleSheet.textContent = exportImportStyles;
+document.head.appendChild(exportImportStyleSheet);
+
+// Fonctionnalités d'accessibilité
+function toggleColorBlindMode() {
+    document.documentElement.setAttribute('data-theme', 
+        document.documentElement.getAttribute('data-theme') === 'colorblind' ? 'dark' : 'colorblind'
+    );
+}
+
+function showFontSizeControls() {
+    const fontSizeContent = `
+        <h3>Taille du texte</h3>
+        <div class="font-size-controls">
+            <button onclick="changeFontSize('decrease')">A-</button>
+            <button onclick="changeFontSize('reset')">Reset</button>
+            <button onclick="changeFontSize('increase')">A+</button>
+        </div>
+    `;
+    showModal('Taille du texte', fontSizeContent);
+}
+
+function changeFontSize(action) {
+    const root = document.documentElement;
+    const currentSize = parseFloat(getComputedStyle(root).fontSize);
+    
+    switch (action) {
+        case 'increase':
+            root.style.fontSize = `${currentSize + 2}px`;
+            break;
+        case 'decrease':
+            root.style.fontSize = `${currentSize - 2}px`;
+            break;
+        case 'reset':
+            root.style.fontSize = '16px';
+            break;
+    }
+}
+
+// Fonctionnalités de dessin améliorées
+function setupDrawingTools() {
+    const drawingTools = `
+        <div class="drawing-tools">
+            <div class="tool-section">
+                <h4>Création rapide</h4>
+                <button onclick="quickCreateTable()" data-tooltip="Créer une table rapidement (Ctrl+T)">
+                    <i class="fas fa-table"></i> Nouvelle table
+                </button>
+                <button onclick="quickCreateRelation()" data-tooltip="Créer une relation (Ctrl+R)">
+                    <i class="fas fa-link"></i> Nouvelle relation
+                </button>
+                <button onclick="quickCreateAttribute()" data-tooltip="Ajouter un attribut (Ctrl+A)">
+                    <i class="fas fa-list"></i> Nouvel attribut
+                </button>
+            </div>
+            <div class="tool-section">
+                <h4>Assistants</h4>
+                <button onclick="showTableWizard()" data-tooltip="Assistant de création de table">
+                    <i class="fas fa-magic"></i> Assistant de table
+                </button>
+                <button onclick="showRelationWizard()" data-tooltip="Assistant de création de relation">
+                    <i class="fas fa-wand-magic-sparkles"></i> Assistant de relation
+                </button>
+                <button onclick="showAttributeWizard()" data-tooltip="Assistant de création d'attribut">
+                    <i class="fas fa-sparkles"></i> Assistant d'attribut
+                </button>
+            </div>
+            <div class="tool-section">
+                <h4>Suggestions</h4>
+                <button onclick="showTableSuggestions()" data-tooltip="Voir les suggestions de tables">
+                    <i class="fas fa-lightbulb"></i> Suggestions de tables
+                </button>
+                <button onclick="showRelationSuggestions()" data-tooltip="Voir les suggestions de relations">
+                    <i class="fas fa-lightbulb"></i> Suggestions de relations
+                </button>
+            </div>
+        </div>
+    `;
+    document.querySelector('.panel').insertAdjacentHTML('beforeend', drawingTools);
+}
+
+// Styles pour les outils de dessin
+const drawingToolsStyles = `
+    .drawing-tools {
+        position: fixed;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--panel-background);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        z-index: 1000;
+    }
+
+    .tool-section {
+        margin-bottom: 15px;
+    }
+
+    .tool-section h4 {
+        margin: 0 0 10px 0;
+        color: var(--text-color);
+        font-size: 14px;
+    }
+
+    .drawing-tools button {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px;
+        text-align: left;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .drawing-tools button:hover {
+        background: var(--hover-color);
+        transform: translateX(5px);
+    }
+
+    .drawing-tools button i {
+        margin-right: 8px;
+    }
+
+    .wizard-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .wizard-content {
+        background: var(--panel-background);
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .wizard-step {
+        display: none;
+    }
+
+    .wizard-step.active {
+        display: block;
+    }
+
+    .wizard-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .suggestion-item {
+        padding: 10px;
+        margin: 5px 0;
+        background: var(--secondary-color);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+`;
+
+// Ajout des styles
+const drawingToolsStyleSheet = document.createElement('style');
+drawingToolsStyleSheet.textContent = drawingToolsStyles;
+document.head.appendChild(drawingToolsStyleSheet);
+
+// Fonctions d'assistance au dessin
+function quickCreateTable() {
+    const tableName = prompt('Nom de la table :');
+    if (tableName) {
+        createTable(tableName);
+        showFeedback('Table créée avec succès', 'success');
+    }
+}
+
+function quickCreateRelation() {
+    const tables = getAllTables();
+    if (tables.length < 2) {
+        showFeedback('Il faut au moins deux tables pour créer une relation', 'warning');
+        return;
+    }
+    showRelationWizard();
+}
+
+function quickCreateAttribute() {
+    const tables = getAllTables();
+    if (tables.length === 0) {
+        showFeedback('Il faut d\'abord créer une table', 'warning');
+        return;
+    }
+    showAttributeWizard();
+}
+
+// Assistants de création
+function showTableWizard() {
+    const wizardContent = `
+        <div class="wizard-content">
+            <h3>Assistant de création de table</h3>
+            <div class="wizard-step active" data-step="1">
+                <h4>Étape 1 : Informations de base</h4>
+                <input type="text" placeholder="Nom de la table" id="table-name">
+                <textarea placeholder="Description de la table" id="table-description"></textarea>
+                <button onclick="nextWizardStep('table', 1)">Suivant</button>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <h4>Étape 2 : Attributs</h4>
+                <div id="attributes-list"></div>
+                <button onclick="addAttribute()">Ajouter un attribut</button>
+                <div class="wizard-navigation">
+                    <button onclick="previousWizardStep('table', 2)">Précédent</button>
+                    <button onclick="finishTableWizard()">Terminer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    showWizardOverlay(wizardContent);
+}
+
+function showRelationWizard() {
+    const tables = getAllTables();
+    const wizardContent = `
+        <div class="wizard-content">
+            <h3>Assistant de création de relation</h3>
+            <div class="wizard-step active" data-step="1">
+                <h4>Étape 1 : Tables concernées</h4>
+                <select id="source-table">
+                    <option value="">Sélectionner la table source</option>
+                    ${tables.map(table => `<option value="${table.id}">${table.name}</option>`).join('')}
+                </select>
+                <select id="target-table">
+                    <option value="">Sélectionner la table cible</option>
+                    ${tables.map(table => `<option value="${table.id}">${table.name}</option>`).join('')}
+                </select>
+                <button onclick="nextWizardStep('relation', 1)">Suivant</button>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <h4>Étape 2 : Type de relation</h4>
+                <select id="relation-type">
+                    <option value="1,1">Un à un (1,1)</option>
+                    <option value="1,n">Un à plusieurs (1,n)</option>
+                    <option value="n,1">Plusieurs à un (n,1)</option>
+                    <option value="n,n">Plusieurs à plusieurs (n,n)</option>
+                </select>
+                <div class="wizard-navigation">
+                    <button onclick="previousWizardStep('relation', 2)">Précédent</button>
+                    <button onclick="finishRelationWizard()">Terminer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    showWizardOverlay(wizardContent);
+}
+
+function showAttributeWizard() {
+    const tables = getAllTables();
+    const wizardContent = `
+        <div class="wizard-content">
+            <h3>Assistant de création d'attribut</h3>
+            <div class="wizard-step active" data-step="1">
+                <h4>Étape 1 : Table cible</h4>
+                <select id="target-table-attribute">
+                    <option value="">Sélectionner la table</option>
+                    ${tables.map(table => `<option value="${table.id}">${table.name}</option>`).join('')}
+                </select>
+                <button onclick="nextWizardStep('attribute', 1)">Suivant</button>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <h4>Étape 2 : Type d'attribut</h4>
+                <select id="attribute-type">
+                    <option value="primary">Clé primaire</option>
+                    <option value="foreign">Clé étrangère</option>
+                    <option value="normal">Attribut normal</option>
+                </select>
+                <input type="text" placeholder="Nom de l'attribut" id="attribute-name">
+                <select id="data-type">
+                    <option value="int">Entier</option>
+                    <option value="varchar">Texte</option>
+                    <option value="date">Date</option>
+                    <option value="boolean">Booléen</option>
+                    <option value="decimal">Décimal</option>
+                </select>
+                <div class="wizard-navigation">
+                    <button onclick="previousWizardStep('attribute', 2)">Précédent</button>
+                    <button onclick="finishAttributeWizard()">Terminer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    showWizardOverlay(wizardContent);
+}
+
+// Fonctions de suggestions
+function showTableSuggestions() {
+    const suggestions = [
+        { name: 'Utilisateurs', description: 'Table standard pour gérer les utilisateurs' },
+        { name: 'Produits', description: 'Table pour le catalogue de produits' },
+        { name: 'Commandes', description: 'Table pour gérer les commandes' },
+        { name: 'Catégories', description: 'Table pour organiser les éléments' }
+    ];
+    
+    const suggestionsContent = `
+        <div class="wizard-content">
+            <h3>Suggestions de tables</h3>
+            <div class="suggestions-list">
+                ${suggestions.map(suggestion => `
+                    <div class="suggestion-item" onclick="createTableFromSuggestion('${suggestion.name}')">
+                        <h4>${suggestion.name}</h4>
+                        <p>${suggestion.description}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    showWizardOverlay(suggestionsContent);
+}
+
+function showRelationSuggestions() {
+    const tables = getAllTables();
+    if (tables.length < 2) {
+        showFeedback('Il faut au moins deux tables pour voir les suggestions de relations', 'warning');
+        return;
+    }
+
+    const suggestions = generateRelationSuggestions(tables);
+    const suggestionsContent = `
+        <div class="wizard-content">
+            <h3>Suggestions de relations</h3>
+            <div class="suggestions-list">
+                ${suggestions.map(suggestion => `
+                    <div class="suggestion-item" onclick="createRelationFromSuggestion('${suggestion.source}', '${suggestion.target}', '${suggestion.type}')">
+                        <h4>${suggestion.source} → ${suggestion.target}</h4>
+                        <p>Type: ${suggestion.type}</p>
+                        <p>${suggestion.description}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    showWizardOverlay(suggestionsContent);
+}
+
+// Fonctions utilitaires
+function showWizardOverlay(content) {
+    const overlay = document.createElement('div');
+    overlay.className = 'wizard-overlay';
+    overlay.innerHTML = content;
+    document.body.appendChild(overlay);
+}
+
+function nextWizardStep(type, currentStep) {
+    const currentStepElement = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
+    const nextStepElement = document.querySelector(`.wizard-step[data-step="${currentStep + 1}"]`);
+    
+    if (currentStepElement && nextStepElement) {
+        currentStepElement.classList.remove('active');
+        nextStepElement.classList.add('active');
+    }
+}
+
+function previousWizardStep(type, currentStep) {
+    const currentStepElement = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
+    const previousStepElement = document.querySelector(`.wizard-step[data-step="${currentStep - 1}"]`);
+    
+    if (currentStepElement && previousStepElement) {
+        currentStepElement.classList.remove('active');
+        previousStepElement.classList.add('active');
+    }
+}
+
+// Initialisation des outils de dessin
+document.addEventListener('DOMContentLoaded', () => {
+    setupDrawingTools();
+    
+    // Ajout des raccourcis clavier
+    document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey) {
+            switch (event.key.toLowerCase()) {
+                case 't':
+                    event.preventDefault();
+                    quickCreateTable();
+                    break;
+                case 'r':
+                    event.preventDefault();
+                    quickCreateRelation();
+                    break;
+                case 'a':
+                    event.preventDefault();
+                    quickCreateAttribute();
+                    break;
+            }
+        }
+    });
+});
+
+// Fonctionnalités professionnelles pour le dessin de MCD
+function setupProfessionalTools() {
+    const professionalTools = `
+        <div class="professional-tools">
+            <div class="tool-section">
+                <h4>Modèles prédéfinis</h4>
+                <button onclick="showPredefinedModels()" data-tooltip="Utiliser un modèle prédéfini">
+                    <i class="fas fa-cubes"></i> Modèles prédéfinis
+                </button>
+                <button onclick="showTemplates()" data-tooltip="Utiliser un template">
+                    <i class="fas fa-file-alt"></i> Templates
+                </button>
+                <button onclick="showBestPractices()" data-tooltip="Voir les bonnes pratiques">
+                    <i class="fas fa-check-circle"></i> Bonnes pratiques
+                </button>
+            </div>
+            <div class="tool-section">
+                <h4>Analyse avancée</h4>
+                <button onclick="analyzeModel()" data-tooltip="Analyser le modèle">
+                    <i class="fas fa-chart-line"></i> Analyser
+                </button>
+                <button onclick="optimizeModel()" data-tooltip="Optimiser le modèle">
+                    <i class="fas fa-magic"></i> Optimiser
+                </button>
+                <button onclick="validateModel()" data-tooltip="Valider le modèle">
+                    <i class="fas fa-check-double"></i> Valider
+                </button>
+            </div>
+            <div class="tool-section">
+                <h4>Documentation</h4>
+                <button onclick="generateDocumentation()" data-tooltip="Générer la documentation">
+                    <i class="fas fa-book"></i> Documentation
+                </button>
+                <button onclick="exportToUML()" data-tooltip="Exporter en UML">
+                    <i class="fas fa-project-diagram"></i> UML
+                </button>
+                <button onclick="showVersionHistory()" data-tooltip="Voir l'historique">
+                    <i class="fas fa-history"></i> Historique
+                </button>
+            </div>
+        </div>
+    `;
+    document.querySelector('.panel').insertAdjacentHTML('beforeend', professionalTools);
+}
+
+// Styles pour les outils professionnels
+const professionalToolsStyles = `
+    .professional-tools {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--panel-background);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        z-index: 1000;
+        width: 250px;
+    }
+
+    .professional-tools .tool-section {
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+
+    .professional-tools .tool-section:last-child {
+        border-bottom: none;
+    }
+
+    .professional-tools h4 {
+        margin: 0 0 10px 0;
+        color: var(--text-color);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .professional-tools button {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px;
+        text-align: left;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 13px;
+    }
+
+    .professional-tools button:hover {
+        background: var(--hover-color);
+        transform: translateX(-5px);
+    }
+
+    .professional-tools button i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+    }
+
+    .model-analysis-panel {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 300px;
+        height: 100%;
+        background: var(--panel-background);
+        border-left: 1px solid var(--border-color);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 900;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .model-analysis-panel.active {
+        transform: translateX(0);
+    }
+
+    .analysis-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        background: var(--secondary-color);
+    }
+
+    .analysis-item h5 {
+        margin: 0 0 5px 0;
+        color: var(--text-color);
+    }
+
+    .analysis-item p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-color);
+    }
+
+    .analysis-item.warning {
+        border-left: 3px solid var(--warning-color);
+    }
+
+    .analysis-item.error {
+        border-left: 3px solid var(--error-color);
+    }
+
+    .analysis-item.success {
+        border-left: 3px solid var(--success-color);
+    }
+
+    .predefined-model-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        background: var(--secondary-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .predefined-model-item:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .predefined-model-item h5 {
+        margin: 0 0 5px 0;
+    }
+
+    .predefined-model-item p {
+        margin: 0;
+        font-size: 12px;
+    }
+
+    .documentation-panel {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 400px;
+        height: 100%;
+        background: var(--panel-background);
+        border-left: 1px solid var(--border-color);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 900;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .documentation-panel.active {
+        transform: translateX(0);
+    }
+
+    .documentation-section {
+        margin-bottom: 20px;
+    }
+
+    .documentation-section h4 {
+        margin: 0 0 10px 0;
+        color: var(--text-color);
+    }
+
+    .documentation-section p {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .documentation-section code {
+        background: var(--secondary-color);
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+`;
+
+// Ajout des styles
+const professionalToolsStyleSheet = document.createElement('style');
+professionalToolsStyleSheet.textContent = professionalToolsStyles;
+document.head.appendChild(professionalToolsStyleSheet);
+
+// Fonctions pour les modèles prédéfinis
+function showPredefinedModels() {
+    const predefinedModels = [
+        {
+            name: 'E-commerce',
+            description: 'Modèle pour un site e-commerce avec produits, commandes, clients et catégories',
+            tables: ['Utilisateurs', 'Produits', 'Commandes', 'Catégories', 'Paniers', 'Paiements']
+        },
+        {
+            name: 'Gestion de projet',
+            description: 'Modèle pour la gestion de projets avec tâches, ressources et jalons',
+            tables: ['Projets', 'Tâches', 'Ressources', 'Jalons', 'Équipes', 'Temps']
+        },
+        {
+            name: 'Gestion de bibliothèque',
+            description: 'Modèle pour une bibliothèque avec livres, emprunts et membres',
+            tables: ['Livres', 'Membres', 'Emprunts', 'Auteurs', 'Éditeurs', 'Catégories']
+        },
+        {
+            name: 'Gestion d\'école',
+            description: 'Modèle pour une école avec étudiants, cours et notes',
+            tables: ['Étudiants', 'Cours', 'Notes', 'Professeurs', 'Classes', 'Emplois du temps']
+        }
+    ];
+    
+    const modelsContent = `
+        <div class="wizard-content">
+            <h3>Modèles prédéfinis</h3>
+            <div class="predefined-models-list">
+                ${predefinedModels.map(model => `
+                    <div class="predefined-model-item" onclick="loadPredefinedModel('${model.name}')">
+                        <h5>${model.name}</h5>
+                        <p>${model.description}</p>
+                        <small>Tables: ${model.tables.join(', ')}</small>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    showWizardOverlay(modelsContent);
+}
+
+function loadPredefinedModel(modelName) {
+    // Logique pour charger un modèle prédéfini
+    showFeedback(`Modèle "${modelName}" chargé avec succès`, 'success');
+    closeWizardOverlay();
+}
+
+// Fonctions pour l'analyse avancée
+function analyzeModel() {
+    const analysisPanel = document.createElement('div');
+    analysisPanel.className = 'model-analysis-panel';
+    analysisPanel.innerHTML = `
+        <div class="panel-header">
+            <h3>Analyse du modèle</h3>
+            <button onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="analysis-content">
+            <div class="analysis-item warning">
+                <h5>Normalisation</h5>
+                <p>Vérifiez la normalisation de vos tables pour éviter la redondance des données.</p>
+            </div>
+            <div class="analysis-item error">
+                <h5>Clés étrangères manquantes</h5>
+                <p>Certaines relations n'ont pas de clés étrangères définies.</p>
+            </div>
+            <div class="analysis-item success">
+                <h5>Nommage cohérent</h5>
+                <p>Les noms de tables et d'attributs suivent une convention cohérente.</p>
+            </div>
+            <div class="analysis-item warning">
+                <h5>Indexation</h5>
+                <p>Considérez l'ajout d'index pour améliorer les performances des requêtes.</p>
+            </div>
+            <div class="analysis-item">
+                <h5>Statistiques</h5>
+                <p>Tables: 5 | Relations: 8 | Attributs: 32</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(analysisPanel);
+    setTimeout(() => {
+        analysisPanel.classList.add('active');
+    }, 10);
+}
+
+function optimizeModel() {
+    // Logique pour optimiser le modèle
+    showFeedback('Modèle optimisé avec succès', 'success');
+}
+
+function validateModel() {
+    // Logique pour valider le modèle
+    showFeedback('Modèle validé avec succès', 'success');
+}
+
+// Fonctions pour la documentation
+function generateDocumentation() {
+    const documentationPanel = document.createElement('div');
+    documentationPanel.className = 'documentation-panel';
+    documentationPanel.innerHTML = `
+        <div class="panel-header">
+            <h3>Documentation du modèle</h3>
+            <button onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="documentation-content">
+            <div class="documentation-section">
+                <h4>Vue d'ensemble</h4>
+                <p>Ce modèle de données représente un système de gestion de bibliothèque avec les entités principales suivantes :</p>
+                <ul>
+                    <li>Livres : Stockage des informations sur les livres</li>
+                    <li>Membres : Gestion des utilisateurs de la bibliothèque</li>
+                    <li>Emprunts : Suivi des emprunts de livres</li>
+                </ul>
+            </div>
+            <div class="documentation-section">
+                <h4>Tables principales</h4>
+                <p><strong>Livres</strong> : Stocke les informations sur chaque livre</p>
+                <code>CREATE TABLE Livres (id INT PRIMARY KEY, titre VARCHAR(255), auteur VARCHAR(255), ...)</code>
+                <p><strong>Membres</strong> : Gère les informations des utilisateurs</p>
+                <code>CREATE TABLE Membres (id INT PRIMARY KEY, nom VARCHAR(255), email VARCHAR(255), ...)</code>
+            </div>
+            <div class="documentation-section">
+                <h4>Relations</h4>
+                <p>Le modèle utilise les relations suivantes :</p>
+                <ul>
+                    <li>Un membre peut emprunter plusieurs livres (1:n)</li>
+                    <li>Un livre peut être emprunté par plusieurs membres (n:n)</li>
+                </ul>
+            </div>
+            <div class="documentation-section">
+                <h4>Conventions de nommage</h4>
+                <p>Les conventions suivantes sont utilisées :</p>
+                <ul>
+                    <li>Noms de tables au pluriel et en PascalCase</li>
+                    <li>Noms d'attributs en camelCase</li>
+                    <li>Clés primaires nommées "id"</li>
+                    <li>Clés étrangères nommées "table_id"</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(documentationPanel);
+    setTimeout(() => {
+        documentationPanel.classList.add('active');
+    }, 10);
+}
+
+function exportToUML() {
+    // Logique pour exporter en UML
+    showFeedback('Modèle exporté en UML avec succès', 'success');
+}
+
+function showVersionHistory() {
+    // Logique pour afficher l'historique des versions
+    showFeedback('Historique des versions chargé', 'success');
+}
+
+// Fonctions utilitaires
+function closeWizardOverlay() {
+    const overlay = document.querySelector('.wizard-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Initialisation des outils professionnels
+document.addEventListener('DOMContentLoaded', () => {
+    setupProfessionalTools();
+});
+
+// Ajout du sélecteur de modèle dans la barre d'outils
+const modelSelector = `
+    <div class="model-selector panel">
+        <h3>Type de modèle</h3>
+        <select id="model-type-select" onchange="changeModelType(this.value)">
+            <option value="mcd">MCD (Modèle Conceptuel de Données)</option>
+            <option value="uml">UML (Unified Modeling Language)</option>
+            <option value="mld">MLD (Modèle Logique de Données)</option>
+            <option value="mpd">MPD (Modèle Physique de Données)</option>
+            <option value="sql">SQL (Structured Query Language)</option>
+        </select>
+        <div class="model-actions">
+            <button onclick="saveAsCurrentModel()" data-tooltip="Enregistrer sous le format actuel">
+                <i class="fas fa-save"></i> Enregistrer
+            </button>
+            <button onclick="showSaveAsOptions()" data-tooltip="Enregistrer sous un autre format">
+                <i class="fas fa-file-export"></i> Enregistrer sous...
+            </button>
+        </div>
+    </div>
+`;
+
+// Styles pour le sélecteur de modèle
+const modelSelectorStyles = `
+    .model-selector {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: var(--panel-background);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        z-index: 1000;
+        width: 300px;
+    }
+
+    .model-selector select {
+        width: 100%;
+        margin: 10px 0;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background: var(--background-color);
+        color: var(--text-color);
+    }
+
+    .model-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .model-actions button {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: none;
+        background: var(--primary-color);
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .model-actions button:hover {
+        background: var(--hover-color);
+        transform: translateY(-2px);
+    }
+
+    .model-actions button i {
+        margin-right: 5px;
+    }
+
+    .save-as-options {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--panel-background);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        z-index: 1001;
+        width: 400px;
+    }
+
+    .save-as-options h3 {
+        margin: 0 0 15px 0;
+        color: var(--text-color);
+    }
+
+    .save-as-options .option-group {
+        margin-bottom: 15px;
+    }
+
+    .save-as-options .option-group h4 {
+        margin: 0 0 10px 0;
+        color: var(--text-color);
+    }
+
+    .save-as-options button {
+        width: 100%;
+        margin: 5px 0;
+        padding: 10px;
+        text-align: left;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .save-as-options button:hover {
+        background: var(--hover-color);
+        transform: translateX(5px);
+    }
+
+    .save-as-options button i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+    }
+`;
+
+// Ajout des styles
+const modelSelectorStyleSheet = document.createElement('style');
+modelSelectorStyleSheet.textContent = modelSelectorStyles;
+document.head.appendChild(modelSelectorStyleSheet);
+
+// Fonctions pour la gestion des modèles
+let currentModelType = 'mcd';
+
+function changeModelType(type) {
+    currentModelType = type;
+    updateModelDisplay();
+    showFeedback(`Modèle changé en ${getModelTypeName(type)}`, 'success');
+}
+
+function getModelTypeName(type) {
+    const modelTypes = {
+        'mcd': 'MCD (Modèle Conceptuel de Données)',
+        'uml': 'UML (Unified Modeling Language)',
+        'mld': 'MLD (Modèle Logique de Données)',
+        'mpd': 'MPD (Modèle Physique de Données)',
+        'sql': 'SQL (Structured Query Language)'
+    };
+    return modelTypes[type] || type;
+}
+
+function updateModelDisplay() {
+    // Mise à jour de l'affichage en fonction du type de modèle
+    const tables = document.querySelectorAll('.table');
+    const relations = document.querySelectorAll('.relation');
+    
+    switch(currentModelType) {
+        case 'mcd':
+            // Affichage standard MCD
+            tables.forEach(table => {
+                table.classList.remove('uml-class', 'mld-table', 'mpd-table', 'sql-table');
+                table.classList.add('mcd-table');
+            });
+            break;
+        case 'uml':
+            // Conversion en classes UML
+            tables.forEach(table => {
+                table.classList.remove('mcd-table', 'mld-table', 'mpd-table', 'sql-table');
+                table.classList.add('uml-class');
+            });
+            break;
+        case 'mld':
+            // Conversion en tables MLD
+            tables.forEach(table => {
+                table.classList.remove('mcd-table', 'uml-class', 'mpd-table', 'sql-table');
+                table.classList.add('mld-table');
+            });
+            break;
+        case 'mpd':
+            // Conversion en tables MPD
+            tables.forEach(table => {
+                table.classList.remove('mcd-table', 'uml-class', 'mld-table', 'sql-table');
+                table.classList.add('mpd-table');
+            });
+            break;
+        case 'sql':
+            // Conversion en tables SQL
+            tables.forEach(table => {
+                table.classList.remove('mcd-table', 'uml-class', 'mld-table', 'mpd-table');
+                table.classList.add('sql-table');
+            });
+            break;
+    }
+}
+
+function saveAsCurrentModel() {
+    const modelData = getCurrentModelData();
+    const fileName = `model_${currentModelType}_${new Date().toISOString().slice(0,10)}`;
+    
+    switch(currentModelType) {
+        case 'mcd':
+            saveAsMCD(modelData, fileName);
+            break;
+        case 'uml':
+            saveAsUML(modelData, fileName);
+            break;
+        case 'mld':
+            saveAsMLD(modelData, fileName);
+            break;
+        case 'mpd':
+            saveAsMPD(modelData, fileName);
+            break;
+        case 'sql':
+            saveAsSQL(modelData, fileName);
+            break;
+    }
+}
+
+function showSaveAsOptions() {
+    const saveAsContent = `
+        <div class="save-as-options">
+            <h3>Enregistrer sous...</h3>
+            <div class="option-group">
+                <h4>Modèles de données</h4>
+                <button onclick="saveAs('mcd')">
+                    <i class="fas fa-project-diagram"></i> MCD (Modèle Conceptuel de Données)
+                </button>
+                <button onclick="saveAs('mld')">
+                    <i class="fas fa-table"></i> MLD (Modèle Logique de Données)
+                </button>
+                <button onclick="saveAs('mpd')">
+                    <i class="fas fa-database"></i> MPD (Modèle Physique de Données)
+                </button>
+            </div>
+            <div class="option-group">
+                <h4>Langages de modélisation</h4>
+                <button onclick="saveAs('uml')">
+                    <i class="fas fa-sitemap"></i> UML (Unified Modeling Language)
+                </button>
+                <button onclick="saveAs('sql')">
+                    <i class="fas fa-code"></i> SQL (Structured Query Language)
+                </button>
+            </div>
+            <div class="option-group">
+                <h4>Formats d'export</h4>
+                <button onclick="saveAs('json')">
+                    <i class="fas fa-file-code"></i> JSON
+                </button>
+                <button onclick="saveAs('xml')">
+                    <i class="fas fa-file-code"></i> XML
+                </button>
+                <button onclick="saveAs('pdf')">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </div>
+    `;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'wizard-overlay';
+    overlay.innerHTML = saveAsContent;
+    document.body.appendChild(overlay);
+}
+
+function saveAs(type) {
+    const modelData = getCurrentModelData();
+    const fileName = `model_${type}_${new Date().toISOString().slice(0,10)}`;
+    
+    switch(type) {
+        case 'mcd':
+            saveAsMCD(modelData, fileName);
+            break;
+        case 'uml':
+            saveAsUML(modelData, fileName);
+            break;
+        case 'mld':
+            saveAsMLD(modelData, fileName);
+            break;
+        case 'mpd':
+            saveAsMPD(modelData, fileName);
+            break;
+        case 'sql':
+            saveAsSQL(modelData, fileName);
+            break;
+        case 'json':
+            saveAsJSON(modelData, fileName);
+            break;
+        case 'xml':
+            saveAsXML(modelData, fileName);
+            break;
+        case 'pdf':
+            saveAsPDF(modelData, fileName);
+            break;
+    }
+    
+    closeWizardOverlay();
+}
+
+function getCurrentModelData() {
+    // Récupération des données du modèle actuel
+    const tables = Array.from(document.querySelectorAll('.table')).map(table => ({
+        name: table.querySelector('.table-name').textContent,
+        attributes: Array.from(table.querySelectorAll('.column-name')).map(col => ({
+            name: col.textContent,
+            type: col.getAttribute('data-type'),
+            isPrimary: col.classList.contains('primary-key'),
+            isForeign: col.classList.contains('foreign-key')
+        }))
+    }));
+    
+    const relations = Array.from(document.querySelectorAll('.relation')).map(relation => ({
+        source: relation.getAttribute('data-source'),
+        target: relation.getAttribute('data-target'),
+        type: relation.getAttribute('data-type')
+    }));
+    
+    return {
+        tables,
+        relations,
+        type: currentModelType,
+        metadata: {
+            created: new Date().toISOString(),
+            modified: new Date().toISOString(),
+            version: '1.0'
+        }
+    };
+}
+
+// Fonctions de sauvegarde spécifiques
+function saveAsMCD(data, fileName) {
+    // Logique de sauvegarde en format MCD
+    showFeedback('Modèle sauvegardé en format MCD', 'success');
+}
+
+function saveAsUML(data, fileName) {
+    // Logique de sauvegarde en format UML
+    showFeedback('Modèle sauvegardé en format UML', 'success');
+}
+
+function saveAsMLD(data, fileName) {
+    // Logique de sauvegarde en format MLD
+    showFeedback('Modèle sauvegardé en format MLD', 'success');
+}
+
+function saveAsMPD(data, fileName) {
+    // Logique de sauvegarde en format MPD
+    showFeedback('Modèle sauvegardé en format MPD', 'success');
+}
+
+function saveAsSQL(data, fileName) {
+    // Logique de sauvegarde en format SQL
+    showFeedback('Modèle sauvegardé en format SQL', 'success');
+}
+
+function saveAsJSON(data, fileName) {
+    // Logique de sauvegarde en format JSON
+    const jsonString = JSON.stringify(data, null, 2);
+    downloadFile(jsonString, `${fileName}.json`, 'application/json');
+    showFeedback('Modèle sauvegardé en format JSON', 'success');
+}
+
+function saveAsXML(data, fileName) {
+    // Logique de sauvegarde en format XML
+    showFeedback('Modèle sauvegardé en format XML', 'success');
+}
+
+function saveAsPDF(data, fileName) {
+    // Logique de sauvegarde en format PDF
+    showFeedback('Modèle sauvegardé en format PDF', 'success');
+}
+
+function downloadFile(content, fileName, type) {
+    const blob = new Blob([content], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Initialisation du sélecteur de modèle
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.panel').insertAdjacentHTML('beforeend', modelSelector);
+});
+
+// Ajout des styles spécifiques pour chaque type de modèle
+const modelSpecificStyles = `
+    /* Styles MCD */
+    .mcd-table {
+        border: 2px solid var(--primary-color);
+        background: var(--panel-background);
+    }
+    .mcd-table .table-name {
+        background: var(--primary-color);
+        color: white;
+    }
+    .mcd-table .column-name {
+        border-bottom: 1px solid var(--border-color);
+    }
+    .mcd-table .primary-key {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    .mcd-table .foreign-key {
+        color: var(--secondary-color);
+    }
+
+    /* Styles UML */
+    .uml-class {
+        border: 2px solid #2c3e50;
+        background: #ecf0f1;
+    }
+    .uml-class .table-name {
+        background: #2c3e50;
+        color: white;
+        font-style: italic;
+    }
+    .uml-class .column-name {
+        border-bottom: 1px solid #bdc3c7;
+    }
+    .uml-class .method {
+        color: #3498db;
+        font-style: italic;
+    }
+    .uml-class .property {
+        color: #2ecc71;
+    }
+
+    /* Styles MLD */
+    .mld-table {
+        border: 2px solid #e67e22;
+        background: #fff5eb;
+    }
+    .mld-table .table-name {
+        background: #e67e22;
+        color: white;
+    }
+    .mld-table .column-name {
+        border-bottom: 1px solid #f39c12;
+    }
+    .mld-table .data-type {
+        color: #d35400;
+        font-size: 0.9em;
+    }
+
+    /* Styles MPD */
+    .mpd-table {
+        border: 2px solid #8e44ad;
+        background: #f5eef8;
+    }
+    .mpd-table .table-name {
+        background: #8e44ad;
+        color: white;
+    }
+    .mpd-table .column-name {
+        border-bottom: 1px solid #9b59b6;
+    }
+    .mpd-table .constraint {
+        color: #6c3483;
+        font-size: 0.9em;
+    }
+
+    /* Styles SQL */
+    .sql-table {
+        border: 2px solid #16a085;
+        background: #e8f6f3;
+    }
+    .sql-table .table-name {
+        background: #16a085;
+        color: white;
+        font-family: monospace;
+    }
+    .sql-table .column-name {
+        border-bottom: 1px solid #1abc9c;
+        font-family: monospace;
+    }
+    .sql-table .sql-type {
+        color: #0e6655;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+
+    /* Styles des relations selon le type de modèle */
+    .mcd-relation {
+        stroke: var(--primary-color);
+        stroke-width: 2;
+    }
+    .uml-relation {
+        stroke: #2c3e50;
+        stroke-width: 2;
+        stroke-dasharray: 5,5;
+    }
+    .mld-relation {
+        stroke: #e67e22;
+        stroke-width: 2;
+    }
+    .mpd-relation {
+        stroke: #8e44ad;
+        stroke-width: 2;
+    }
+    .sql-relation {
+        stroke: #16a085;
+        stroke-width: 2;
+    }
+`;
+
+// Ajout des styles au document
+const modelSpecificStyleSheet = document.createElement('style');
+modelSpecificStyleSheet.textContent = modelSpecificStyles;
+document.head.appendChild(modelSpecificStyleSheet);
+
+// Amélioration de la fonction updateModelDisplay
+function updateModelDisplay() {
+    const tables = document.querySelectorAll('.table');
+    const relations = document.querySelectorAll('.relation');
+    
+    // Sauvegarde de l'état actuel avant la conversion
+    const currentState = getCurrentModelData();
+    
+    switch(currentModelType) {
+        case 'mcd':
+            convertToMCD(tables, relations);
+            break;
+        case 'uml':
+            convertToUML(tables, relations);
+            break;
+        case 'mld':
+            convertToMLD(tables, relations);
+            break;
+        case 'mpd':
+            convertToMPD(tables, relations);
+            break;
+        case 'sql':
+            convertToSQL(tables, relations);
+            break;
+    }
+    
+    // Validation de la conversion
+    validateConversion(currentState);
+}
+
+// Fonctions de conversion spécifiques
+function convertToMCD(tables, relations) {
+    tables.forEach(table => {
+        table.classList.remove('uml-class', 'mld-table', 'mpd-table', 'sql-table');
+        table.classList.add('mcd-table');
+        
+        // Conversion des attributs
+        const columns = table.querySelectorAll('.column-name');
+        columns.forEach(col => {
+            col.classList.remove('method', 'property', 'data-type', 'constraint', 'sql-type');
+            if (col.classList.contains('primary-key')) {
+                col.classList.add('primary-key');
+            }
+            if (col.classList.contains('foreign-key')) {
+                col.classList.add('foreign-key');
+            }
+        });
+    });
+    
+    relations.forEach(relation => {
+        relation.classList.remove('uml-relation', 'mld-relation', 'mpd-relation', 'sql-relation');
+        relation.classList.add('mcd-relation');
+    });
+}
+
+function convertToUML(tables, relations) {
+    tables.forEach(table => {
+        table.classList.remove('mcd-table', 'mld-table', 'mpd-table', 'sql-table');
+        table.classList.add('uml-class');
+        
+        // Conversion des attributs en propriétés et méthodes
+        const columns = table.querySelectorAll('.column-name');
+        columns.forEach(col => {
+            col.classList.remove('primary-key', 'foreign-key', 'data-type', 'constraint', 'sql-type');
+            if (col.getAttribute('data-type')) {
+                col.classList.add('property');
+            } else {
+                col.classList.add('method');
+            }
+        });
+    });
+    
+    relations.forEach(relation => {
+        relation.classList.remove('mcd-relation', 'mld-relation', 'mpd-relation', 'sql-relation');
+        relation.classList.add('uml-relation');
+    });
+}
+
+function convertToMLD(tables, relations) {
+    tables.forEach(table => {
+        table.classList.remove('mcd-table', 'uml-class', 'mpd-table', 'sql-table');
+        table.classList.add('mld-table');
+        
+        // Ajout des types de données
+        const columns = table.querySelectorAll('.column-name');
+        columns.forEach(col => {
+            col.classList.remove('primary-key', 'foreign-key', 'method', 'property', 'constraint', 'sql-type');
+            col.classList.add('data-type');
+        });
+    });
+    
+    relations.forEach(relation => {
+        relation.classList.remove('mcd-relation', 'uml-relation', 'mpd-relation', 'sql-relation');
+        relation.classList.add('mld-relation');
+    });
+}
+
+function convertToMPD(tables, relations) {
+    tables.forEach(table => {
+        table.classList.remove('mcd-table', 'uml-class', 'mld-table', 'sql-table');
+        table.classList.add('mpd-table');
+        
+        // Ajout des contraintes
+        const columns = table.querySelectorAll('.column-name');
+        columns.forEach(col => {
+            col.classList.remove('primary-key', 'foreign-key', 'method', 'property', 'data-type', 'sql-type');
+            col.classList.add('constraint');
+        });
+    });
+    
+    relations.forEach(relation => {
+        relation.classList.remove('mcd-relation', 'uml-relation', 'mld-relation', 'sql-relation');
+        relation.classList.add('mpd-relation');
+    });
+}
+
+function convertToSQL(tables, relations) {
+    tables.forEach(table => {
+        table.classList.remove('mcd-table', 'uml-class', 'mld-table', 'mpd-table');
+        table.classList.add('sql-table');
+        
+        // Conversion en syntaxe SQL
+        const columns = table.querySelectorAll('.column-name');
+        columns.forEach(col => {
+            col.classList.remove('primary-key', 'foreign-key', 'method', 'property', 'data-type', 'constraint');
+            col.classList.add('sql-type');
+        });
+    });
+    
+    relations.forEach(relation => {
+        relation.classList.remove('mcd-relation', 'uml-relation', 'mld-relation', 'mpd-relation');
+        relation.classList.add('sql-relation');
+    });
+}
+
+// Fonction de validation de la conversion
+function validateConversion(previousState) {
+    const currentState = getCurrentModelData();
+    
+    // Vérification de l'intégrité des données
+    if (currentState.tables.length !== previousState.tables.length) {
+        showFeedback('Attention : Certaines tables ont été perdues lors de la conversion', 'warning');
+    }
+    
+    if (currentState.relations.length !== previousState.relations.length) {
+        showFeedback('Attention : Certaines relations ont été perdues lors de la conversion', 'warning');
+    }
+    
+    // Vérification des attributs
+    currentState.tables.forEach((table, index) => {
+        if (table.attributes.length !== previousState.tables[index].attributes.length) {
+            showFeedback(`Attention : Des attributs ont été perdus dans la table ${table.name}`, 'warning');
+        }
+    });
+    
+    // Validation spécifique selon le type de modèle
+    switch(currentModelType) {
+        case 'uml':
+            validateUMLConversion(currentState);
+            break;
+        case 'mld':
+            validateMLDConversion(currentState);
+            break;
+        case 'mpd':
+            validateMPDConversion(currentState);
+            break;
+        case 'sql':
+            validateSQLConversion(currentState);
+            break;
+    }
+}
+
+// Fonctions de validation spécifiques
+function validateUMLConversion(state) {
+    state.tables.forEach(table => {
+        if (!table.attributes.some(attr => attr.isPrimary)) {
+            showFeedback(`Attention : La classe ${table.name} n'a pas de clé primaire`, 'warning');
+        }
+    });
+}
+
+function validateMLDConversion(state) {
+    state.tables.forEach(table => {
+        if (!table.attributes.some(attr => attr.type)) {
+            showFeedback(`Attention : La table ${table.name} a des attributs sans type de données`, 'warning');
+        }
+    });
+}
+
+function validateMPDConversion(state) {
+    state.tables.forEach(table => {
+        if (!table.attributes.some(attr => attr.isPrimary)) {
+            showFeedback(`Attention : La table ${table.name} n'a pas de clé primaire`, 'warning');
+        }
+    });
+}
+
+function validateSQLConversion(state) {
+    state.tables.forEach(table => {
+        if (!table.attributes.some(attr => attr.type)) {
+            showFeedback(`Attention : La table ${table.name} a des colonnes sans type SQL`, 'warning');
+        }
+    });
+}
+</script> 

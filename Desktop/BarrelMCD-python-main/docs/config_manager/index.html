@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - config_manager</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>config_manager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module config_manager</h1>
+<h2>Classes</h2>
+<div class='class' id='ConfigManager'>
+<h3>ConfigManager</h3>
+<div class='class-description'>
+Gestionnaire de configuration multiplateforme
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='ConfigManager.__init__'>
+<h5>__init__</h5>
+<div class='method-description'>
+<br>        Initialise le gestionnaire de configuration<br>        <br>        <h6>Paramètres</h6><br>            app_name: Nom de l'application<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>app_name</li>
+</ul>
+</div>
+<div class='method' id='ConfigManager._get_config_dir'>
+<h5>_get_config_dir</h5>
+<div class='method-description'>
+<br>        Obtient le répertoire de configuration selon la plateforme<br>        <br>        <h6>Retourne</h6><br>            Path: Chemin du répertoire de configuration<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ConfigManager._get_default_config'>
+<h5>_get_default_config</h5>
+<div class='method-description'>
+<br>        Retourne la configuration par défaut<br>        <br>        <h6>Retourne</h6><br>            Dict[str, Any]: Configuration par défaut<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict[Unknown]</p>
+</div>
+<div class='method' id='ConfigManager._load_config'>
+<h5>_load_config</h5>
+<div class='method-description'>
+<br>        Charge la configuration depuis le fichier<br>        <br>        <h6>Retourne</h6><br>            Dict[str, Any]: Configuration chargée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict[Unknown]</p>
+</div>
+<div class='method' id='ConfigManager._merge_configs'>
+<h5>_merge_configs</h5>
+<div class='method-description'>
+<br>        Fusionne la configuration utilisateur avec la configuration par défaut<br>        <br>        <h6>Paramètres</h6><br>            default: Configuration par défaut<br>            user: Configuration utilisateur<br>            <br>        <h6>Retourne</h6><br>            Dict[str, Any]: Configuration fusionnée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>default</li>
+<li>user</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict[Unknown]</p>
+</div>
+<div class='method' id='ConfigManager.save_config'>
+<h5>save_config</h5>
+<div class='method-description'>
+<br>        Sauvegarde la configuration actuelle<br>        <br>        <h6>Retourne</h6><br>            bool: True si la sauvegarde a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ConfigManager.get'>
+<h5>get</h5>
+<div class='method-description'>
+<br>        Récupère une valeur de configuration<br>        <br>        <h6>Paramètres</h6><br>            key: Clé de configuration (notation pointée supportée)<br>            default: Valeur par défaut<br>            <br>        <h6>Retourne</h6><br>            Any: Valeur de configuration<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>key</li>
+<li>default</li>
+</ul>
+<h6>Retourne</h6>
+<p>Any</p>
+</div>
+<div class='method' id='ConfigManager.set'>
+<h5>set</h5>
+<div class='method-description'>
+<br>        Définit une valeur de configuration<br>        <br>        <h6>Paramètres</h6><br>            key: Clé de configuration (notation pointée supportée)<br>            value: Valeur à définir<br>            <br>        <h6>Retourne</h6><br>            bool: True si la définition a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>key</li>
+<li>value</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ConfigManager.reset'>
+<h5>reset</h5>
+<div class='method-description'>
+<br>        Réinitialise la configuration aux valeurs par défaut<br>        <br>        <h6>Retourne</h6><br>            bool: True si la réinitialisation a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ConfigManager.add_recent_file'>
+<h5>add_recent_file</h5>
+<div class='method-description'>
+<br>        Ajoute un fichier à la liste des fichiers récents<br>        <br>        <h6>Paramètres</h6><br>            file_path: Chemin du fichier<br>            <br>        <h6>Retourne</h6><br>            bool: True si l'ajout a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ConfigManager.clear_recent_files'>
+<h5>clear_recent_files</h5>
+<div class='method-description'>
+<br>        Efface la liste des fichiers récents<br>        <br>        <h6>Retourne</h6><br>            bool: True si l'effacement a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

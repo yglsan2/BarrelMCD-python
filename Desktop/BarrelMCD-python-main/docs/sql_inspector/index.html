@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - sql_inspector</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>sql_inspector</a></li>
+            <li><a href='#ResponsiveStyles'>ResponsiveStyles</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module sql_inspector</h1>
+<h2>Classes</h2>
+<div class='class' id='SQLInspector'>
+<h3>SQLInspector</h3>
+<div class='class-description'>
+Inspecteur intelligent de schémas SQL
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='SQLInspector.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='SQLInspector.analyze_sql'>
+<h5>analyze_sql</h5>
+<div class='method-description'>
+Analyse un script SQL pour construire un schéma.<br>        <br>        <h6>Paramètres</h6><br>            sql_script: Script SQL à analyser<br>            <br>        <h6>Retourne</h6><br>            Dict: Schéma de la base de données<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>sql_script</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='SQLInspector._is_create_table'>
+<h5>_is_create_table</h5>
+<div class='method-description'>
+Vérifie si l'instruction est un CREATE TABLE.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>statement</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='SQLInspector._is_alter_table'>
+<h5>_is_alter_table</h5>
+<div class='method-description'>
+Vérifie si l'instruction est un ALTER TABLE.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>statement</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='SQLInspector._analyze_create_table'>
+<h5>_analyze_create_table</h5>
+<div class='method-description'>
+Analyse une instruction CREATE TABLE.<br>        <br>        <h6>Paramètres</h6><br>            statement: Instruction SQL<br>            table_name: Nom de la table<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>statement</li>
+<li>table_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='SQLInspector._analyze_column_definition'>
+<h5>_analyze_column_definition</h5>
+<div class='method-description'>
+Analyse la définition d'une colonne.<br>        <br>        <h6>Paramètres</h6><br>            column_def: Définition de la colonne<br>            <br>        <h6>Retourne</h6><br>            Optional[Dict]: Informations sur la colonne ou None si invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>column_def</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._analyze_foreign_key'>
+<h5>_analyze_foreign_key</h5>
+<div class='method-description'>
+Analyse une contrainte de clé étrangère.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>token_list</li>
+<li>start_token</li>
+<li>table_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._extract_column_list'>
+<h5>_extract_column_list</h5>
+<div class='method-description'>
+Extrait une liste de colonnes d'une parenthèse.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>token_list</li>
+<li>start_token</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[str]</p>
+</div>
+<div class='method' id='SQLInspector._analyze_alter_table'>
+<h5>_analyze_alter_table</h5>
+<div class='method-description'>
+Analyse une instruction ALTER TABLE.<br>        <br>        <h6>Paramètres</h6><br>            statement: Instruction SQL<br>            table_name: Nom de la table<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>statement</li>
+<li>table_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='SQLInspector._analyze_constraint'>
+<h5>_analyze_constraint</h5>
+<div class='method-description'>
+Analyse une contrainte.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>table_name</li>
+<li>column_def</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[Dict]</p>
+</div>
+<div class='method' id='SQLInspector.validate_schema'>
+<h5>validate_schema</h5>
+<div class='method-description'>
+Valide le schéma de la base de données.<br>        <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des problèmes trouvés<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._validate_naming_conventions'>
+<h5>_validate_naming_conventions</h5>
+<div class='method-description'>
+Valide les conventions de nommage.<br>        <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des problèmes trouvés<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._validate_data_types'>
+<h5>_validate_data_types</h5>
+<div class='method-description'>
+Valide les types de données.<br>        <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des problèmes trouvés<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._validate_null_constraints'>
+<h5>_validate_null_constraints</h5>
+<div class='method-description'>
+Valide les contraintes NULL.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._validate_foreign_keys'>
+<h5>_validate_foreign_keys</h5>
+<div class='method-description'>
+Valide les clés étrangères.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector.suggest_optimizations'>
+<h5>suggest_optimizations</h5>
+<div class='method-description'>
+Suggère des optimisations pour le schéma.<br>        <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des suggestions d'optimisation<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='SQLInspector._analyze_relationships'>
+<h5>_analyze_relationships</h5>
+<div class='method-description'>
+Analyse les relations entre les tables.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='SQLInspector._split_column_definitions'>
+<h5>_split_column_definitions</h5>
+<div class='method-description'>
+Divise la chaîne de définitions de colonnes en une liste.<br>        <br>        <h6>Paramètres</h6><br>            columns_str: Chaîne contenant les définitions de colonnes<br>            <br>        <h6>Retourne</h6><br>            List[str]: Liste des définitions de colonnes<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>columns_str</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[str]</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - resource_manager</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>resource_manager</a></li>
+            <li><a href='#FontManager'>FontManager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module resource_manager</h1>
+<h2>Classes</h2>
+<div class='class' id='ResourceManager'>
+<h3>ResourceManager</h3>
+<div class='class-description'>
+Gestionnaire de ressources multiplateforme
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='ResourceManager.__init__'>
+<h5>__init__</h5>
+<div class='method-description'>
+<br>        Initialise le gestionnaire de ressources<br>        <br>        <h6>Paramètres</h6><br>            app_name: Nom de l'application<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>app_name</li>
+</ul>
+</div>
+<div class='method' id='ResourceManager._get_resource_dir'>
+<h5>_get_resource_dir</h5>
+<div class='method-description'>
+<br>        Obtient le répertoire de ressources selon la plateforme<br>        <br>        <h6>Retourne</h6><br>            Path: Chemin du répertoire de ressources<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.setup_resources'>
+<h5>setup_resources</h5>
+<div class='method-description'>
+Configure les répertoires de ressources
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='ResourceManager.get_resource_path'>
+<h5>get_resource_path</h5>
+<div class='method-description'>
+<br>        Obtient le chemin d'une ressource<br>        <br>        <h6>Paramètres</h6><br>            resource_name: Nom de la ressource<br>            resource_type: Type de ressource (icons, styles, templates, locales)<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin de la ressource<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>resource_name</li>
+<li>resource_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.get_icon_path'>
+<h5>get_icon_path</h5>
+<div class='method-description'>
+<br>        Obtient le chemin d'une icône<br>        <br>        <h6>Paramètres</h6><br>            icon_name: Nom de l'icône<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin de l'icône<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>icon_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.get_style_path'>
+<h5>get_style_path</h5>
+<div class='method-description'>
+<br>        Obtient le chemin d'un style<br>        <br>        <h6>Paramètres</h6><br>            style_name: Nom du style<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin du style<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>style_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.get_template_path'>
+<h5>get_template_path</h5>
+<div class='method-description'>
+<br>        Obtient le chemin d'un template<br>        <br>        <h6>Paramètres</h6><br>            template_name: Nom du template<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin du template<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>template_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.get_locale_path'>
+<h5>get_locale_path</h5>
+<div class='method-description'>
+<br>        Obtient le chemin d'un fichier de traduction<br>        <br>        <h6>Paramètres</h6><br>            locale: Code de la langue<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin du fichier de traduction<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>locale</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.copy_resource'>
+<h5>copy_resource</h5>
+<div class='method-description'>
+<br>        Copie une ressource<br>        <br>        <h6>Paramètres</h6><br>            source: Chemin source<br>            destination: Chemin de destination<br>            <br>        <h6>Retourne</h6><br>            bool: True si la copie a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>destination</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ResourceManager.ensure_resource_exists'>
+<h5>ensure_resource_exists</h5>
+<div class='method-description'>
+<br>        Vérifie si une ressource existe<br>        <br>        <h6>Paramètres</h6><br>            resource_path: Chemin de la ressource<br>            <br>        <h6>Retourne</h6><br>            bool: True si la ressource existe<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>resource_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ResourceManager.get_platform_specific_resource'>
+<h5>get_platform_specific_resource</h5>
+<div class='method-description'>
+<br>        Obtient une ressource spécifique à la plateforme<br>        <br>        <h6>Paramètres</h6><br>            base_name: Nom de base de la ressource<br>            resource_type: Type de ressource<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin de la ressource<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>base_name</li>
+<li>resource_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='ResourceManager.list_resources'>
+<h5>list_resources</h5>
+<div class='method-description'>
+<br>        Liste les ressources d'un type donné<br>        <br>        <h6>Paramètres</h6><br>            resource_type: Type de ressource<br>            pattern: Pattern de recherche<br>            <br>        <h6>Retourne</h6><br>            list: Liste des ressources trouvées<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>resource_type</li>
+<li>pattern</li>
+</ul>
+<h6>Retourne</h6>
+<p>list</p>
+</div>
+<div class='method' id='ResourceManager.create_resource_backup'>
+<h5>create_resource_backup</h5>
+<div class='method-description'>
+<br>        Crée une sauvegarde d'une ressource<br>        <br>        <h6>Paramètres</h6><br>            resource_path: Chemin de la ressource<br>            <br>        <h6>Retourne</h6><br>            Optional[Path]: Chemin de la sauvegarde ou None en cas d'erreur<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>resource_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[Path]</p>
+</div>
+<div class='method' id='ResourceManager.restore_resource_backup'>
+<h5>restore_resource_backup</h5>
+<div class='method-description'>
+<br>        Restaure une sauvegarde de ressource<br>        <br>        <h6>Paramètres</h6><br>            resource_path: Chemin de la ressource<br>            <br>        <h6>Retourne</h6><br>            bool: True si la restauration a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>resource_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

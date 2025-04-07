@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - model_validator</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>model_validator</a></li>
+            <li><a href='#ModelManagerDialog'>ModelManagerDialog</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module model_validator</h1>
+<h2>Classes</h2>
+<div class='class' id='ModelValidator'>
+<h3>ModelValidator</h3>
+<div class='class-description'>
+Validateur de modèles et générateur de MLD
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='ModelValidator.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='ModelValidator.validate_model'>
+<h5>validate_model</h5>
+<div class='method-description'>
+Valide le modèle complet
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_entities'>
+<h5>_validate_entities</h5>
+<div class='method-description'>
+Valide les entités
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_attributes'>
+<h5>_validate_attributes</h5>
+<div class='method-description'>
+Valide les attributs d'une entité
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>attributes</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_data_type'>
+<h5>_validate_data_type</h5>
+<div class='method-description'>
+Valide un type de données
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_relations'>
+<h5>_validate_relations</h5>
+<div class='method-description'>
+Valide les relations
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_cardinality'>
+<h5>_validate_cardinality</h5>
+<div class='method-description'>
+Valide une cardinalité
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>cardinality</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._check_cycles'>
+<h5>_check_cycles</h5>
+<div class='method-description'>
+Vérifie l'absence de cycles dans les relations
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator._validate_keys'>
+<h5>_validate_keys</h5>
+<div class='method-description'>
+Valide les clés primaires et étrangères
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ModelValidator.generate_mld'>
+<h5>generate_mld</h5>
+<div class='method-description'>
+Génère le script SQL pour le MLD
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ModelValidator._generate_table_sql'>
+<h5>_generate_table_sql</h5>
+<div class='method-description'>
+Génère le SQL pour une table
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ModelValidator._generate_foreign_key_sql'>
+<h5>_generate_foreign_key_sql</h5>
+<div class='method-description'>
+Génère le SQL pour une clé étrangère
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>association</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ModelValidator.generate_documentation'>
+<h5>generate_documentation</h5>
+<div class='method-description'>
+Génère la documentation du modèle
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+<div class='function' id='has_cycle'>
+<h3>has_cycle</h3>
+<h4>Paramètres</h4>
+<ul>
+<li>node</li>
+</ul>
+<h4>Retourne</h4>
+<p>bool</p>
+</div>
+</div>
+</body>
+</html>

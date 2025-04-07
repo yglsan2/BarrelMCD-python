@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - file_manager</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>file_manager</a></li>
+            <li><a href='#ErrorHandler'>ErrorHandler</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module file_manager</h1>
+<h2>Classes</h2>
+<div class='class' id='FileManager'>
+<h3>FileManager</h3>
+<div class='class-description'>
+Gestionnaire de fichiers multiplateforme
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='FileManager.__init__'>
+<h5>__init__</h5>
+<div class='method-description'>
+<br>        Initialise le gestionnaire de fichiers<br>        <br>        <h6>Paramètres</h6><br>            base_dir: Répertoire de base pour les opérations sur les fichiers<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>base_dir</li>
+</ul>
+</div>
+<div class='method' id='FileManager.setup_directories'>
+<h5>setup_directories</h5>
+<div class='method-description'>
+Crée les répertoires nécessaires
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='FileManager.get_platform_path'>
+<h5>get_platform_path</h5>
+<div class='method-description'>
+<br>        Convertit un chemin en chemin compatible avec la plateforme<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin à convertir<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin compatible avec la plateforme<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='FileManager.normalize_path'>
+<h5>normalize_path</h5>
+<div class='method-description'>
+<br>        Normalise un chemin pour l'affichage<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin à normaliser<br>            <br>        <h6>Retourne</h6><br>            str: Chemin normalisé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FileManager.get_relative_path'>
+<h5>get_relative_path</h5>
+<div class='method-description'>
+<br>        Obtient un chemin relatif<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin absolu<br>            base: Chemin de base (optionnel)<br>            <br>        <h6>Retourne</h6><br>            str: Chemin relatif<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+<li>base</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FileManager.ensure_directory'>
+<h5>ensure_directory</h5>
+<div class='method-description'>
+<br>        Crée un répertoire s'il n'existe pas<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin du répertoire<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin du répertoire créé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='FileManager.list_files'>
+<h5>list_files</h5>
+<div class='method-description'>
+<br>        Liste les fichiers d'un répertoire<br>        <br>        <h6>Paramètres</h6><br>            directory: Répertoire à lister<br>            pattern: Pattern de recherche<br>            <br>        <h6>Retourne</h6><br>            List[Path]: Liste des fichiers trouvés<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>directory</li>
+<li>pattern</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Path]</p>
+</div>
+<div class='method' id='FileManager.copy_file'>
+<h5>copy_file</h5>
+<div class='method-description'>
+<br>        Copie un fichier<br>        <br>        <h6>Paramètres</h6><br>            source: Chemin source<br>            destination: Chemin de destination<br>            <br>        <h6>Retourne</h6><br>            bool: True si la copie a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>destination</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='FileManager.move_file'>
+<h5>move_file</h5>
+<div class='method-description'>
+<br>        Déplace un fichier<br>        <br>        <h6>Paramètres</h6><br>            source: Chemin source<br>            destination: Chemin de destination<br>            <br>        <h6>Retourne</h6><br>            bool: True si le déplacement a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>destination</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='FileManager.delete_file'>
+<h5>delete_file</h5>
+<div class='method-description'>
+<br>        Supprime un fichier<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin du fichier<br>            <br>        <h6>Retourne</h6><br>            bool: True si la suppression a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='FileManager.create_temp_file'>
+<h5>create_temp_file</h5>
+<div class='method-description'>
+<br>        Crée un fichier temporaire<br>        <br>        <h6>Paramètres</h6><br>            suffix: Suffixe du fichier<br>            <br>        <h6>Retourne</h6><br>            Path: Chemin du fichier temporaire<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>suffix</li>
+</ul>
+<h6>Retourne</h6>
+<p>Path</p>
+</div>
+<div class='method' id='FileManager.save_json'>
+<h5>save_json</h5>
+<div class='method-description'>
+<br>        Sauvegarde des données au format JSON<br>        <br>        <h6>Paramètres</h6><br>            data: Données à sauvegarder<br>            path: Chemin du fichier<br>            <br>        <h6>Retourne</h6><br>            bool: True si la sauvegarde a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='FileManager.load_json'>
+<h5>load_json</h5>
+<div class='method-description'>
+<br>        Charge des données au format JSON<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin du fichier<br>            <br>        <h6>Retourne</h6><br>            Optional[dict]: Données chargées ou None en cas d'erreur<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[dict]</p>
+</div>
+<div class='method' id='FileManager.get_file_info'>
+<h5>get_file_info</h5>
+<div class='method-description'>
+<br>        Obtient les informations sur un fichier<br>        <br>        <h6>Paramètres</h6><br>            path: Chemin du fichier<br>            <br>        <h6>Retourne</h6><br>            dict: Informations sur le fichier<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+</ul>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+<div class='method' id='FileManager.cleanup_temp_files'>
+<h5>cleanup_temp_files</h5>
+<div class='method-description'>
+<br>        Nettoie les fichiers temporaires<br>        <br>        <h6>Paramètres</h6><br>            max_age_hours: Âge maximum des fichiers en heures<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>max_age_hours</li>
+</ul>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

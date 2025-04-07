@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - query_inspector</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>query_inspector</a></li>
+            <li><a href='#ModelValidator'>ModelValidator</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module query_inspector</h1>
+<h2>Classes</h2>
+<div class='class' id='QueryType'>
+<h3>QueryType</h3>
+<div class='class-description'>
+Types de requêtes SQL supportés
+</div>
+<h4>Méthodes</h4>
+</div>
+<div class='class' id='QueryError'>
+<h3>QueryError</h3>
+<div class='class-description'>
+Classe de base pour les erreurs de requête
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='QueryError.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>message</li>
+<li>query_type</li>
+<li>context</li>
+</ul>
+</div>
+</div>
+<div class='class' id='SyntaxError'>
+<h3>SyntaxError</h3>
+<div class='class-description'>
+Erreur de syntaxe dans la description
+</div>
+<h4>Méthodes</h4>
+</div>
+<div class='class' id='SemanticError'>
+<h3>SemanticError</h3>
+<div class='class-description'>
+Erreur sémantique dans la description
+</div>
+<h4>Méthodes</h4>
+</div>
+<div class='class' id='ValidationError'>
+<h3>ValidationError</h3>
+<div class='class-description'>
+Erreur de validation des paramètres
+</div>
+<h4>Méthodes</h4>
+</div>
+<div class='class' id='QueryInspector'>
+<h3>QueryInspector</h3>
+<div class='class-description'>
+Classe pour analyser et générer des requêtes SQL à partir d'une description textuelle.
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='QueryInspector.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_query_patterns'>
+<h5>_load_query_patterns</h5>
+<div class='method-description'>
+Charge les patterns de reconnaissance pour différents types de requêtes
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_procedure_patterns'>
+<h5>_load_procedure_patterns</h5>
+<div class='method-description'>
+Charge les patterns de reconnaissance pour les procédures stockées
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_correction_rules'>
+<h5>_load_correction_rules</h5>
+<div class='method-description'>
+Charge les règles de correction pour la gestion des erreurs de frappe
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_error_patterns'>
+<h5>_load_error_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la détection des erreurs
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_performance_rules'>
+<h5>_load_performance_rules</h5>
+<div class='method-description'>
+Charge les règles de validation des performances
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_constraint_patterns'>
+<h5>_load_constraint_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la gestion des contraintes
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_trigger_patterns'>
+<h5>_load_trigger_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la gestion des triggers
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_nested_trigger_patterns'>
+<h5>_load_nested_trigger_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la gestion des triggers imbriqués
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_trigger_cursor_patterns'>
+<h5>_load_trigger_cursor_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la gestion des curseurs dans les triggers
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._load_trigger_constraint_patterns'>
+<h5>_load_trigger_constraint_patterns</h5>
+<div class='method-description'>
+Charge les patterns pour la gestion des contraintes dans les triggers
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._normalize_text'>
+<h5>_normalize_text</h5>
+<div class='method-description'>
+Normalise le texte pour la comparaison.<br>        <br>        <h6>Paramètres</h6><br>            text: Texte à normaliser<br>            <br>        <h6>Retourne</h6><br>            str: Texte normalisé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>text</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._similarity_ratio'>
+<h5>_similarity_ratio</h5>
+<div class='method-description'>
+Calcule le ratio de similarité entre deux chaînes.<br>        <br>        <h6>Paramètres</h6><br>            s1: Première chaîne<br>            s2: Deuxième chaîne<br>            <br>        <h6>Retourne</h6><br>            float: Ratio de similarité<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>s1</li>
+<li>s2</li>
+</ul>
+<h6>Retourne</h6>
+<p>float</p>
+</div>
+<div class='method' id='QueryInspector._correct_word'>
+<h5>_correct_word</h5>
+<div class='method-description'>
+Corrige un mot en utilisant les règles de correction.<br>        <br>        <h6>Paramètres</h6><br>            word: Mot à corriger<br>            <br>        <h6>Retourne</h6><br>            str: Mot corrigé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>word</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._analyze_procedure'>
+<h5>_analyze_procedure</h5>
+<div class='method-description'>
+Analyse une description de procédure stockée.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la procédure<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL de la procédure<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_procedure_logic'>
+<h5>_extract_procedure_logic</h5>
+<div class='method-description'>
+Extrait la logique d'une procédure stockée.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la procédure<br>            <br>        <h6>Retourne</h6><br>            str: Logique SQL<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._analyze_complex_query'>
+<h5>_analyze_complex_query</h5>
+<div class='method-description'>
+Analyse une requête complexe avec CTE et fonctions analytiques.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_cte_query'>
+<h5>_generate_cte_query</h5>
+<div class='method-description'>
+Génère une requête avec CTE.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_recursive_query'>
+<h5>_generate_recursive_query</h5>
+<div class='method-description'>
+Génère une requête récursive.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_hierarchical_query'>
+<h5>_generate_hierarchical_query</h5>
+<div class='method-description'>
+Génère une requête hiérarchique.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_statistic_query'>
+<h5>_generate_statistic_query</h5>
+<div class='method-description'>
+Génère une requête d'analyse statistique.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_standard_deviation_query'>
+<h5>_generate_standard_deviation_query</h5>
+<div class='method-description'>
+Génère une requête pour calculer l'écart-type.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._validate_query'>
+<h5>_validate_query</h5>
+<div class='method-description'>
+Valide une requête SQL générée.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            query_type: Type de requête<br>            <br>        <h6>Retourne</h6><br>            bool: True si la requête est valide, False sinon<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+<li>query_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='QueryInspector._validate_tables_and_columns'>
+<h5>_validate_tables_and_columns</h5>
+<div class='method-description'>
+Valide les tables et colonnes d'une requête.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si une table ou une colonne est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_joins'>
+<h5>_validate_joins</h5>
+<div class='method-description'>
+Valide les jointures d'une requête.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si une jointure est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_conditions'>
+<h5>_validate_conditions</h5>
+<div class='method-description'>
+Valide les conditions d'une requête.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si une condition est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_condition_syntax'>
+<h5>_validate_condition_syntax</h5>
+<div class='method-description'>
+Valide la syntaxe d'une condition.<br>        <br>        <h6>Paramètres</h6><br>            condition: Condition à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si la condition est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>condition</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_aggregations'>
+<h5>_validate_aggregations</h5>
+<div class='method-description'>
+Valide les agrégations d'une requête.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si une agrégation est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_cte'>
+<h5>_validate_cte</h5>
+<div class='method-description'>
+Valide une requête avec CTE.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si la CTE est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_recursive_cte'>
+<h5>_validate_recursive_cte</h5>
+<div class='method-description'>
+Valide une CTE récursive.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si la CTE récursive est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector._validate_transaction'>
+<h5>_validate_transaction</h5>
+<div class='method-description'>
+Valide une transaction.<br>        <br>        <h6>Paramètres</h6><br>            query: Requête SQL à valider<br>            <br>        <h6>Lève</h6><br>            SyntaxError: Si la transaction est invalide<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>query</li>
+</ul>
+</div>
+<div class='method' id='QueryInspector.analyze_query'>
+<h5>analyze_query</h5>
+<div class='method-description'>
+Analyse une description textuelle et génère la requête SQL correspondante.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SQL générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._correct_text'>
+<h5>_correct_text</h5>
+<div class='method-description'>
+Corrige le texte en gérant les erreurs de frappe.<br>        <br>        <h6>Paramètres</h6><br>            text: Texte à corriger<br>            <br>        <h6>Retourne</h6><br>            str: Texte corrigé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>text</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._determine_query_type'>
+<h5>_determine_query_type</h5>
+<div class='method-description'>
+Détermine le type de requête à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            QueryType: Type de requête déterminé<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>QueryType</p>
+</div>
+<div class='method' id='QueryInspector._generate_select_query'>
+<h5>_generate_select_query</h5>
+<div class='method-description'>
+Génère une requête SELECT à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Requête SELECT générée<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_tables'>
+<h5>_extract_tables</h5>
+<div class='method-description'>
+Extrait les noms des tables mentionnées dans la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            list[str]: Liste des noms de tables<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>list[str]</p>
+</div>
+<div class='method' id='QueryInspector._extract_joins'>
+<h5>_extract_joins</h5>
+<div class='method-description'>
+Extrait les conditions de jointure à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            tables: Liste des tables mentionnées<br>            <br>        <h6>Retourne</h6><br>            list[str]: Liste des conditions de jointure<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+<li>tables</li>
+</ul>
+<h6>Retourne</h6>
+<p>list[str]</p>
+</div>
+<div class='method' id='QueryInspector._extract_where_conditions'>
+<h5>_extract_where_conditions</h5>
+<div class='method-description'>
+Extrait les conditions WHERE à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Conditions WHERE extraites<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_group_by'>
+<h5>_extract_group_by</h5>
+<div class='method-description'>
+Extrait les conditions GROUP BY à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Conditions GROUP BY extraites<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_having'>
+<h5>_extract_having</h5>
+<div class='method-description'>
+Extrait les conditions HAVING à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Conditions HAVING extraites<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_order_by'>
+<h5>_extract_order_by</h5>
+<div class='method-description'>
+Extrait les conditions ORDER BY à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Conditions ORDER BY extraites<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._extract_limit'>
+<h5>_extract_limit</h5>
+<div class='method-description'>
+Extrait la limite à partir de la description.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la requête<br>            <br>        <h6>Retourne</h6><br>            str: Limite extraite<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._convert_condition_to_sql'>
+<h5>_convert_condition_to_sql</h5>
+<div class='method-description'>
+Convertit une condition en langage naturel en condition SQL.<br>        <br>        <h6>Paramètres</h6><br>            condition: Condition en langage naturel<br>            <br>        <h6>Retourne</h6><br>            str: Condition SQL<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>condition</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_transaction'>
+<h5>_generate_transaction</h5>
+<div class='method-description'>
+Génère une transaction.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la transaction<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL de la transaction<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_foreign_key'>
+<h5>_generate_foreign_key</h5>
+<div class='method-description'>
+Génère une contrainte de clé étrangère.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la contrainte<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL de la contrainte<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_materialized_view'>
+<h5>_generate_materialized_view</h5>
+<div class='method-description'>
+Génère une vue matérialisée.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle de la vue<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL de la vue<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_cursor'>
+<h5>_generate_cursor</h5>
+<div class='method-description'>
+Génère un curseur.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du curseur<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du curseur<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_complex_trigger'>
+<h5>_generate_complex_trigger</h5>
+<div class='method-description'>
+Génère un trigger complexe.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du trigger<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du trigger<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_audit_trigger'>
+<h5>_generate_audit_trigger</h5>
+<div class='method-description'>
+Génère un trigger d'audit.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du trigger<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du trigger<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_nested_trigger'>
+<h5>_generate_nested_trigger</h5>
+<div class='method-description'>
+Génère un trigger imbriqué.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du trigger<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du trigger<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_trigger_with_cursor'>
+<h5>_generate_trigger_with_cursor</h5>
+<div class='method-description'>
+Génère un trigger avec curseur.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du trigger<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du trigger<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='QueryInspector._generate_trigger_with_constraints'>
+<h5>_generate_trigger_with_constraints</h5>
+<div class='method-description'>
+Génère un trigger avec contraintes.<br>        <br>        <h6>Paramètres</h6><br>            description: Description textuelle du trigger<br>            <br>        <h6>Retourne</h6><br>            str: Code SQL du trigger<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>description</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<div class='class' id='QueryInspectorDialog'>
+<h3>QueryInspectorDialog</h3>
+<div class='class-description'>
+Dialogue pour l'inspecteur de requêtes.
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='QueryInspectorDialog.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='QueryInspectorDialog.setup_ui'>
+<h5>setup_ui</h5>
+<div class='method-description'>
+Configure l'interface utilisateur.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspectorDialog._analyze_query'>
+<h5>_analyze_query</h5>
+<div class='method-description'>
+Analyse la description et génère la requête SQL.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='QueryInspectorDialog._on_suggestion_made'>
+<h5>_on_suggestion_made</h5>
+<div class='method-description'>
+Gère les suggestions de correction.<br>        <br>        <h6>Paramètres</h6><br>            suggestion: Suggestion de correction<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>suggestion</li>
+</ul>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

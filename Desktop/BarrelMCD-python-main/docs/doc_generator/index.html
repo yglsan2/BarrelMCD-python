@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - doc_generator</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>doc_generator</a></li>
+            <li><a href='#ConfigManager'>ConfigManager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module doc_generator</h1>
+<h2>Classes</h2>
+<div class='class' id='DocGenerator'>
+<h3>DocGenerator</h3>
+<div class='class-description'>
+<br>    Générateur de documentation au format HTML style Javadoc.<br>    <br>    Cette classe analyse le code source Python et génère une documentation HTML<br>    complète à partir des docstrings, similaire au format Javadoc.<br>    <br>    Features:<br>        - Génération de documentation HTML<br>        - Support des docstrings Google style<br>        - Navigation par classe/méthode<br>        - Recherche intégrée<br>        - Support multilingue<br>    
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='DocGenerator.__init__'>
+<h5>__init__</h5>
+<div class='method-description'>
+<br>        Initialise le générateur de documentation.<br>        <br>        <h6>Paramètres</h6><br>            output_dir: Répertoire de sortie pour la documentation<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>output_dir</li>
+</ul>
+</div>
+<div class='method' id='DocGenerator.generate_docs'>
+<h5>generate_docs</h5>
+<div class='method-description'>
+<br>        Génère la documentation pour un répertoire source.<br>        <br>        <h6>Paramètres</h6><br>            source_dir: Répertoire contenant le code source<br>            <br>        <h6>Retourne</h6><br>            bool: True si la génération a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source_dir</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='DocGenerator._process_file'>
+<h5>_process_file</h5>
+<div class='method-description'>
+<br>        Traite un fichier Python et génère sa documentation.<br>        <br>        <h6>Paramètres</h6><br>            file_path: Chemin du fichier Python<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DocGenerator._generate_module_doc'>
+<h5>_generate_module_doc</h5>
+<div class='method-description'>
+<br>        Génère la documentation HTML pour un module.<br>        <br>        <h6>Paramètres</h6><br>            file_path: Chemin du fichier<br>            module_doc: Docstring du module<br>            tree: AST du module<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+<li>module_doc</li>
+<li>tree</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DocGenerator._generate_module_html'>
+<h5>_generate_module_html</h5>
+<div class='method-description'>
+<br>        Génère le HTML pour un module.<br>        <br>        <h6>Paramètres</h6><br>            file_path: Chemin du fichier<br>            module_doc: Docstring du module<br>            tree: AST du module<br>            <br>        <h6>Retourne</h6><br>            str: HTML généré<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+<li>module_doc</li>
+<li>tree</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._generate_class_html'>
+<h5>_generate_class_html</h5>
+<div class='method-description'>
+<br>        Génère le HTML pour une classe.<br>        <br>        <h6>Paramètres</h6><br>            node: Nœud AST de la classe<br>            <br>        <h6>Retourne</h6><br>            str: HTML généré<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>node</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._generate_method_html'>
+<h5>_generate_method_html</h5>
+<div class='method-description'>
+<br>        Génère le HTML pour une méthode.<br>        <br>        <h6>Paramètres</h6><br>            node: Nœud AST de la méthode<br>            <br>        <h6>Retourne</h6><br>            str: HTML généré<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>node</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._generate_function_html'>
+<h5>_generate_function_html</h5>
+<div class='method-description'>
+<br>        Génère le HTML pour une fonction.<br>        <br>        <h6>Paramètres</h6><br>            node: Nœud AST de la fonction<br>            <br>        <h6>Retourne</h6><br>            str: HTML généré<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>node</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._format_docstring'>
+<h5>_format_docstring</h5>
+<div class='method-description'>
+<br>        Formate une docstring en HTML.<br>        <br>        <h6>Paramètres</h6><br>            docstring: Texte de la docstring<br>            <br>        <h6>Retourne</h6><br>            str: HTML formaté<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>docstring</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._get_type_name'>
+<h5>_get_type_name</h5>
+<div class='method-description'>
+<br>        Obtient le nom d'un type à partir d'un nœud AST.<br>        <br>        <h6>Paramètres</h6><br>            node: Nœud AST du type<br>            <br>        <h6>Retourne</h6><br>            str: Nom du type<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>node</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._generate_navigation'>
+<h5>_generate_navigation</h5>
+<div class='method-description'>
+<br>        Génère la barre de navigation HTML.<br>        <br>        <h6>Retourne</h6><br>            str: HTML de la navigation<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DocGenerator._generate_index'>
+<h5>_generate_index</h5>
+<div class='method-description'>
+<br>        Génère la page d'index principale.<br>        <br>        <h6>Paramètres</h6><br>            source_path: Chemin du répertoire source<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DocGenerator._copy_resources'>
+<h5>_copy_resources</h5>
+<div class='method-description'>
+Copie les ressources (CSS, JS, images) dans le répertoire de documentation.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DocGenerator.generate_all'>
+<h5>generate_all</h5>
+<div class='method-description'>
+<br>        Génère toute la documentation.<br>        <br>        <h6>Paramètres</h6><br>            source_dir: Répertoire source<br>            <br>        <h6>Retourne</h6><br>            bool: True si la génération a réussi<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source_dir</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

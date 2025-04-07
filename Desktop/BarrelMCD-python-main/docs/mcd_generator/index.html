@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - mcd_generator</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>mcd_generator</a></li>
+            <li><a href='#MCDDrawer'>MCDDrawer</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module mcd_generator</h1>
+<h2>Classes</h2>
+<div class='class' id='MCDGenerator'>
+<h3>MCDGenerator</h3>
+<div class='class-description'>
+Générateur de MCD à partir d'un dictionnaire de données
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='MCDGenerator.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>model_manager</li>
+</ul>
+</div>
+<div class='method' id='MCDGenerator.generate_from_dict'>
+<h5>generate_from_dict</h5>
+<div class='method-description'>
+Génère un MCD à partir d'un dictionnaire de données.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data_dict</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='MCDGenerator.generate_from_dataframes'>
+<h5>generate_from_dataframes</h5>
+<div class='method-description'>
+Génère un MCD à partir de DataFrames pandas.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='MCDGenerator.generate_from_text'>
+<h5>generate_from_text</h5>
+<div class='method-description'>
+Génère un MCD à partir d'une description textuelle.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>text</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='MCDGenerator._draw_mcd'>
+<h5>_draw_mcd</h5>
+<div class='method-description'>
+Dessine le MCD dans la scène.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='MCDGenerator._get_cardinality_text'>
+<h5>_get_cardinality_text</h5>
+<div class='method-description'>
+Retourne le texte de cardinalité pour une relation.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>relation_type</li>
+<li>side</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<div class='class' id='MCDView'>
+<h3>MCDView</h3>
+<div class='class-description'>
+Vue pour afficher le MCD
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='MCDView.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='MCDView.wheelEvent'>
+<h5>wheelEvent</h5>
+<div class='method-description'>
+Gère le zoom avec la molette de la souris.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

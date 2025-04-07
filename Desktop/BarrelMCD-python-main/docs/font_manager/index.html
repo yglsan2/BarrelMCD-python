@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - font_manager</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>font_manager</a></li>
+            <li><a href='#FileManager'>FileManager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module font_manager</h1>
+<h2>Classes</h2>
+<div class='class' id='FontManager'>
+<h3>FontManager</h3>
+<div class='class-description'>
+Gestionnaire de polices multiplateforme
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='FontManager.__init__'>
+<h5>__init__</h5>
+<div class='method-description'>
+Initialise le gestionnaire de polices
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='FontManager._get_available_fonts'>
+<h5>_get_available_fonts</h5>
+<div class='method-description'>
+<br>        Récupère les polices disponibles sur le système<br>        <br>        <h6>Retourne</h6><br>            Dict[str, List[str]]: Polices disponibles par catégorie<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict[Unknown]</p>
+</div>
+<div class='method' id='FontManager.get_font'>
+<h5>get_font</h5>
+<div class='method-description'>
+<br>        Obtient une police pour une catégorie donnée<br>        <br>        <h6>Paramètres</h6><br>            category: Catégorie de police (monospace, sans, serif)<br>            size: Taille de la police<br>            weight: Graisse de la police (normal, bold, etc.)<br>            <br>        <h6>Retourne</h6><br>            str: Spécification de police CSS<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>category</li>
+<li>size</li>
+<li>weight</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FontManager.get_code_font'>
+<h5>get_code_font</h5>
+<div class='method-description'>
+<br>        Obtient une police optimisée pour le code<br>        <br>        <h6>Paramètres</h6><br>            size: Taille de la police<br>            <br>        <h6>Retourne</h6><br>            str: Spécification de police CSS<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>size</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FontManager.get_ui_font'>
+<h5>get_ui_font</h5>
+<div class='method-description'>
+<br>        Obtient une police optimisée pour l'interface utilisateur<br>        <br>        <h6>Paramètres</h6><br>            size: Taille de la police<br>            <br>        <h6>Retourne</h6><br>            str: Spécification de police CSS<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>size</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FontManager.get_title_font'>
+<h5>get_title_font</h5>
+<div class='method-description'>
+<br>        Obtient une police optimisée pour les titres<br>        <br>        <h6>Paramètres</h6><br>            size: Taille de la police<br>            <br>        <h6>Retourne</h6><br>            str: Spécification de police CSS<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>size</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='FontManager.get_font_styles'>
+<h5>get_font_styles</h5>
+<div class='method-description'>
+<br>        Obtient les styles de police pour l'application<br>        <br>        <h6>Retourne</h6><br>            Dict[str, str]: Styles CSS pour les différentes catégories de texte<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict[Unknown]</p>
+</div>
+<div class='method' id='FontManager.get_font_css'>
+<h5>get_font_css</h5>
+<div class='method-description'>
+<br>        Génère le CSS pour les polices de l'application<br>        <br>        <h6>Retourne</h6><br>            str: CSS pour les polices<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

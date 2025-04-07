@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fond coloré -->
+    <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FF6B6B"/>
+            <stop offset="100%" style="stop-color:#4ECDC4"/>
+        </linearGradient>
+    </defs>
+    
+    <circle cx="100" cy="100" r="90" fill="url(#gradient)"/>
+    
+    <!-- Tonneau vibrant -->
+    <g transform="rotate(-10, 100, 100)">
+        <!-- Corps du tonneau -->
+        <path d="M 50,85 
+                 C 50,70 150,70 150,85
+                 L 150,115
+                 C 150,130 50,130 50,115
+                 Z" 
+              fill="#FFE66D"/>
+        
+        <!-- Cercles du tonneau -->
+        <path d="M 50,85 C 50,70 150,70 150,85" 
+              fill="none" 
+              stroke="#FF6B6B" 
+              stroke-width="4"
+              stroke-linecap="round"/>
+              
+        <path d="M 50,115 C 50,130 150,130 150,115" 
+              fill="none" 
+              stroke="#FF6B6B" 
+              stroke-width="4"
+              stroke-linecap="round"/>
+              
+        <!-- Effet de brillance -->
+        <path d="M 60,90 C 60,80 140,80 140,90" 
+              fill="none" 
+              stroke="white" 
+              stroke-width="3"
+              stroke-linecap="round"
+              opacity="0.8"/>
+              
+        <!-- Points décoratifs -->
+        <circle cx="70" cy="100" r="3" fill="#4ECDC4"/>
+        <circle cx="130" cy="100" r="3" fill="#4ECDC4"/>
+    </g>
+    
+    <!-- Texte vibrant -->
+    <text x="100" y="170" 
+          font-family="Arial" 
+          font-size="28" 
+          text-anchor="middle" 
+          font-weight="bold">
+        <tspan fill="#FFE66D">Barrel</tspan>
+        <tspan fill="#FF6B6B">MCD</tspan>
+    </text>
+    
+    <!-- Étoiles décoratives -->
+    <path d="M 40,40 L 45,45 L 50,40 L 45,35 Z" fill="#4ECDC4"/>
+    <path d="M 160,40 L 165,45 L 170,40 L 165,35 Z" fill="#4ECDC4"/>
+    <path d="M 100,30 L 105,35 L 110,30 L 105,25 Z" fill="#FFE66D"/>
+</svg> 
