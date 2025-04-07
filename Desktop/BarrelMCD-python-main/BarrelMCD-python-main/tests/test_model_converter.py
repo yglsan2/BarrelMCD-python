@@ -170,4 +170,113 @@ def test_convert_many_to_many():
     junction_table = mld["tables"]["etudiant_cours"]
     assert "etudiant_id" in [col["name"] for col in junction_table["columns"]]
     assert "cours_id" in [col["name"] for col in junction_table["columns"]]
-    assert "date_inscription" in [col["name"] for col in junction_table["columns"]] 
+    assert "date_inscription" in [col["name"] for col in junction_table["columns"]]
+
+def test_convert_to_uml_with_inheritance():
+    """Test la conversion MCD vers UML avec héritage."""
+    converter = ModelConverter()
+    mcd = {
+        "entities": {
+            "personne": {
+                "name": "personne",
+                "attributes": [
+                    {"name": "id", "type": "integer", "primary_key": True},
+                    {"name": "nom", "type": "varchar"}
+                ]
+            },
+            "client": {
+                "name": "client",
+                "attributes": [
+                    {"name": "numero_client", "type": "varchar"}
+                ],
+                "inherits_from": "personne"
+            }
+        },
+        "relations": []
+    }
+    
+    uml = converter.convert_model(mcd, ConversionType.MCD_TO_UML)
+    
+    assert "generalizations" in uml
+    assert len(uml["generalizations"]) == 1
+    assert uml["generalizations"][0]["parent"] == "personne"
+    assert uml["generalizations"][0]["child"] == "client"
+
+def test_convert_to_mld_with_constraints():
+    """Test la conversion MCD vers MLD avec contraintes."""
+    converter = ModelConverter()
+    mcd = {
+        "entities": {
+            "produit": {
+                "name": "produit",
+                "attributes": [
+                    {"name": "id", "type": "integer", "primary_key": True},
+                    {"name": "nom", "type": "varchar", "unique": True},
+                    {"name": "prix", "type": "decimal", "check": "prix > 0"}
+                ]
+            }
+        },
+        "relations": []
+    }
+    
+    mld = converter.convert_model(mcd, ConversionType.MCD_TO_MLD)
+    
+    assert "constraints" in mld
+    assert len(mld["constraints"]) >= 2  # Au moins UNIQUE et CHECK
+    assert any("UNIQUE" in str(c) for c in mld["constraints"])
+    assert any("CHECK" in str(c) for c in mld["constraints"])
+
+def test_convert_to_sql_with_indexes():
+    """Test la conversion MLD vers SQL avec index."""
+    converter = ModelConverter()
+    mld = {
+        "tables": {
+            "client": {
+                "name": "client",
+                "columns": [
+                    {"name": "id", "type": "INTEGER", "nullable": False},
+                    {"name": "nom", "type": "VARCHAR", "nullable": True}
+                ],
+                "primary_key": ["id"],
+                "indexes": [
+                    {"name": "idx_client_nom", "columns": ["nom"]}
+                ]
+            }
+        },
+        "foreign_keys": [],
+        "constraints": []
+    }
+    
+    sql = converter.convert_model(mld, ConversionType.MLD_TO_SQL)
+    
+    assert "CREATE INDEX idx_client_nom" in sql
+    assert "ON client (nom)" in sql
+
+def test_invalid_conversion_type():
+    """Test la gestion des types de conversion invalides."""
+    converter = ModelConverter()
+    mcd = {"entities": {}, "relations": []}
+    
+    with pytest.raises(ValueError):
+        converter.convert_model(mcd, "INVALID_TYPE")
+
+def test_empty_model_conversion():
+    """Test la conversion d'un modèle vide."""
+    converter = ModelConverter()
+    empty_model = {"entities": {}, "relations": []}
+    
+    # Test conversion vers UML
+    uml = converter.convert_model(empty_model, ConversionType.MCD_TO_UML)
+    assert "classes" in uml
+    assert len(uml["classes"]) == 0
+    
+    # Test conversion vers MLD
+    mld = converter.convert_model(empty_model, ConversionType.MCD_TO_MLD)
+    assert "tables" in mld
+    assert len(mld["tables"]) == 0
+    
+    # Test conversion vers SQL
+    sql = converter.convert_model({"tables": {}, "foreign_keys": [], "constraints": []}, 
+                                ConversionType.MLD_TO_SQL)
+    assert isinstance(sql, str)
+    assert len(sql.strip()) == 0 
