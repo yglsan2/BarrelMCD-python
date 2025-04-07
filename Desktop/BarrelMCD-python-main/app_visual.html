@@ -1,0 +1,469 @@
+// Fonction améliorée pour analyser le texte et détecter les mots
+function analyzeText(text) {
+    // Nettoyage et préparation du texte
+    text = text.toLowerCase()
+        .replace(/[.,;:!?]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Détection des mots-clés SQL
+    const sqlKeywords = {
+        select: ['sélectionner', 'afficher', 'voir', 'montrer', 'obtenir', 'récupérer', 'lister'],
+        from: ['de', 'depuis', 'dans', 'sur', 'table', 'tables'],
+        where: ['où', 'dans lequel', 'pour lequel', 'tel que', 'qui', 'que'],
+        join: ['joindre', 'relier', 'connecter', 'lier', 'associer'],
+        group: ['grouper', 'regrouper', 'par', 'selon'],
+        order: ['trier', 'ordonner', 'classer', 'par ordre'],
+        having: ['ayant', 'avec', 'qui ont', 'qui possèdent'],
+        limit: ['limiter', 'maximum', 'au plus', 'pas plus de'],
+        distinct: ['unique', 'distinct', 'différent', 'sans doublon'],
+        count: ['compter', 'nombre', 'quantité', 'total'],
+        sum: ['somme', 'additionner', 'total'],
+        avg: ['moyenne', 'moyen'],
+        max: ['maximum', 'plus grand', 'plus haut'],
+        min: ['minimum', 'plus petit', 'plus bas']
+    };
+
+    // Détection des opérateurs de comparaison
+    const comparisonOperators = {
+        '=': ['égal', 'égale', 'égaux', 'égales', 'est', 'sont'],
+        '>': ['supérieur', 'supérieure', 'supérieurs', 'supérieures', 'plus grand', 'plus grande', 'plus grands', 'plus grandes'],
+        '<': ['inférieur', 'inférieure', 'inférieurs', 'inférieures', 'plus petit', 'plus petite', 'plus petits', 'plus petites'],
+        '>=': ['supérieur ou égal', 'supérieure ou égale', 'supérieurs ou égaux', 'supérieures ou égales', 'au moins'],
+        '<=': ['inférieur ou égal', 'inférieure ou égale', 'inférieurs ou égaux', 'inférieures ou égales', 'au plus'],
+        '!=': ['différent', 'différente', 'différents', 'différentes', 'n\'est pas', 'ne sont pas'],
+        'like': ['comme', 'similaire à', 'ressemble à', 'contient'],
+        'in': ['dans', 'parmi', 'fait partie de', 'appartient à'],
+        'between': ['entre', 'compris entre', 'dans l\'intervalle'],
+        'is null': ['est vide', 'n\'a pas de valeur', 'est nul', 'est nulle'],
+        'is not null': ['n\'est pas vide', 'a une valeur', 'n\'est pas nul', 'n\'est pas nulle']
+    };
+
+    // Détection des opérateurs logiques
+    const logicalOperators = {
+        'and': ['et', 'ainsi que', 'de plus', 'en plus'],
+        'or': ['ou', 'ou bien', 'soit', 'alternativement'],
+        'not': ['non', 'ne pas', 'sauf', 'à l\'exception de']
+    };
+
+    // Détection des fonctions d'agrégation
+    const aggregationFunctions = {
+        'count': ['compter', 'nombre', 'quantité', 'total'],
+        'sum': ['somme', 'additionner', 'total'],
+        'avg': ['moyenne', 'moyen'],
+        'max': ['maximum', 'plus grand', 'plus haut'],
+        'min': ['minimum', 'plus petit', 'plus bas']
+    };
+
+    // Détection des jointures
+    const joinTypes = {
+        'inner join': ['jointure interne', 'jointure', 'relier', 'connecter'],
+        'left join': ['jointure gauche', 'jointure à gauche', 'relier à gauche'],
+        'right join': ['jointure droite', 'jointure à droite', 'relier à droite'],
+        'full join': ['jointure complète', 'jointure totale', 'relier complètement'],
+        'cross join': ['jointure croisée', 'produit cartésien', 'relier croisé']
+    };
+
+    // Détection des expressions complexes
+    const complexExpressions = {
+        'subquery': ['sous-requête', 'requête imbriquée', 'requête interne'],
+        'union': ['union', 'combiner', 'fusionner', 'unir'],
+        'intersect': ['intersection', 'commun', 'partagé'],
+        'except': ['différence', 'sauf', 'à l\'exception de'],
+        'case': ['cas', 'si', 'condition', 'selon'],
+        'exists': ['existe', 'présent', 'trouvé'],
+        'any': ['n\'importe lequel', 'quelconque', 'au moins un'],
+        'all': ['tous', 'toutes', 'chacun', 'chacune']
+    };
+
+    // Détection des fonctions de fenêtrage
+    const windowFunctions = {
+        'row_number': ['numéro de ligne', 'rang'],
+        'rank': ['classement', 'rang'],
+        'dense_rank': ['classement dense', 'rang dense'],
+        'ntile': ['tranche', 'groupe'],
+        'lag': ['décalage arrière', 'valeur précédente'],
+        'lead': ['décalage avant', 'valeur suivante'],
+        'first_value': ['première valeur', 'valeur initiale'],
+        'last_value': ['dernière valeur', 'valeur finale']
+    };
+
+    // Analyse du texte pour détecter les mots-clés SQL
+    const detectedKeywords = {};
+    for (const [keyword, synonyms] of Object.entries(sqlKeywords)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedKeywords[keyword] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les opérateurs de comparaison
+    const detectedOperators = {};
+    for (const [operator, synonyms] of Object.entries(comparisonOperators)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedOperators[operator] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les opérateurs logiques
+    const detectedLogicalOperators = {};
+    for (const [operator, synonyms] of Object.entries(logicalOperators)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedLogicalOperators[operator] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les fonctions d'agrégation
+    const detectedAggregations = {};
+    for (const [function_, synonyms] of Object.entries(aggregationFunctions)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedAggregations[function_] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les types de jointures
+    const detectedJoins = {};
+    for (const [joinType, synonyms] of Object.entries(joinTypes)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedJoins[joinType] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les expressions complexes
+    const detectedComplexExpressions = {};
+    for (const [expression, synonyms] of Object.entries(complexExpressions)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedComplexExpressions[expression] = true;
+        }
+    }
+
+    // Analyse du texte pour détecter les fonctions de fenêtrage
+    const detectedWindowFunctions = {};
+    for (const [function_, synonyms] of Object.entries(windowFunctions)) {
+        if (synonyms.some(synonym => text.includes(synonym))) {
+            detectedWindowFunctions[function_] = true;
+        }
+    }
+
+    // Extraction des noms de tables et de colonnes
+    const tables = [];
+    const columns = [];
+    const words = text.split(' ');
+    
+    // Recherche des noms de tables dans le modèle
+    const tableNames = Array.from(document.querySelectorAll('.table-name')).map(el => el.textContent.toLowerCase());
+    const columnNames = Array.from(document.querySelectorAll('.column-name')).map(el => el.textContent.toLowerCase());
+
+    for (const word of words) {
+        if (tableNames.includes(word)) {
+            tables.push(word);
+        }
+        if (columnNames.includes(word)) {
+            columns.push(word);
+        }
+    }
+
+    return {
+        keywords: detectedKeywords,
+        operators: detectedOperators,
+        logicalOperators: detectedLogicalOperators,
+        aggregations: detectedAggregations,
+        joins: detectedJoins,
+        complexExpressions: detectedComplexExpressions,
+        windowFunctions: detectedWindowFunctions,
+        tables: [...new Set(tables)],
+        columns: [...new Set(columns)]
+    };
+}
+
+// Fonction améliorée pour générer une requête SQL
+function generateSQLQuery(analysis) {
+    let query = '';
+
+    // Construction de la clause SELECT
+    if (analysis.keywords.select) {
+        query += 'SELECT ';
+        if (analysis.keywords.distinct) {
+            query += 'DISTINCT ';
+        }
+
+        // Gestion des fonctions de fenêtrage
+        if (Object.keys(analysis.windowFunctions).length > 0) {
+            const windowFunction = Object.keys(analysis.windowFunctions)[0];
+            query += windowFunction.toUpperCase() + '() OVER (';
+            if (analysis.keywords.order) {
+                query += 'ORDER BY ' + (analysis.columns[0] || '*');
+                if (analysis.operators['>']) {
+                    query += ' DESC';
+                } else {
+                    query += ' ASC';
+                }
+            }
+            query += ')';
+        }
+        // Gestion des fonctions d'agrégation
+        else if (analysis.aggregations.count) {
+            query += 'COUNT(*)';
+        } else if (analysis.aggregations.sum) {
+            query += 'SUM(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.avg) {
+            query += 'AVG(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.max) {
+            query += 'MAX(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.min) {
+            query += 'MIN(' + (analysis.columns[0] || '*') + ')';
+        } else {
+            query += analysis.columns.length > 0 ? analysis.columns.join(', ') : '*';
+        }
+    }
+
+    // Construction de la clause FROM avec sous-requêtes
+    if (analysis.keywords.from && analysis.tables.length > 0) {
+        if (analysis.complexExpressions.subquery) {
+            query += '\nFROM (SELECT * FROM ' + analysis.tables[0] + ') AS subquery';
+        } else {
+            query += '\nFROM ' + analysis.tables[0];
+        }
+    }
+
+    // Construction des jointures avec EXISTS
+    if (analysis.complexExpressions.exists) {
+        query += '\nWHERE EXISTS (SELECT 1 FROM ' + analysis.tables[1] + ' WHERE ' + 
+                analysis.tables[0] + '.' + analysis.columns[0] + ' = ' + 
+                analysis.tables[1] + '.' + analysis.columns[1] + ')';
+    }
+    // Construction des jointures normales
+    else if (analysis.joins['inner join'] || analysis.joins['left join'] || 
+             analysis.joins['right join'] || analysis.joins['full join']) {
+        for (let i = 1; i < analysis.tables.length; i++) {
+            const joinType = Object.keys(analysis.joins).find(key => analysis.joins[key]);
+            query += '\n' + joinType.toUpperCase() + ' ' + analysis.tables[i];
+            if (analysis.columns.length >= 2) {
+                query += ' ON ' + analysis.tables[i-1] + '.' + analysis.columns[0] + ' = ' + 
+                        analysis.tables[i] + '.' + analysis.columns[1];
+            }
+        }
+    }
+
+    // Construction de la clause WHERE avec CASE
+    if (analysis.keywords.where) {
+        query += '\nWHERE ';
+        if (analysis.complexExpressions.case) {
+            query += 'CASE\n';
+            if (analysis.operators['=']) {
+                query += '  WHEN ' + analysis.columns[0] + ' = ? THEN \'Valeur1\'\n';
+                query += '  WHEN ' + analysis.columns[0] + ' = ? THEN \'Valeur2\'\n';
+                query += '  ELSE \'Autre\'\n';
+                query += 'END';
+            }
+        } else {
+            const conditions = [];
+            if (analysis.operators['=']) {
+                conditions.push(analysis.columns[0] + ' = ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['>']) {
+                conditions.push(analysis.columns[0] + ' > ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['<']) {
+                conditions.push(analysis.columns[0] + ' < ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['>=']) {
+                conditions.push(analysis.columns[0] + ' >= ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['<=']) {
+                conditions.push(analysis.columns[0] + ' <= ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['!=']) {
+                conditions.push(analysis.columns[0] + ' != ' + (analysis.columns[1] || '?'));
+            } else if (analysis.operators['like']) {
+                conditions.push(analysis.columns[0] + ' LIKE ?');
+            } else if (analysis.operators['in']) {
+                conditions.push(analysis.columns[0] + ' IN (?)');
+            } else if (analysis.operators['between']) {
+                conditions.push(analysis.columns[0] + ' BETWEEN ? AND ?');
+            } else if (analysis.operators['is null']) {
+                conditions.push(analysis.columns[0] + ' IS NULL');
+            } else if (analysis.operators['is not null']) {
+                conditions.push(analysis.columns[0] + ' IS NOT NULL');
+            }
+            query += conditions.join(' AND ');
+        }
+    }
+
+    // Construction des clauses UNION, INTERSECT, EXCEPT
+    if (analysis.complexExpressions.union) {
+        query += '\nUNION\nSELECT * FROM ' + analysis.tables[1];
+    } else if (analysis.complexExpressions.intersect) {
+        query += '\nINTERSECT\nSELECT * FROM ' + analysis.tables[1];
+    } else if (analysis.complexExpressions.except) {
+        query += '\nEXCEPT\nSELECT * FROM ' + analysis.tables[1];
+    }
+
+    // Construction de la clause GROUP BY
+    if (analysis.keywords.group) {
+        query += '\nGROUP BY ' + (analysis.columns[0] || '*');
+    }
+
+    // Construction de la clause HAVING
+    if (analysis.keywords.having) {
+        query += '\nHAVING ';
+        if (analysis.aggregations.count) {
+            query += 'COUNT(*)';
+        } else if (analysis.aggregations.sum) {
+            query += 'SUM(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.avg) {
+            query += 'AVG(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.max) {
+            query += 'MAX(' + (analysis.columns[0] || '*') + ')';
+        } else if (analysis.aggregations.min) {
+            query += 'MIN(' + (analysis.columns[0] || '*') + ')';
+        }
+        if (analysis.operators['>']) {
+            query += ' > ?';
+        } else if (analysis.operators['<']) {
+            query += ' < ?';
+        } else if (analysis.operators['>=']) {
+            query += ' >= ?';
+        } else if (analysis.operators['<=']) {
+            query += ' <= ?';
+        } else if (analysis.operators['=']) {
+            query += ' = ?';
+        }
+    }
+
+    // Construction de la clause ORDER BY
+    if (analysis.keywords.order) {
+        query += '\nORDER BY ' + (analysis.columns[0] || '*');
+        if (analysis.operators['>']) {
+            query += ' DESC';
+        } else {
+            query += ' ASC';
+        }
+    }
+
+    // Construction de la clause LIMIT
+    if (analysis.keywords.limit) {
+        query += '\nLIMIT ?';
+    }
+
+    return query;
+}
+
+// Fonction de validation des requêtes SQL
+function validateSQLQuery(query) {
+    const errors = [];
+    
+    // Vérification de la syntaxe de base
+    if (!query.trim()) {
+        errors.push('La requête ne peut pas être vide');
+        return errors;
+    }
+
+    // Vérification des clauses obligatoires
+    if (!query.toLowerCase().includes('select')) {
+        errors.push('La clause SELECT est obligatoire');
+    }
+    if (!query.toLowerCase().includes('from')) {
+        errors.push('La clause FROM est obligatoire');
+    }
+
+    // Vérification de l'ordre des clauses
+    const clauses = ['select', 'from', 'where', 'group by', 'having', 'order by', 'limit'];
+    let lastIndex = -1;
+    
+    for (const clause of clauses) {
+        const index = query.toLowerCase().indexOf(clause);
+        if (index !== -1) {
+            if (index < lastIndex) {
+                errors.push(`La clause ${clause.toUpperCase()} doit apparaître après ${clauses[clauses.indexOf(clause) - 1].toUpperCase()}`);
+            }
+            lastIndex = index;
+        }
+    }
+
+    // Vérification des parenthèses équilibrées
+    const parentheses = query.match(/[()]/g) || [];
+    if (parentheses.length % 2 !== 0) {
+        errors.push('Les parenthèses ne sont pas équilibrées');
+    }
+
+    // Vérification des guillemets
+    const quotes = query.match(/['"]/g) || [];
+    if (quotes.length % 2 !== 0) {
+        errors.push('Les guillemets ne sont pas équilibrés');
+    }
+
+    return errors;
+}
+
+// Fonction de gestion des erreurs
+function handleSQLError(error) {
+    console.error('Erreur SQL:', error);
+    
+    // Création d'un élément pour afficher l'erreur
+    const errorElement = document.createElement('div');
+    errorElement.className = 'sql-error';
+    errorElement.style.color = 'red';
+    errorElement.style.padding = '10px';
+    errorElement.style.margin = '10px';
+    errorElement.style.border = '1px solid red';
+    errorElement.style.borderRadius = '5px';
+    
+    // Définition du message d'erreur
+    let errorMessage = 'Une erreur est survenue lors de l\'exécution de la requête SQL.';
+    
+    if (error.code) {
+        switch (error.code) {
+            case 'ER_NO_SUCH_TABLE':
+                errorMessage = 'La table spécifiée n\'existe pas.';
+                break;
+            case 'ER_BAD_FIELD_ERROR':
+                errorMessage = 'La colonne spécifiée n\'existe pas.';
+                break;
+            case 'ER_PARSE_ERROR':
+                errorMessage = 'Erreur de syntaxe dans la requête SQL.';
+                break;
+            case 'ER_DUP_ENTRY':
+                errorMessage = 'Une entrée en double a été détectée.';
+                break;
+            default:
+                errorMessage = `Erreur SQL (${error.code}): ${error.message}`;
+        }
+    }
+    
+    errorElement.textContent = errorMessage;
+    
+    // Ajout de l'élément d'erreur à la page
+    const container = document.querySelector('.sql-container') || document.body;
+    container.appendChild(errorElement);
+    
+    // Suppression automatique après 5 secondes
+    setTimeout(() => {
+        errorElement.remove();
+    }, 5000);
+}
+
+// Fonction d'exécution sécurisée des requêtes SQL
+async function executeSQLQuery(query) {
+    try {
+        // Validation de la requête
+        const errors = validateSQLQuery(query);
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+
+        // Exécution de la requête
+        const result = await fetch('/api/execute-query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query })
+        });
+
+        if (!result.ok) {
+            throw new Error('Erreur lors de l\'exécution de la requête');
+        }
+
+        const data = await result.json();
+        return data;
+
+    } catch (error) {
+        handleSQLError(error);
+        throw error;
+    }
+} 
