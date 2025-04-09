@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - data_analyzer</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>data_analyzer</a></li>
+            <li><a href='#AnimationManager'>AnimationManager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module data_analyzer</h1>
+<h2>Classes</h2>
+<div class='class' id='EntityTemplate'>
+<h3>EntityTemplate</h3>
+<div class='class-description'>
+Modèles d'entités courantes avec leurs attributs typiques
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='EntityTemplate.get_template'>
+<h5>get_template</h5>
+<div class='method-description'>
+Retourne un template d'entité.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>cls</li>
+<li>name</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='EntityTemplate.find_matching_template'>
+<h5>find_matching_template</h5>
+<div class='method-description'>
+Trouve le template le plus proche pour un ensemble de colonnes.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>cls</li>
+<li>columns</li>
+<li>data_sample</li>
+</ul>
+<h6>Retourne</h6>
+<p>Tuple[Unknown]</p>
+</div>
+<div class='method' id='EntityTemplate._analyze_data_patterns'>
+<h5>_analyze_data_patterns</h5>
+<div class='method-description'>
+Analyse les patterns dans les données pour matcher avec le template.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>cls</li>
+<li>data</li>
+<li>template</li>
+</ul>
+<h6>Retourne</h6>
+<p>float</p>
+</div>
+</div>
+<div class='class' id='EntityTemplates'>
+<h3>EntityTemplates</h3>
+<h4>Méthodes</h4>
+<div class='method' id='EntityTemplates.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='EntityTemplates.find_matching_template'>
+<h5>find_matching_template</h5>
+<div class='method-description'>
+Trouve le meilleur template correspondant aux mots donnés.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>words</li>
+</ul>
+<h6>Retourne</h6>
+<p>Tuple[Unknown]</p>
+</div>
+<div class='method' id='EntityTemplates._calculate_similarity'>
+<h5>_calculate_similarity</h5>
+<div class='method-description'>
+Calcule la similarité entre les mots et les attributs du template.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>words</li>
+<li>template_attrs</li>
+</ul>
+<h6>Retourne</h6>
+<p>float</p>
+</div>
+</div>
+<div class='class' id='DataAnalyzer'>
+<h3>DataAnalyzer</h3>
+<div class='class-description'>
+Classe responsable de l'analyse intelligente des données pour générer le MCD.
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='DataAnalyzer.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='DataAnalyzer.analyze_data'>
+<h5>analyze_data</h5>
+<div class='method-description'>
+Analyse les données et génère un MCD.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+<li>format_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._convert_to_dict'>
+<h5>_convert_to_dict</h5>
+<div class='method-description'>
+Convertit les données dans un format dictionnaire.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+<li>format_type</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._xml_to_dict'>
+<h5>_xml_to_dict</h5>
+<div class='method-description'>
+Convertit un élément XML en dictionnaire.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>element</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_structure'>
+<h5>_analyze_structure</h5>
+<div class='method-description'>
+Analyse la structure des données.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_entity'>
+<h5>_analyze_entity</h5>
+<div class='method-description'>
+Analyse une entité et ses attributs.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>name</li>
+<li>data</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_attribute'>
+<h5>_analyze_attribute</h5>
+<div class='method-description'>
+Analyse un attribut pour déterminer son type et ses contraintes.<br>        <br>        <h6>Paramètres</h6><br>            name: Nom de l'attribut ou liste de mots-clés<br>            value: Valeur de l'attribut (optionnel)<br>            <br>        <h6>Retourne</h6><br>            Dict: Informations sur l'attribut<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>name</li>
+<li>value</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._detect_relations'>
+<h5>_detect_relations</h5>
+<div class='method-description'>
+Détecte les relations entre les entités à partir des données.<br>        <br>        <h6>Paramètres</h6><br>            data: DataFrame ou dictionnaire contenant les données<br>            <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des relations détectées<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>data</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='DataAnalyzer.detect_n_ary_relations'>
+<h5>detect_n_ary_relations</h5>
+<div class='method-description'>
+Détecte les relations n-aires dans un texte.<br>        <br>        <h6>Paramètres</h6><br>            text: Texte à analyser<br>            <br>        <h6>Retourne</h6><br>            List[Dict]: Liste des relations n-aires détectées<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>text</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[Dict]</p>
+</div>
+<div class='method' id='DataAnalyzer._validate_model'>
+<h5>_validate_model</h5>
+<div class='method-description'>
+Valide le modèle généré.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_database_schema'>
+<h5>_analyze_database_schema</h5>
+<div class='method-description'>
+Analyse le schéma de la base de données.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>schema</li>
+</ul>
+</div>
+<div class='method' id='DataAnalyzer._consolidate_results'>
+<h5>_consolidate_results</h5>
+<div class='method-description'>
+Consolide les résultats de l'analyse.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._should_merge_entity'>
+<h5>_should_merge_entity</h5>
+<div class='method-description'>
+Détermine si une entité devrait être fusionnée.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='DataAnalyzer._merge_entity'>
+<h5>_merge_entity</h5>
+<div class='method-description'>
+Fusionne une entité avec une entité existante ou crée une relation.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+<li>existing_entities</li>
+</ul>
+</div>
+<div class='method' id='DataAnalyzer._find_main_entity'>
+<h5>_find_main_entity</h5>
+<div class='method-description'>
+Trouve l'entité principale pour une fusion.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+<li>existing_entities</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+<div class='method' id='DataAnalyzer._is_valid_relation'>
+<h5>_is_valid_relation</h5>
+<div class='method-description'>
+Vérifie si une relation est valide.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>relation</li>
+<li>entities</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='DataAnalyzer._normalize_attribute_name'>
+<h5>_normalize_attribute_name</h5>
+<div class='method-description'>
+Normalise le nom d'un attribut pour la détection de patterns.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>name</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._is_potential_foreign_key'>
+<h5>_is_potential_foreign_key</h5>
+<div class='method-description'>
+Détermine si une colonne peut être une clé étrangère.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>column_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='DataAnalyzer._extract_referenced_table'>
+<h5>_extract_referenced_table</h5>
+<div class='method-description'>
+Extrait le nom de la table référencée depuis le nom de la colonne.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>column_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_text_for_context'>
+<h5>_analyze_text_for_context</h5>
+<div class='method-description'>
+Analyse le texte pour détecter le contexte métier.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>text</li>
+<li>contexts</li>
+</ul>
+</div>
+<div class='method' id='DataAnalyzer._analyze_relationship'>
+<h5>_analyze_relationship</h5>
+<div class='method-description'>
+Analyse une relation entre entités dans une phrase.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>sentence</li>
+<li>entities</li>
+</ul>
+</div>
+<div class='method' id='DataAnalyzer._detect_relation_type'>
+<h5>_detect_relation_type</h5>
+<div class='method-description'>
+Détecte le type de relation basé sur les patterns.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>sentence</li>
+<li>patterns</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._detect_specific_cardinality'>
+<h5>_detect_specific_cardinality</h5>
+<div class='method-description'>
+Détecte une cardinalité spécifique pour une entité.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>sentence</li>
+<li>entity</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._extract_relation_name'>
+<h5>_extract_relation_name</h5>
+<div class='method-description'>
+Extrait un nom significatif pour la relation.
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>sentence</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._extract_entity_name'>
+<h5>_extract_entity_name</h5>
+<div class='method-description'>
+Extrait le nom de l'entité à partir du nom de la colonne.<br>        <br>        <h6>Paramètres</h6><br>            column_name: Nom de la colonne<br>            <br>        <h6>Retourne</h6><br>            str: Nom de l'entité<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>column_name</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='DataAnalyzer._analyze_attribute'>
+<h5>_analyze_attribute</h5>
+<div class='method-description'>
+Analyse les mots pour déterminer les caractéristiques d'un attribut.<br>        <br>        <h6>Paramètres</h6><br>            words: Liste des mots à analyser<br>            <br>        <h6>Retourne</h6><br>            Dict: Informations sur l'attribut<br>        
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>words</li>
+</ul>
+<h6>Retourne</h6>
+<p>Dict</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

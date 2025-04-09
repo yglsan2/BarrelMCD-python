@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - magnetic_arrow</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>magnetic_arrow</a></li>
+            <li><a href='#FlexibleArrow'>FlexibleArrow</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module magnetic_arrow</h1>
+<h2>Classes</h2>
+<div class='class' id='MagneticArrow'>
+<h3>MagneticArrow</h3>
+<div class='class-description'>
+Représente une flèche magnétique qui s'adapte aux entités et associations
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='MagneticArrow.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>source</li>
+<li>target</li>
+</ul>
+</div>
+<div class='method' id='MagneticArrow.boundingRect'>
+<h5>boundingRect</h5>
+<div class='method-description'>
+Retourne la zone englobante de la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>QRectF</p>
+</div>
+<div class='method' id='MagneticArrow.paint'>
+<h5>paint</h5>
+<div class='method-description'>
+Dessine la flèche avec effets visuels
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>option</li>
+<li>widget</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._draw_bezier_arrow'>
+<h5>_draw_bezier_arrow</h5>
+<div class='method-description'>
+Dessine une flèche avec courbe de Bézier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._draw_orthogonal_arrow'>
+<h5>_draw_orthogonal_arrow</h5>
+<div class='method-description'>
+Dessine une flèche orthogonale
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._draw_straight_arrow'>
+<h5>_draw_straight_arrow</h5>
+<div class='method-description'>
+Dessine une flèche droite
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._draw_control_points'>
+<h5>_draw_control_points</h5>
+<div class='method-description'>
+Dessine les points de contrôle
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._update_control_points'>
+<h5>_update_control_points</h5>
+<div class='method-description'>
+Met à jour les points de contrôle et d'ancrage
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow._update_labels'>
+<h5>_update_labels</h5>
+<div class='method-description'>
+Met à jour les labels de cardinalité
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.mousePressEvent'>
+<h5>mousePressEvent</h5>
+<div class='method-description'>
+Gère le clic sur la flèche
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.mouseReleaseEvent'>
+<h5>mouseReleaseEvent</h5>
+<div class='method-description'>
+Gère le relâchement du clic
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.mouseMoveEvent'>
+<h5>mouseMoveEvent</h5>
+<div class='method-description'>
+Gère le déplacement de la souris
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.contextMenuEvent'>
+<h5>contextMenuEvent</h5>
+<div class='method-description'>
+Gère le menu contextuel
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>event</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.set_line_style'>
+<h5>set_line_style</h5>
+<div class='method-description'>
+Définit le style de ligne
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>style</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.set_cardinality'>
+<h5>set_cardinality</h5>
+<div class='method-description'>
+Définit la cardinalité d'une extrémité
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>end</li>
+<li>value</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.set_show_control_points'>
+<h5>set_show_control_points</h5>
+<div class='method-description'>
+Affiche ou cache les points de contrôle
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>show</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+<div class='method' id='MagneticArrow.to_dict'>
+<h5>to_dict</h5>
+<div class='method-description'>
+Convertit la flèche en dictionnaire pour la sauvegarde
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+<div class='method' id='MagneticArrow.from_dict'>
+<h5>from_dict</h5>
+<div class='method-description'>
+Crée une flèche à partir d'un dictionnaire
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>cls</li>
+<li>data</li>
+<li>source</li>
+<li>target</li>
+</ul>
+<h6>Retourne</h6>
+<p>Unknown</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

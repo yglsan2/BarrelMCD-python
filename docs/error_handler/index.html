@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - error_handler</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>error_handler</a></li>
+            <li><a href='#DocumentationGenerator'>DocumentationGenerator</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module error_handler</h1>
+<h2>Classes</h2>
+<div class='class' id='ErrorHandler'>
+<h3>ErrorHandler</h3>
+<div class='class-description'>
+Gestionnaire d'erreurs et de robustesse
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='ErrorHandler.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='ErrorHandler.setup_logging'>
+<h5>setup_logging</h5>
+<div class='method-description'>
+Configure le système de logging
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='ErrorHandler.handle_error'>
+<h5>handle_error</h5>
+<div class='method-description'>
+Gère une erreur
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>error</li>
+<li>context</li>
+<li>show_dialog</li>
+</ul>
+</div>
+<div class='method' id='ErrorHandler.handle_warning'>
+<h5>handle_warning</h5>
+<div class='method-description'>
+Gère un avertissement
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>message</li>
+<li>context</li>
+<li>show_dialog</li>
+</ul>
+</div>
+<div class='method' id='ErrorHandler.handle_info'>
+<h5>handle_info</h5>
+<div class='method-description'>
+Gère une information
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>message</li>
+<li>context</li>
+<li>show_dialog</li>
+</ul>
+</div>
+<div class='method' id='ErrorHandler.safe_execute'>
+<h5>safe_execute</h5>
+<div class='method-description'>
+Exécute une fonction de manière sécurisée
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>func</li>
+</ul>
+<h6>Retourne</h6>
+<p>Optional[Any]</p>
+</div>
+<div class='method' id='ErrorHandler.validate_input'>
+<h5>validate_input</h5>
+<div class='method-description'>
+Valide une entrée
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>value</li>
+<li>validation_func</li>
+<li>error_message</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.check_file_access'>
+<h5>check_file_access</h5>
+<div class='method-description'>
+Vérifie l'accès à un fichier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+<li>mode</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.check_directory_access'>
+<h5>check_directory_access</h5>
+<div class='method-description'>
+Vérifie l'accès à un répertoire
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>dir_path</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.validate_file_size'>
+<h5>validate_file_size</h5>
+<div class='method-description'>
+Vérifie la taille d'un fichier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+<li>max_size_mb</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.check_memory_usage'>
+<h5>check_memory_usage</h5>
+<div class='method-description'>
+Vérifie l'utilisation de la mémoire
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>threshold_mb</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.validate_network_connection'>
+<h5>validate_network_connection</h5>
+<div class='method-description'>
+Vérifie la connexion réseau
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.check_disk_space'>
+<h5>check_disk_space</h5>
+<div class='method-description'>
+Vérifie l'espace disque disponible
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>path</li>
+<li>required_mb</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.validate_file_format'>
+<h5>validate_file_format</h5>
+<div class='method-description'>
+Vérifie le format d'un fichier
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>file_path</li>
+<li>allowed_extensions</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='ErrorHandler.check_system_resources'>
+<h5>check_system_resources</h5>
+<div class='method-description'>
+Vérifie les ressources système
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - responsive_styles</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>responsive_styles</a></li>
+            <li><a href='#QueryInspectorDialog'>QueryInspectorDialog</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module responsive_styles</h1>
+<h2>Classes</h2>
+<div class='class' id='ResponsiveStyles'>
+<h3>ResponsiveStyles</h3>
+<div class='class-description'>
+Gestion des styles responsifs
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='ResponsiveStyles.get_scale_factor'>
+<h5>get_scale_factor</h5>
+<div class='method-description'>
+Calcule le facteur d'échelle par rapport aux dimensions de référence
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>width</li>
+<li>height</li>
+</ul>
+<h6>Retourne</h6>
+<p>float</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_font_size'>
+<h5>get_font_size</h5>
+<div class='method-description'>
+Calcule la taille de police
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_button_size'>
+<h5>get_button_size</h5>
+<div class='method-description'>
+Calcule la taille des boutons
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>tuple</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_toolbar_height'>
+<h5>get_toolbar_height</h5>
+<div class='method-description'>
+Calcule la hauteur de la barre d'outils
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_status_bar_height'>
+<h5>get_status_bar_height</h5>
+<div class='method-description'>
+Calcule la hauteur de la barre d'état
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_grid_size'>
+<h5>get_grid_size</h5>
+<div class='method-description'>
+Calcule la taille de la grille
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_margin'>
+<h5>get_margin</h5>
+<div class='method-description'>
+Calcule la marge
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_padding'>
+<h5>get_padding</h5>
+<div class='method-description'>
+Calcule le padding
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_corner_radius'>
+<h5>get_corner_radius</h5>
+<div class='method-description'>
+Calcule le rayon des coins arrondis
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>int</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_window_size'>
+<h5>get_window_size</h5>
+<div class='method-description'>
+Calcule la taille de la fenêtre
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>tuple</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_entity_size'>
+<h5>get_entity_size</h5>
+<div class='method-description'>
+Calcule la taille des entités
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>tuple</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_association_size'>
+<h5>get_association_size</h5>
+<div class='method-description'>
+Calcule la taille des associations
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>tuple</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_colors'>
+<h5>get_colors</h5>
+<div class='method-description'>
+Retourne les couleurs
+</div>
+<h6>Retourne</h6>
+<p>dict</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_button_style'>
+<h5>get_button_style</h5>
+<div class='method-description'>
+Retourne le style des boutons
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_toolbar_style'>
+<h5>get_toolbar_style</h5>
+<div class='method-description'>
+Retourne le style de la barre d'outils
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_status_bar_style'>
+<h5>get_status_bar_style</h5>
+<div class='method-description'>
+Retourne le style de la barre d'état
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_menu_style'>
+<h5>get_menu_style</h5>
+<div class='method-description'>
+Retourne le style du menu
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_dialog_style'>
+<h5>get_dialog_style</h5>
+<div class='method-description'>
+Retourne le style des boîtes de dialogue
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_canvas_style'>
+<h5>get_canvas_style</h5>
+<div class='method-description'>
+Retourne le style du canvas
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='ResponsiveStyles.get_window_style'>
+<h5>get_window_style</h5>
+<div class='method-description'>
+Retourne le style de la fenêtre
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>scale</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

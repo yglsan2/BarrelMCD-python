@@ -1,0 +1,2633 @@
+<!--
+    Charte graphique mise à jour :
+    
+    Mode sombre (par défaut) :
+    - Fond principal : #121212 (noir)
+    - Panneau de travail : #1a1a2e (bleu très foncé)
+    - Barre de menu : #1a1a2e (bleu très foncé)
+    - Barre d'outils : #2d2d44 (bleu foncé)
+    - Entités : fond #2a2a3a, bordure #3d3d4d
+    - Associations : fond #1a2a3a, bordure #2d3d4d
+    - Texte : blanc #ffffff et gris clair #b3b3b3
+    - Grille : blanc semi-transparent rgba(255, 255, 255, 0.1)
+    - Boutons : fond #2d2d44, survol #3d3d4d
+    - Accent : violet #6a1b9a
+    
+    Mode clair :
+    - Fond principal : #121212 (noir)
+    - Panneau de travail : #ffffff (blanc)
+    - Barre de menu : #1a1a2e (bleu très foncé)
+    - Barre d'outils : #2d2d44 (bleu foncé)
+    - Entités : fond #2a2a3a, bordure #3d3d4d
+    - Associations : fond #1a2a3a, bordure #2d3d4d
+    - Texte : blanc #ffffff et gris clair #b3b3b3
+    - Grille : noir semi-transparent rgba(0, 0, 0, 0.15)
+    - Boutons : fond #2d2d44, survol #3d3d4d
+    - Accent : violet #6a1b9a
+    
+    Éléments interactifs :
+    - Boutons : fond #2d2d44, survol #3d3d4d
+    - Boutons actifs : fond #3d3d4d, texte blanc
+    - Notifications : fond #2d2d44, texte blanc
+    - Sélecteur de modèle : fond #2d2d44, survol #3d3d4d, actif #3d3d4d
+    
+    Typographie :
+    - Police principale : 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+    - Taille de base : 14px
+    - Titres : 18px, gras
+    - Sous-titres : 16px, semi-gras
+    - Texte normal : 14px, normal
+    - Texte secondaire : 14px, gris clair
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarrelMCD - Visualisation</title>
+    <link rel="stylesheet" href="colors.css">
+    <style>
+        /* Styles de base */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+        
+        :root {
+            /* Mode sombre (par défaut) */
+            --background-dark: #121212;
+            --workspace-color: #1a1a2e;
+            --menu-dark: #1a1a2e;
+            --toolbar-dark: #2d2d44;
+            --entity-bg: #2a2a3a;
+            --entity-border: #3d3d4d;
+            --association-bg: #1a2a3a;
+            --association-border: #2d3d4d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-color: #6a1b9a;
+            --button-hover: #3d3d4d;
+            --grid-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        :root[data-theme="light"] {
+            /* Mode clair avec panneau blanc uniquement */
+            --background-dark: #121212;
+            --workspace-color: #ffffff;
+            --menu-dark: #1a1a2e;
+            --toolbar-dark: #2d2d44;
+            --entity-bg: #2a2a3a;
+            --entity-border: #3d3d4d;
+            --association-bg: #1a2a3a;
+            --association-border: #2d3d4d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-color: #6a1b9a;
+            --button-hover: #3d3d4d;
+            --grid-color: rgba(0, 0, 0, 0.15);
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Barre de menu */
+        .menu-bar {
+            background-color: var(--bg-secondary);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .menu-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .menu-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .menu-button {
+            background-color: var(--button-bg);
+            color: var(--text-primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .menu-button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .menu-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .menu-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .menu-item {
+            color: var(--text-primary);
+            margin-right: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .toolbar {
+            height: 50px;
+            background-color: var(--toolbar-dark);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button {
+            background-color: var(--toolbar-dark);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-1px);
+        }
+        
+        /* Zone de travail */
+        .workspace {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 60px);
+            background-color: var(--bg-secondary);
+            overflow: auto;
+        }
+        
+        /* Grille */
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+        
+        .grid.active {
+            display: block;
+        }
+        
+        /* Entités */
+        .entity, .association {
+            position: absolute;
+            min-width: 150px;
+            min-height: 100px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: move;
+            user-select: none;
+            resize: both;
+            overflow: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.2s;
+        }
+        
+        .entity:hover, .association:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .entity.dragging, .association.dragging {
+            opacity: 0.8;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+        
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--entity-border);
+            border-radius: 50%;
+            cursor: se-resize;
+            right: -5px;
+            bottom: -5px;
+            display: none;
+        }
+        
+        .entity:hover .resize-handle,
+        .association:hover .resize-handle {
+            display: block;
+        }
+        
+        .arrow {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .arrow path {
+            stroke-width: 2;
+            fill: none;
+            stroke: var(--text-secondary);
+            transition: stroke 0.2s;
+        }
+        
+        .arrow:hover path {
+            stroke: var(--text-primary);
+            stroke-width: 3;
+        }
+        
+        .cardinality {
+            position: absolute;
+            background-color: var(--entity-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-size: 1em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        
+        .grid-toggle {
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .grid-toggle:hover {
+            background-color: var(--button-hover);
+            color: var(--text-primary);
+        }
+        
+        .model-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 5;
+        }
+        
+        .model-button {
+            background-color: var(--toolbar-dark);
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .model-button:hover {
+            background-color: var(--button-hover);
+            color: var(--text-primary);
+        }
+        
+        .model-button.active {
+            background-color: var(--button-hover);
+            color: var(--text-primary);
+        }
+        
+        .model-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--entity-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .model-info.visible {
+            opacity: 1;
+        }
+        
+        .model-info h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+        
+        .model-info p {
+            color: var(--text-secondary);
+            margin: 5px 0;
+        }
+        
+        .association-title {
+            text-align: center;
+            padding: 8px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+        
+        .association-attribute {
+            padding: 4px 8px;
+            display: flex;
+            justify-content: center;
+            font-size: 0.9em;
+            width: 100%;
+        }
+        
+        /* Ajout d'un guide de déplacement */
+        .drag-guide {
+            position: absolute;
+            background-color: rgba(108, 99, 255, 0.2);
+            border: 1px dashed var(--accent-color);
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+        
+        .drag-guide.active {
+            display: block;
+        }
+        
+        /* Ajout d'un indicateur de position */
+        .position-indicator {
+            position: absolute;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            pointer-events: none;
+            z-index: 20;
+            display: none;
+        }
+        
+        .position-indicator.active {
+            display: block;
+        }
+        
+        .theme-toggle {
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--button-hover);
+            color: var(--text-primary);
+        }
+        
+        .theme-toggle i {
+            margin-right: 5px;
+        }
+        
+        .theme-notification {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        
+        .theme-notification.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Styles pour le mode dessin de flèches */
+        .drawing-mode {
+            cursor: crosshair;
+        }
+        
+        .drawing-mode .entity {
+            cursor: pointer;
+        }
+        
+        .drawing-mode .entity:hover {
+            outline: 2px dashed var(--accent-color);
+        }
+        
+        .drawing-arrow {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .drawing-arrow path {
+            stroke-width: 2;
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-dasharray: 5, 5;
+        }
+        
+        /* Styles pour la barre d'outils flottante */
+        .floating-toolbar {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .tool-button {
+            background-color: var(--button-bg);
+            color: var(--text-primary);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 18px;
+        }
+        
+        .tool-button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .tool-button.active {
+            background-color: var(--accent-color);
+        }
+        
+        /* Styles pour le mode édition */
+        .editing {
+            outline: 2px solid var(--accent-color);
+        }
+        
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .edit-form input, .edit-form textarea {
+            background-color: var(--entity-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--entity-border);
+            border-radius: 3px;
+            padding: 5px;
+            font-family: inherit;
+        }
+        
+        .edit-form textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .edit-form button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .edit-form button:hover {
+            background-color: #8e24aa;
+        }
+        
+        /* Styles pour le menu contextuel */
+        .context-menu {
+            position: absolute;
+            background-color: var(--toolbar-dark);
+            border-radius: 5px;
+            padding: 5px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .context-menu-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 3px;
+        }
+        
+        .context-menu-item:hover {
+            background-color: var(--button-hover);
+        }
+        
+        /* Styles pour le zoom */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--toolbar-dark);
+            border-radius: 5px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+        }
+        
+        .zoom-controls button {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .zoom-controls button:hover {
+            background-color: var(--button-hover);
+            color: var(--text-primary);
+        }
+        
+        /* Styles pour la minimap */
+        .minimap {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--toolbar-dark);
+            border-radius: 5px;
+            padding: 5px;
+            width: 150px;
+            height: 100px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .minimap-viewport {
+            position: absolute;
+            border: 1px solid var(--accent-color);
+            background-color: rgba(106, 27, 154, 0.2);
+            pointer-events: none;
+        }
+        
+        .minimap-content {
+            position: absolute;
+            transform-origin: top left;
+        }
+        
+        .entity {
+            position: absolute;
+            background-color: var(--entity-bg);
+            border: 1px solid var(--entity-border);
+            border-radius: 5px;
+            padding: 10px;
+            min-width: 150px;
+            min-height: 50px;
+            cursor: move;
+            user-select: none;
+            resize: both;
+            overflow: auto;
+            z-index: 1;
+        }
+        
+        .entity.inheritance-parent {
+            border: 2px dashed #2c3e50;
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.1), rgba(44, 62, 80, 0.05));
+            box-shadow: 0 0 15px rgba(44, 62, 80, 0.2);
+            position: relative;
+        }
+        
+        .entity.inheritance-parent::before {
+            content: '🔷';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            text-shadow: 0 0 5px rgba(44, 62, 80, 0.5);
+        }
+        
+        .entity.inheritance-parent::after {
+            content: 'Classe Mère';
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #2c3e50;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(44, 62, 80, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .entity.inheritance-child {
+            border-left: 4px solid #3498db;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.02));
+            position: relative;
+        }
+        
+        .entity.inheritance-child::before {
+            content: '🔶';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            text-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        .entity.inheritance-child::after {
+            content: 'Classe Enfant';
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #3498db;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .inheritance-arrow {
+            stroke: #2c3e50;
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 3px rgba(44, 62, 80, 0.5));
+            marker-end: url(#inheritance-arrowhead);
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+        
+        .inheritance-label {
+            font-size: 12px;
+            fill: #2c3e50;
+            font-weight: bold;
+            filter: drop-shadow(0 0 2px rgba(44, 62, 80, 0.3));
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(44, 62, 80, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        /* Ajout d'un effet de survol pour les entités en héritage */
+        .entity.inheritance-parent:hover,
+        .entity.inheritance-child:hover {
+            transform: scale(1.02);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Style pour la flèche d'héritage au survol */
+        .inheritance-arrow:hover {
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px rgba(44, 62, 80, 0.8));
+        }
+
+        .inheritance-object {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #2c3e50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(44, 62, 80, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .inheritance-object::before {
+            content: '⚡';
+            font-size: 20px;
+            color: white;
+        }
+
+        .inheritance-object:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(44, 62, 80, 0.8);
+        }
+
+        .inheritance-object.active {
+            background-color: #3498db;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
+        }
+
+        .inheritance-object.active::before {
+            content: '✓';
+        }
+
+        .inheritance-connector {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .inheritance-connector-line {
+            stroke: #2c3e50;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            fill: none;
+            animation: dash 20s linear infinite;
+        }
+
+        .inheritance-connector-line.active {
+            stroke: #3498db;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.8));
+        }
+
+        /* Styles pour le panneau d'analyse */
+        .analysis-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            border-radius: 8px;
+            padding: 15px;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .analysis-panel.visible {
+            display: block;
+        }
+
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--entity-border);
+        }
+
+        .analysis-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .analysis-close {
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .analysis-close:hover {
+            color: var(--text-primary);
+        }
+
+        .analysis-section {
+            margin-bottom: 15px;
+        }
+
+        .analysis-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .analysis-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-item-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .analysis-item-content {
+            flex: 1;
+        }
+
+        .analysis-item-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .analysis-item-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .analysis-item.error {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        .analysis-item.warning {
+            background-color: rgba(255, 165, 0, 0.1);
+        }
+
+        .analysis-item.info {
+            background-color: rgba(0, 128, 255, 0.1);
+        }
+
+        .analysis-item.success {
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+
+        .analysis-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .analysis-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .analysis-button:hover {
+            background-color: #8e24aa;
+        }
+
+        /* Styles pour l'inspecteur SQL */
+        .sql-inspector {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            border-radius: 8px;
+            padding: 15px;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .sql-inspector.visible {
+            display: block;
+        }
+
+        .sql-inspector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--entity-border);
+        }
+
+        .sql-inspector-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .sql-inspector-close {
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .sql-inspector-close:hover {
+            color: var(--text-primary);
+        }
+
+        .sql-query-section {
+            margin-bottom: 15px;
+        }
+
+        .sql-query-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .sql-query {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            margin-bottom: 8px;
+        }
+
+        .sql-query-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .sql-query-button {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .sql-query-button:hover {
+            background-color: #8e24aa;
+        }
+
+        .sql-query-button.copy {
+            background-color: #2196f3;
+        }
+
+        .sql-query-button.copy:hover {
+            background-color: #1976d2;
+        }
+
+        /* Styles pour le panneau de dessin automatique */
+        .auto-draw-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--entity-bg);
+            border-radius: 8px;
+            padding: 15px;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .auto-draw-panel.visible {
+            display: block;
+        }
+
+        .auto-draw-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--entity-border);
+        }
+
+        .auto-draw-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .auto-draw-close {
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .auto-draw-close:hover {
+            color: var(--text-primary);
+        }
+
+        .auto-draw-section {
+            margin-bottom: 15px;
+        }
+
+        .auto-draw-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .auto-draw-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .auto-draw-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auto-draw-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .auto-draw-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .auto-draw-form-group label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .auto-draw-form-group input,
+        .auto-draw-form-group select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--entity-border);
+            background-color: var(--toolbar-dark);
+            color: var(--text-primary);
+        }
+
+        .auto-draw-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .auto-draw-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .auto-draw-button:hover {
+            background-color: #8e24aa;
+        }
+
+        .auto-draw-results {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .auto-draw-result-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--entity-border);
+        }
+
+        .auto-draw-result-icon {
+            font-size: 16px;
+        }
+
+        .auto-draw-result-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .auto-draw-result-item.success .auto-draw-result-icon {
+            color: #4caf50;
+        }
+
+        .auto-draw-result-item.error .auto-draw-result-icon {
+            color: #f44336;
+        }
+
+        .auto-draw-result-item.warning .auto-draw-result-icon {
+            color: #ff9800;
+        }
+
+        .auto-draw-result-item.info .auto-draw-result-icon {
+            color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="menu-bar">
+            <div class="menu-left">
+                <div class="menu-item">Fichier</div>
+                <div class="menu-item">Édition</div>
+                <div class="menu-item">Affichage</div>
+                <div class="menu-item">Langue</div>
+            </div>
+            <div class="menu-right">
+                <div class="grid-toggle" onclick="toggleGrid()">Grille</div>
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <i>🌙</i> Mode
+                </div>
+                <div class="inheritance-toggle" onclick="toggleInheritanceMode()">
+                    <i>⚡</i> Héritage
+                </div>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <button class="button">Importer</button>
+            <button class="button" onclick="toggleAutoDraw()">Dessin Auto</button>
+            <button class="button">Analyser</button>
+            <button class="button">Convertir</button>
+            <button class="button">Exporter</button>
+            <button class="button">Enregistrer</button>
+        </div>
+        
+        <div class="workspace">
+            <div class="grid" id="grid"></div>
+            
+            <!-- Ajout des guides de déplacement -->
+            <div class="drag-guide" id="drag-guide"></div>
+            <div class="position-indicator" id="position-indicator"></div>
+            
+            <!-- Ajout de la notification de thème -->
+            <div class="theme-notification" id="theme-notification">Mode sombre activé</div>
+            
+            <div class="model-switcher">
+                <button class="model-button active" onclick="switchModel('mcd')" onmouseover="showModelInfo('mcd')" onmouseout="hideModelInfo()">MCD</button>
+                <button class="model-button" onclick="switchModel('uml')" onmouseover="showModelInfo('uml')" onmouseout="hideModelInfo()">UML</button>
+                <button class="model-button" onclick="switchModel('mld')" onmouseover="showModelInfo('mld')" onmouseout="hideModelInfo()">MLD</button>
+                <button class="model-button" onclick="switchModel('mpd')" onmouseover="showModelInfo('mpd')" onmouseout="hideModelInfo()">MPD</button>
+                <button class="model-button" onclick="switchModel('sql')" onmouseover="showModelInfo('sql')" onmouseout="hideModelInfo()">SQL</button>
+            </div>
+            
+            <div class="entity" style="top: 100px; left: 100px;">
+                <div class="entity-title">Client</div>
+                <div class="entity-attribute">
+                    <span>id</span>
+                </div>
+                <div class="entity-attribute">
+                    <span>nom</span>
+                </div>
+            </div>
+            
+            <div class="entity" style="top: 100px; left: 500px;">
+                <div class="entity-title">Commande</div>
+                <div class="entity-attribute">
+                    <span>id</span>
+                </div>
+                <div class="entity-attribute">
+                    <span>date</span>
+                </div>
+            </div>
+            
+            <!-- Relation Client-Commande -->
+            <div class="arrow" style="top: 150px; left: 200px; width: 100px;"></div>
+            <div class="association" style="top: 120px; left: 300px; width: 120px; height: 120px;">
+                <div class="association-title">Commande</div>
+                <div class="association-attribute">
+                    <span>date_commande</span>
+                </div>
+            </div>
+            <div class="arrow" style="top: 150px; left: 450px; width: 100px;"></div>
+            
+            <div class="cardinality" style="top: 130px; left: 250px;">1,n</div>
+            <div class="cardinality" style="top: 130px; left: 500px;">1,1</div>
+            
+            <div class="model-info" id="model-info">
+                <h3>Modèle Conceptuel de Données (MCD)</h3>
+                <p>Le MCD représente les entités, leurs attributs et les relations entre elles, sans notion de clés.</p>
+                <p>Les cardinalités indiquent le nombre d'occurrences d'une entité par rapport à une autre.</p>
+            </div>
+            
+            <div class="zoom-controls">
+                <button onclick="zoomIn()">+</button>
+                <button onclick="zoomOut()">-</button>
+                <button onclick="resetZoom()">↺</button>
+            </div>
+            
+            <div class="minimap">
+                <div class="minimap-content"></div>
+                <div class="minimap-viewport"></div>
+            </div>
+            
+            <div class="floating-toolbar">
+                <button class="toolbar-button" onclick="toggleTheme()">🌓</button>
+                <button class="toolbar-button" onclick="toggleGrid()">📏</button>
+                <button class="toolbar-button" onclick="toggleSqlInspector()">💾 SQL</button>
+                <button class="toolbar-button" onclick="toggleAnalysisPanel()">🔍</button>
+                <button class="toolbar-button" onclick="togglePresentationMode()">📊</button>
+                <button class="toolbar-button" onclick="toggleInheritanceMode()">⚡</button>
+                <button class="toolbar-button" onclick="toggleDrawingMode()">✏️</button>
+                <button class="toolbar-button" onclick="toggleAutoDraw()">🔄</button>
+            </div>
+            
+            <div class="context-menu">
+                <div class="context-menu-item" onclick="createEntity()">Nouvelle entité</div>
+                <div class="context-menu-item" onclick="createAssociation()">Nouvelle association</div>
+                <div class="context-menu-item" onclick="createAttribute()">Nouvel attribut</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="analysis-panel" id="analysisPanel">
+        <div class="analysis-header">
+            <div class="analysis-title">Analyse du Modèle</div>
+            <div class="analysis-close" onclick="toggleAnalysisPanel()">✕</div>
+        </div>
+        <div class="analysis-content" id="analysisContent">
+            <!-- Le contenu sera généré dynamiquement -->
+        </div>
+        <div class="analysis-actions">
+            <button class="analysis-button" onclick="runAnalysis()">Analyser</button>
+            <button class="analysis-button" onclick="fixIssues()">Corriger</button>
+        </div>
+    </div>
+    
+    <div class="sql-inspector" id="sqlInspector">
+        <div class="sql-inspector-header">
+            <div class="sql-inspector-title">Inspecteur SQL</div>
+            <div class="sql-inspector-close" onclick="toggleSqlInspector()">✕</div>
+        </div>
+        <div class="sql-inspector-content" id="sqlInspectorContent">
+            <!-- Le contenu sera généré dynamiquement -->
+        </div>
+    </div>
+    
+    <!-- Ajout du panneau de dessin automatique -->
+    <div class="auto-draw-panel" id="autoDrawPanel">
+        <div class="auto-draw-header">
+            <div class="auto-draw-title">Dessin Automatique de MCD</div>
+            <div class="auto-draw-close" onclick="toggleAutoDraw()">✕</div>
+        </div>
+        <div class="auto-draw-content">
+            <div class="auto-draw-section">
+                <div class="auto-draw-section-title">Source de données</div>
+                <div class="auto-draw-options">
+                    <div class="auto-draw-option">
+                        <input type="radio" id="sourceSql" name="dataSource" value="sql" checked onchange="toggleDataSource()">
+                        <label for="sourceSql">Base de données SQL</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="radio" id="sourceCsv" name="dataSource" value="csv" onchange="toggleDataSource()">
+                        <label for="sourceCsv">Fichier CSV</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="radio" id="sourceJson" name="dataSource" value="json" onchange="toggleDataSource()">
+                        <label for="sourceJson">Fichier JSON</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="auto-draw-section" id="sqlConnectionSection">
+                <div class="auto-draw-section-title">Connexion à la base de données</div>
+                <div class="auto-draw-form">
+                    <div class="auto-draw-form-group">
+                        <label for="dbType">Type de base de données</label>
+                        <select id="dbType">
+                            <option value="mysql">MySQL</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="sqlite">SQLite</option>
+                            <option value="mssql">SQL Server</option>
+                            <option value="oracle">Oracle</option>
+                        </select>
+                    </div>
+                    <div class="auto-draw-form-group">
+                        <label for="dbHost">Hôte</label>
+                        <input type="text" id="dbHost" placeholder="localhost">
+                    </div>
+                    <div class="auto-draw-form-group">
+                        <label for="dbPort">Port</label>
+                        <input type="text" id="dbPort" placeholder="3306">
+                    </div>
+                    <div class="auto-draw-form-group">
+                        <label for="dbName">Nom de la base</label>
+                        <input type="text" id="dbName" placeholder="ma_base">
+                    </div>
+                    <div class="auto-draw-form-group">
+                        <label for="dbUser">Utilisateur</label>
+                        <input type="text" id="dbUser" placeholder="root">
+                    </div>
+                    <div class="auto-draw-form-group">
+                        <label for="dbPassword">Mot de passe</label>
+                        <input type="password" id="dbPassword">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="auto-draw-section" id="fileUploadSection" style="display: none;">
+                <div class="auto-draw-section-title">Téléchargement de fichier</div>
+                <div class="auto-draw-form">
+                    <div class="auto-draw-form-group">
+                        <label for="fileUpload">Sélectionner un fichier</label>
+                        <input type="file" id="fileUpload" accept=".csv,.json">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="auto-draw-section">
+                <div class="auto-draw-section-title">Options de dessin</div>
+                <div class="auto-draw-options">
+                    <div class="auto-draw-option">
+                        <input type="checkbox" id="includePrimaryKeys" checked>
+                        <label for="includePrimaryKeys">Inclure les clés primaires</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="checkbox" id="includeForeignKeys" checked>
+                        <label for="includeForeignKeys">Inclure les clés étrangères</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="checkbox" id="includeIndexes">
+                        <label for="includeIndexes">Inclure les index</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="checkbox" id="includeConstraints" checked>
+                        <label for="includeConstraints">Inclure les contraintes</label>
+                    </div>
+                    <div class="auto-draw-option">
+                        <input type="checkbox" id="autoLayout" checked>
+                        <label for="autoLayout">Disposition automatique</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="auto-draw-actions">
+                <button class="auto-draw-button" onclick="connectToDatabase()">Se connecter</button>
+                <button class="auto-draw-button" onclick="analyzeDatabase()">Analyser</button>
+                <button class="auto-draw-button" onclick="generateMCD()">Générer MCD</button>
+            </div>
+            
+            <div class="auto-draw-results" id="autoDrawResults">
+                <!-- Les résultats seront affichés ici -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Variables globales pour le mode dessin
+        let isDrawingMode = false;
+        let drawingStartElement = null;
+        let drawingArrow = null;
+        let selectedElement = null;
+        let zoomLevel = 1;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let workspaceOffsetX = 0;
+        let workspaceOffsetY = 0;
+        
+        let isInheritanceMode = false;
+        let selectedParentEntity = null;
+        let inheritanceRelations = new Map(); // Stocke les relations d'héritage
+        
+        // Ajout des cardinalités par modèle
+        const modelCardinalities = {
+            'mcd': {
+                source: ['0,1', '1,1', '0,n', '1,n'],
+                target: ['0,1', '1,1', '0,n', '1,n']
+            },
+            'uml': {
+                source: ['0..1', '1', '0..*', '1..*'],
+                target: ['0..1', '1', '0..*', '1..*']
+            },
+            'mld': {
+                source: ['0,1', '1,1'],
+                target: ['0,n', '1,n']
+            },
+            'mpd': {
+                source: ['0,1', '1,1'],
+                target: ['0,n', '1,n']
+            },
+            'sql': {
+                source: ['NULL', 'NOT NULL'],
+                target: ['FOREIGN KEY', 'PRIMARY KEY']
+            }
+        };
+        
+        // Fonction pour basculer entre les thèmes clair et sombre
+        function toggleTheme() {
+            const root = document.documentElement;
+            const currentTheme = root.getAttribute('data-theme');
+            const themeToggle = document.querySelector('.theme-toggle i');
+            const themeNotification = document.getElementById('theme-notification');
+            
+            if (currentTheme === 'light') {
+                root.removeAttribute('data-theme');
+                themeToggle.textContent = '🌙';
+                themeNotification.textContent = 'Mode sombre activé';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                themeToggle.textContent = '☀️';
+                themeNotification.textContent = 'Mode clair activé';
+            }
+            
+            // Afficher la notification
+            themeNotification.classList.add('visible');
+            
+            // Masquer la notification après 2 secondes
+            setTimeout(() => {
+                themeNotification.classList.remove('visible');
+            }, 2000);
+        }
+        
+        function toggleGrid() {
+            const grid = document.getElementById('grid');
+            grid.classList.toggle('active');
+        }
+        
+        function showModelInfo(model) {
+            const modelInfo = document.getElementById('model-info');
+            
+            switch(model) {
+                case 'mcd':
+                    modelInfo.innerHTML = `
+                        <h3>Modèle Conceptuel de Données (MCD)</h3>
+                        <p>Le MCD représente les entités, leurs attributs et les relations entre elles, sans notion de clés.</p>
+                        <p>Les cardinalités indiquent le nombre d'occurrences d'une entité par rapport à une autre.</p>
+                    `;
+                    break;
+                case 'uml':
+                    modelInfo.innerHTML = `
+                        <h3>Unified Modeling Language (UML)</h3>
+                        <p>UML représente les classes, leurs attributs, méthodes et relations entre elles.</p>
+                        <p>Les relations peuvent être d'héritage, d'association, d'agrégation ou de composition.</p>
+                    `;
+                    break;
+                case 'mld':
+                    modelInfo.innerHTML = `
+                        <h3>Modèle Logique de Données (MLD)</h3>
+                        <p>Le MLD représente les tables, leurs colonnes et les relations entre elles.</p>
+                        <p>Les clés primaires et étrangères sont utilisées pour représenter les relations.</p>
+                    `;
+                    break;
+                case 'mpd':
+                    modelInfo.innerHTML = `
+                        <h3>Modèle Physique de Données (MPD)</h3>
+                        <p>Le MPD représente les tables, leurs colonnes, types de données et contraintes.</p>
+                        <p>Il inclut les index, les contraintes d'intégrité et les optimisations spécifiques au SGBD.</p>
+                    `;
+                    break;
+                case 'sql':
+                    modelInfo.innerHTML = `
+                        <h3>Structured Query Language (SQL)</h3>
+                        <p>SQL est le langage utilisé pour définir et manipuler les données dans un SGBD relationnel.</p>
+                        <p>Il permet de créer des tables, d'insérer, modifier, supprimer et interroger des données.</p>
+                    `;
+                    break;
+            }
+            
+            modelInfo.classList.add('visible');
+        }
+        
+        function hideModelInfo() {
+            const modelInfo = document.getElementById('model-info');
+            modelInfo.classList.remove('visible');
+        }
+        
+        // Fonction pour mettre à jour les cardinalités en fonction du modèle
+        function updateCardinalities() {
+            const currentModel = document.querySelector('.model-button.active').dataset.model;
+            const cardinalities = modelCardinalities[currentModel];
+            
+            // Mettre à jour les cardinalités existantes
+            document.querySelectorAll('.association').forEach(association => {
+                const sourceCardinality = association.querySelector('.cardinality[data-end="source"]');
+                const targetCardinality = association.querySelector('.cardinality[data-end="target"]');
+                
+                if (sourceCardinality && targetCardinality) {
+                    const currentSourceValue = sourceCardinality.textContent;
+                    const currentTargetValue = targetCardinality.textContent;
+                    
+                    // Convertir les anciennes cardinalités vers le nouveau format
+                    const newSourceValue = convertCardinality(currentSourceValue, 'source', currentModel);
+                    const newTargetValue = convertCardinality(currentTargetValue, 'target', currentModel);
+                    
+                    sourceCardinality.textContent = newSourceValue;
+                    targetCardinality.textContent = newTargetValue;
+                }
+            });
+        }
+        
+        // Fonction pour convertir les cardinalités entre les modèles
+        function convertCardinality(value, end, targetModel) {
+            const conversions = {
+                '0,1': {
+                    'uml': '0..1',
+                    'mld': '0,1',
+                    'mpd': '0,1',
+                    'sql': 'NULL'
+                },
+                '1,1': {
+                    'uml': '1',
+                    'mld': '1,1',
+                    'mpd': '1,1',
+                    'sql': 'NOT NULL'
+                },
+                '0,n': {
+                    'uml': '0..*',
+                    'mld': '0,n',
+                    'mpd': '0,n',
+                    'sql': 'FOREIGN KEY'
+                },
+                '1,n': {
+                    'uml': '1..*',
+                    'mld': '1,n',
+                    'mpd': '1,n',
+                    'sql': 'PRIMARY KEY'
+                }
+            };
+            
+            return conversions[value]?.[targetModel] || value;
+        }
+        
+        // Modifier la fonction switchModel pour mettre à jour les cardinalités
+        function switchModel(model) {
+            // Mettre à jour les boutons actifs
+            document.querySelectorAll('.model-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.querySelector(`[data-model="${model}"]`).classList.add('active');
+            
+            // Mettre à jour les cardinalités
+            updateCardinalities();
+            
+            // Mettre à jour les styles des entités et associations selon le modèle
+            updateModelStyles(model);
+        }
+        
+        // Fonction pour mettre à jour les styles selon le modèle
+        function updateModelStyles(model) {
+            const entities = document.querySelectorAll('.entity');
+            const associations = document.querySelectorAll('.association');
+            
+            // Supprimer les styles précédents
+            entities.forEach(entity => {
+                entity.classList.remove('mcd-style', 'uml-style', 'mld-style', 'mpd-style', 'sql-style');
+            });
+            
+            associations.forEach(association => {
+                association.classList.remove('mcd-style', 'uml-style', 'mld-style', 'mpd-style', 'sql-style');
+            });
+            
+            // Appliquer les nouveaux styles
+            entities.forEach(entity => {
+                entity.classList.add(`${model}-style`);
+            });
+            
+            associations.forEach(association => {
+                association.classList.add(`${model}-style`);
+            });
+        }
+        
+        function adjustArrows() {
+            const arrows = document.querySelectorAll('.arrow');
+            arrows.forEach(arrow => {
+                const path = arrow.querySelector('path');
+                const startId = arrow.getAttribute('data-start');
+                const endId = arrow.getAttribute('data-end');
+                const startCardinality = arrow.querySelector('.start-cardinality');
+                const endCardinality = arrow.querySelector('.end-cardinality');
+                
+                const startElement = document.getElementById(startId);
+                const endElement = document.getElementById(endId);
+                
+                if (startElement && endElement) {
+                    const startRect = startElement.getBoundingClientRect();
+                    const endRect = endElement.getBoundingClientRect();
+                    const workspaceRect = document.getElementById('workspace').getBoundingClientRect();
+                    
+                    // Calcul des centres des éléments
+                    const startCenter = {
+                        x: startRect.left + startRect.width / 2 - workspaceRect.left,
+                        y: startRect.top + startRect.height / 2 - workspaceRect.top
+                    };
+                    const endCenter = {
+                        x: endRect.left + endRect.width / 2 - workspaceRect.left,
+                        y: endRect.top + endRect.height / 2 - workspaceRect.top
+                    };
+                    
+                    // Calcul de l'angle entre les centres
+                    const angle = Math.atan2(endCenter.y - startCenter.y, endCenter.x - startCenter.x);
+                    
+                    // Calcul des points de connexion
+                    const startPoint = {
+                        x: startCenter.x + Math.cos(angle) * (startRect.width / 2),
+                        y: startCenter.y + Math.sin(angle) * (startRect.height / 2)
+                    };
+                    const endPoint = {
+                        x: endCenter.x - Math.cos(angle) * (endRect.width / 2),
+                        y: endCenter.y - Math.sin(angle) * (endRect.height / 2)
+                    };
+                    
+                    // Création d'une courbe de Bézier pour une flèche plus naturelle
+                    const dx = endPoint.x - startPoint.x;
+                    const dy = endPoint.y - startPoint.y;
+                    const controlPoint1X = startPoint.x + dx * 0.25;
+                    const controlPoint1Y = startPoint.y;
+                    const controlPoint2X = endPoint.x - dx * 0.25;
+                    const controlPoint2Y = endPoint.y;
+                    
+                    path.setAttribute('d', `M ${startPoint.x} ${startPoint.y} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${endPoint.x} ${endPoint.y}`);
+                    
+                    // Mise à jour des positions des cardinalités
+                    if (startCardinality) {
+                        startCardinality.style.left = `${startPoint.x + dx * 0.15}px`;
+                        startCardinality.style.top = `${startPoint.y}px`;
+                    }
+                    if (endCardinality) {
+                        endCardinality.style.left = `${endPoint.x - dx * 0.15}px`;
+                        endCardinality.style.top = `${endPoint.y}px`;
+                    }
+                }
+            });
+        }
+        
+        function findOptimalConnectionPoint(rect1, rect2, workspaceRect) {
+            const center1 = {
+                x: rect1.left + rect1.width / 2 - workspaceRect.left,
+                y: rect1.top + rect1.height / 2 - workspaceRect.top
+            };
+            const center2 = {
+                x: rect2.left + rect2.width / 2 - workspaceRect.left,
+                y: rect2.top + rect2.height / 2 - workspaceRect.top
+            };
+            
+            // Calcul de l'angle entre les centres
+            const angle = Math.atan2(center2.y - center1.y, center2.x - center1.x);
+            
+            // Calcul des points d'intersection avec les rectangles
+            const points = [];
+            
+            // Points pour le premier rectangle
+            points.push({
+                x: center1.x + Math.cos(angle) * (rect1.width / 2),
+                y: center1.y + Math.sin(angle) * (rect1.height / 2)
+            });
+            points.push({
+                x: center1.x - Math.cos(angle) * (rect1.width / 2),
+                y: center1.y - Math.sin(angle) * (rect1.height / 2)
+            });
+            
+            // Points pour le deuxième rectangle
+            points.push({
+                x: center2.x + Math.cos(angle) * (rect2.width / 2),
+                y: center2.y + Math.sin(angle) * (rect2.height / 2)
+            });
+            points.push({
+                x: center2.x - Math.cos(angle) * (rect2.width / 2),
+                y: center2.y - Math.sin(angle) * (rect2.height / 2)
+            });
+            
+            // Sélection du point le plus proche du centre de l'autre rectangle
+            let bestPoint = points[0];
+            let minDistance = Infinity;
+            
+            points.forEach(point => {
+                const distance = Math.hypot(point.x - center2.x, point.y - center2.y);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestPoint = point;
+                }
+            });
+            
+            return bestPoint;
+        }
+        
+        // Fonction pour rendre les éléments déplaçables
+        function makeElementsDraggable() {
+            const draggableElements = document.querySelectorAll('.entity, .association');
+            const dragGuide = document.getElementById('drag-guide');
+            const positionIndicator = document.getElementById('position-indicator');
+            
+            draggableElements.forEach(element => {
+                let isDragging = false;
+                let offsetX, offsetY;
+                let originalX, originalY;
+                
+                element.addEventListener('mousedown', function(e) {
+                    isDragging = true;
+                    
+                    // Calculer l'offset de la souris par rapport à l'élément
+                    const rect = element.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                    
+                    // Sauvegarder la position originale
+                    originalX = parseInt(element.style.left);
+                    originalY = parseInt(element.style.top);
+                    
+                    // Ajouter une classe pour indiquer que l'élément est en cours de déplacement
+                    element.classList.add('dragging');
+                    
+                    // Afficher le guide de déplacement
+                    dragGuide.style.width = rect.width + 'px';
+                    dragGuide.style.height = rect.height + 'px';
+                    dragGuide.style.left = rect.left + 'px';
+                    dragGuide.style.top = rect.top + 'px';
+                    dragGuide.classList.add('active');
+                    
+                    // Afficher l'indicateur de position
+                    updatePositionIndicator(e.clientX, e.clientY);
+                    positionIndicator.classList.add('active');
+                    
+                    // Empêcher la sélection de texte pendant le déplacement
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    
+                    // Calculer la nouvelle position
+                    const x = e.clientX - offsetX;
+                    const y = e.clientY - offsetY;
+                    
+                    // Mettre à jour la position de l'élément
+                    element.style.left = x + 'px';
+                    element.style.top = y + 'px';
+                    
+                    // Mettre à jour le guide de déplacement
+                    dragGuide.style.left = x + 'px';
+                    dragGuide.style.top = y + 'px';
+                    
+                    // Mettre à jour l'indicateur de position
+                    updatePositionIndicator(e.clientX, e.clientY);
+                    
+                    // Ajuster les flèches après le déplacement
+                    adjustArrows();
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    if (!isDragging) return;
+                    
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                    
+                    // Masquer le guide de déplacement
+                    dragGuide.classList.remove('active');
+                    
+                    // Masquer l'indicateur de position
+                    positionIndicator.classList.remove('active');
+                    
+                    // Ajouter un effet de transition pour le retour à la normale
+                    element.style.transition = 'all 0.3s ease';
+                    setTimeout(() => {
+                        element.style.transition = '';
+                    }, 300);
+                });
+            });
+            
+            // Fonction pour mettre à jour l'indicateur de position
+            function updatePositionIndicator(x, y) {
+                positionIndicator.textContent = `x: ${Math.round(x)}, y: ${Math.round(y)}`;
+                positionIndicator.style.left = (x + 15) + 'px';
+                positionIndicator.style.top = (y - 25) + 'px';
+            }
+        }
+        
+        // Appeler la fonction d'ajustement au chargement de la page
+        window.addEventListener('load', function() {
+            adjustArrows();
+            makeElementsDraggable();
+            
+            // Ajouter un bouton pour réinitialiser les positions
+            const resetButton = document.createElement('button');
+            resetButton.className = 'button';
+            resetButton.textContent = 'Réinitialiser';
+            resetButton.style.position = 'absolute';
+            resetButton.style.bottom = '20px';
+            resetButton.style.right = '20px';
+            resetButton.style.zIndex = '10';
+            resetButton.onclick = resetPositions;
+            document.querySelector('.workspace').appendChild(resetButton);
+        });
+        
+        // Fonction pour réinitialiser les positions
+        function resetPositions() {
+            // Réinitialiser les entités
+            const clientEntity = document.querySelector('.entity:nth-child(1)');
+            const commandeEntity = document.querySelector('.entity:nth-child(2)');
+            
+            clientEntity.style.left = '100px';
+            clientEntity.style.top = '100px';
+            
+            commandeEntity.style.left = '500px';
+            commandeEntity.style.top = '100px';
+            
+            // Réinitialiser l'association
+            const association = document.querySelector('.association:nth-child(1)');
+            association.style.left = '300px';
+            association.style.top = '120px';
+            
+            // Ajuster les flèches
+            adjustArrows();
+        }
+        
+        // Appeler la fonction d'ajustement lors du redimensionnement de la fenêtre
+        window.addEventListener('resize', adjustArrows);
+        
+        // Ajout de la gestion du redimensionnement
+        function initializeResizeHandles() {
+            const elements = document.querySelectorAll('.entity, .association');
+            elements.forEach(element => {
+                const handle = document.createElement('div');
+                handle.className = 'resize-handle';
+                element.appendChild(handle);
+                
+                let isResizing = false;
+                let startX, startY, startWidth, startHeight;
+                
+                handle.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startWidth = element.offsetWidth;
+                    startHeight = element.offsetHeight;
+                    
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+                
+                function handleMouseMove(e) {
+                    if (!isResizing) return;
+                    
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    
+                    const newWidth = Math.max(150, startWidth + dx);
+                    const newHeight = Math.max(100, startHeight + dy);
+                    
+                    element.style.width = `${newWidth}px`;
+                    element.style.height = `${newHeight}px`;
+                    
+                    adjustArrows();
+                }
+                
+                function handleMouseUp() {
+                    isResizing = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+            });
+        }
+        
+        // Appel de l'initialisation du redimensionnement
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeResizeHandles();
+        });
+        
+        // Fonction pour basculer l'affichage du panneau d'analyse
+        function toggleAnalysisPanel() {
+            const panel = document.getElementById('analysisPanel');
+            panel.classList.toggle('visible');
+        }
+
+        // Fonction pour basculer l'affichage de l'inspecteur SQL
+        function toggleSqlInspector() {
+            const sqlInspectorElement = document.getElementById('sqlInspector');
+            if (!sqlInspectorElement) {
+                // Créer l'inspecteur SQL s'il n'existe pas
+                const newSqlInspector = document.createElement('div');
+                newSqlInspector.id = 'sqlInspector';
+                newSqlInspector.className = 'sql-inspector';
+                newSqlInspector.innerHTML = `
+                    <div class="sql-inspector-header">
+                        <div class="sql-inspector-title">Inspecteur SQL</div>
+                        <div class="sql-inspector-close" onclick="toggleSqlInspector()">✕</div>
+                    </div>
+                    <div class="sql-inspector-content" id="sqlInspectorContent"></div>
+                `;
+                document.body.appendChild(newSqlInspector);
+            }
+            
+            const sqlInspector = document.getElementById('sqlInspector');
+            sqlInspector.classList.toggle('visible');
+            
+            if (sqlInspector.classList.contains('visible')) {
+                generateSqlQueries();
+            }
+        }
+
+        // Fonction pour générer toutes les requêtes SQL possibles
+        function generateSqlQueries() {
+            const inspectorContent = document.getElementById('sqlInspectorContent');
+            inspectorContent.innerHTML = '';
+            
+            // Collecter toutes les entités et associations
+            const entities = document.querySelectorAll('.entity');
+            const associations = document.querySelectorAll('.association');
+            
+            // Générer les requêtes de création de tables
+            addSqlSection('Création des Tables', generateCreateTableQueries(entities));
+            
+            // Générer les requêtes de contraintes de clés étrangères
+            addSqlSection('Contraintes de Clés Étrangères', generateForeignKeyQueries(associations));
+            
+            // Générer les requêtes d'insertion
+            addSqlSection('Requêtes d\'Insertion', generateInsertQueries(entities));
+            
+            // Générer les requêtes de sélection
+            addSqlSection('Requêtes de Sélection', generateSelectQueries(entities, associations));
+            
+            // Générer les requêtes de mise à jour
+            addSqlSection('Requêtes de Mise à Jour', generateUpdateQueries(entities));
+            
+            // Générer les requêtes de suppression
+            addSqlSection('Requêtes de Suppression', generateDeleteQueries(entities));
+        }
+
+        // Fonction pour générer les requêtes de création de tables
+        function generateCreateTableQueries(entities) {
+            const queries = [];
+            
+            entities.forEach(entity => {
+                const tableName = entity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const attributes = Array.from(entity.querySelectorAll('.entity-attribute')).map(attr => {
+                    const name = attr.querySelector('.attribute-name').textContent.toLowerCase().replace(/\s+/g, '_');
+                    const type = attr.querySelector('.attribute-type').textContent;
+                    const isPrimary = attr.querySelector('.attribute-primary')?.checked;
+                    const isNullable = !attr.querySelector('.attribute-required')?.checked;
+                    
+                    let sqlType = 'VARCHAR(255)';
+                    if (type.includes('int')) sqlType = 'INTEGER';
+                    else if (type.includes('float') || type.includes('decimal')) sqlType = 'DECIMAL(10,2)';
+                    else if (type.includes('date')) sqlType = 'DATE';
+                    else if (type.includes('bool')) sqlType = 'BOOLEAN';
+                    
+                    return `${name} ${sqlType}${isPrimary ? ' PRIMARY KEY' : ''}${isNullable ? '' : ' NOT NULL'}`;
+                });
+                
+                const query = `CREATE TABLE ${tableName} (\n    ${attributes.join(',\n    ')}\n);`;
+                queries.push({
+                    title: `Création de la table ${tableName}`,
+                    query: query
+                });
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour générer les requêtes de clés étrangères
+        function generateForeignKeyQueries(associations) {
+            const queries = [];
+            
+            associations.forEach(association => {
+                const sourceEntity = association.querySelector('[data-end="source"]').closest('.entity');
+                const targetEntity = association.querySelector('[data-end="target"]').closest('.entity');
+                
+                const sourceTable = sourceEntity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const targetTable = targetEntity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                
+                const sourceCardinality = association.querySelector('.cardinality[data-end="source"]').textContent;
+                const targetCardinality = association.querySelector('.cardinality[data-end="target"]').textContent;
+                
+                // Générer la clé étrangère appropriée selon les cardinalités
+                if (sourceCardinality.includes('n') || targetCardinality.includes('n')) {
+                    const query = `ALTER TABLE ${sourceTable}\nADD CONSTRAINT fk_${sourceTable}_${targetTable}\nFOREIGN KEY (${targetTable}_id) REFERENCES ${targetTable}(id);`;
+                    queries.push({
+                        title: `Clé étrangère de ${sourceTable} vers ${targetTable}`,
+                        query: query
+                    });
+                }
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour générer les requêtes d'insertion
+        function generateInsertQueries(entities) {
+            const queries = [];
+            
+            entities.forEach(entity => {
+                const tableName = entity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const attributes = Array.from(entity.querySelectorAll('.entity-attribute')).map(attr => {
+                    return attr.querySelector('.attribute-name').textContent.toLowerCase().replace(/\s+/g, '_');
+                });
+                
+                const query = `INSERT INTO ${tableName} (${attributes.join(', ')})\nVALUES (${attributes.map(() => '?').join(', ')});`;
+                queries.push({
+                    title: `Insertion dans ${tableName}`,
+                    query: query
+                });
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour générer les requêtes de sélection
+        function generateSelectQueries(entities, associations) {
+            const queries = [];
+            
+            // Requêtes de base pour chaque entité
+            entities.forEach(entity => {
+                const tableName = entity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const query = `SELECT * FROM ${tableName};`;
+                queries.push({
+                    title: `Sélection de tous les ${tableName}`,
+                    query: query
+                });
+            });
+            
+            // Requêtes de jointure basées sur les associations
+            associations.forEach(association => {
+                const sourceEntity = association.querySelector('[data-end="source"]').closest('.entity');
+                const targetEntity = association.querySelector('[data-end="target"]').closest('.entity');
+                
+                const sourceTable = sourceEntity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const targetTable = targetEntity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                
+                const query = `SELECT s.*, t.*\nFROM ${sourceTable} s\nJOIN ${targetTable} t ON s.${targetTable}_id = t.id;`;
+                queries.push({
+                    title: `Jointure entre ${sourceTable} et ${targetTable}`,
+                    query: query
+                });
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour générer les requêtes de mise à jour
+        function generateUpdateQueries(entities) {
+            const queries = [];
+            
+            entities.forEach(entity => {
+                const tableName = entity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const attributes = Array.from(entity.querySelectorAll('.entity-attribute')).map(attr => {
+                    return attr.querySelector('.attribute-name').textContent.toLowerCase().replace(/\s+/g, '_');
+                });
+                
+                const query = `UPDATE ${tableName}\nSET ${attributes.map(attr => `${attr} = ?`).join(', ')}\nWHERE id = ?;`;
+                queries.push({
+                    title: `Mise à jour de ${tableName}`,
+                    query: query
+                });
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour générer les requêtes de suppression
+        function generateDeleteQueries(entities) {
+            const queries = [];
+            
+            entities.forEach(entity => {
+                const tableName = entity.querySelector('.entity-title').textContent.toLowerCase().replace(/\s+/g, '_');
+                const query = `DELETE FROM ${tableName} WHERE id = ?;`;
+                queries.push({
+                    title: `Suppression d'un ${tableName}`,
+                    query: query
+                });
+            });
+            
+            return queries;
+        }
+
+        // Fonction pour ajouter une section de requêtes SQL
+        function addSqlSection(title, queries) {
+            const inspectorContent = document.getElementById('sqlInspectorContent');
+            
+            const section = document.createElement('div');
+            section.className = 'sql-query-section';
+            
+            const sectionTitle = document.createElement('div');
+            sectionTitle.className = 'sql-query-title';
+            sectionTitle.textContent = title;
+            section.appendChild(sectionTitle);
+            
+            queries.forEach(query => {
+                const queryElement = document.createElement('div');
+                queryElement.className = 'sql-query';
+                queryElement.textContent = query.query;
+                
+                const actions = document.createElement('div');
+                actions.className = 'sql-query-actions';
+                
+                const copyButton = document.createElement('button');
+                copyButton.className = 'sql-query-button copy';
+                copyButton.textContent = 'Copier';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(query.query);
+                    showNotification('Requête SQL copiée !');
+                };
+                
+                actions.appendChild(copyButton);
+                
+                section.appendChild(queryElement);
+                section.appendChild(actions);
+            });
+            
+            inspectorContent.appendChild(section);
+        }
+
+        // Fonction pour corriger automatiquement les problèmes détectés
+        function fixIssues() {
+            // Implémenter la correction automatique des problèmes
+            // Cette fonction sera développée dans une prochaine mise à jour
+            alert('La correction automatique sera disponible dans une prochaine mise à jour.');
+        }
+
+        // Fonction pour basculer l'affichage du panneau de dessin automatique
+        function toggleAutoDraw() {
+            const autoDrawPanelElement = document.getElementById('autoDrawPanel');
+            if (!autoDrawPanelElement) {
+                // Créer le panneau s'il n'existe pas
+                const newAutoDrawPanel = document.createElement('div');
+                newAutoDrawPanel.id = 'autoDrawPanel';
+                newAutoDrawPanel.className = 'auto-draw-panel';
+                newAutoDrawPanel.innerHTML = `
+                    <div class="auto-draw-header">
+                        <div class="auto-draw-title">Dessin Automatique de MCD</div>
+                        <div class="auto-draw-close" onclick="toggleAutoDraw()">✕</div>
+                    </div>
+                    <div class="auto-draw-content">
+                        <div class="auto-draw-section">
+                            <div class="auto-draw-section-title">Source de données</div>
+                            <div class="auto-draw-options">
+                                <div class="auto-draw-option">
+                                    <input type="radio" id="sourceSql" name="dataSource" value="sql" checked onchange="toggleDataSource()">
+                                    <label for="sourceSql">Base de données SQL</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="radio" id="sourceCsv" name="dataSource" value="csv" onchange="toggleDataSource()">
+                                    <label for="sourceCsv">Fichier CSV</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="radio" id="sourceJson" name="dataSource" value="json" onchange="toggleDataSource()">
+                                    <label for="sourceJson">Fichier JSON</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="auto-draw-section" id="sqlConnectionSection">
+                            <div class="auto-draw-section-title">Connexion à la base de données</div>
+                            <div class="auto-draw-form">
+                                <div class="auto-draw-form-group">
+                                    <label for="dbType">Type de base de données</label>
+                                    <select id="dbType">
+                                        <option value="mysql">MySQL</option>
+                                        <option value="postgresql">PostgreSQL</option>
+                                        <option value="sqlite">SQLite</option>
+                                        <option value="mssql">SQL Server</option>
+                                        <option value="oracle">Oracle</option>
+                                    </select>
+                                </div>
+                                <div class="auto-draw-form-group">
+                                    <label for="dbHost">Hôte</label>
+                                    <input type="text" id="dbHost" placeholder="localhost">
+                                </div>
+                                <div class="auto-draw-form-group">
+                                    <label for="dbPort">Port</label>
+                                    <input type="text" id="dbPort" placeholder="3306">
+                                </div>
+                                <div class="auto-draw-form-group">
+                                    <label for="dbName">Nom de la base</label>
+                                    <input type="text" id="dbName" placeholder="ma_base">
+                                </div>
+                                <div class="auto-draw-form-group">
+                                    <label for="dbUser">Utilisateur</label>
+                                    <input type="text" id="dbUser" placeholder="root">
+                                </div>
+                                <div class="auto-draw-form-group">
+                                    <label for="dbPassword">Mot de passe</label>
+                                    <input type="password" id="dbPassword">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="auto-draw-section" id="fileUploadSection" style="display: none;">
+                            <div class="auto-draw-section-title">Téléchargement de fichier</div>
+                            <div class="auto-draw-form">
+                                <div class="auto-draw-form-group">
+                                    <label for="fileUpload">Sélectionner un fichier</label>
+                                    <input type="file" id="fileUpload" accept=".csv,.json">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="auto-draw-section">
+                            <div class="auto-draw-section-title">Options de dessin</div>
+                            <div class="auto-draw-options">
+                                <div class="auto-draw-option">
+                                    <input type="checkbox" id="includePrimaryKeys" checked>
+                                    <label for="includePrimaryKeys">Inclure les clés primaires</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="checkbox" id="includeForeignKeys" checked>
+                                    <label for="includeForeignKeys">Inclure les clés étrangères</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="checkbox" id="includeIndexes">
+                                    <label for="includeIndexes">Inclure les index</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="checkbox" id="includeConstraints" checked>
+                                    <label for="includeConstraints">Inclure les contraintes</label>
+                                </div>
+                                <div class="auto-draw-option">
+                                    <input type="checkbox" id="autoLayout" checked>
+                                    <label for="autoLayout">Disposition automatique</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="auto-draw-actions">
+                            <button class="auto-draw-button" onclick="connectToDatabase()">Se connecter</button>
+                            <button class="auto-draw-button" onclick="analyzeDatabase()">Analyser</button>
+                            <button class="auto-draw-button" onclick="generateMCD()">Générer MCD</button>
+                        </div>
+                        
+                        <div class="auto-draw-results" id="autoDrawResults">
+                            <!-- Les résultats seront affichés ici -->
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(newAutoDrawPanel);
+            }
+            
+            const autoDrawPanel = document.getElementById('autoDrawPanel');
+            autoDrawPanel.classList.toggle('visible');
+        }
+
+        // Fonction pour basculer entre les sources de données
+        function toggleDataSource() {
+            const sourceSql = document.getElementById('sourceSql');
+            const sourceCsv = document.getElementById('sourceCsv');
+            const sourceJson = document.getElementById('sourceJson');
+            const sqlConnectionSection = document.getElementById('sqlConnectionSection');
+            const fileUploadSection = document.getElementById('fileUploadSection');
+            
+            if (sourceSql.checked) {
+                sqlConnectionSection.style.display = 'block';
+                fileUploadSection.style.display = 'none';
+            } else if (sourceCsv.checked || sourceJson.checked) {
+                sqlConnectionSection.style.display = 'none';
+                fileUploadSection.style.display = 'block';
+            }
+        }
+
+        // Fonction pour se connecter à la base de données
+        function connectToDatabase() {
+            const dbType = document.getElementById('dbType').value;
+            const dbHost = document.getElementById('dbHost').value;
+            const dbPort = document.getElementById('dbPort').value;
+            const dbName = document.getElementById('dbName').value;
+            const dbUser = document.getElementById('dbUser').value;
+            const dbPassword = document.getElementById('dbPassword').value;
+            
+            // Afficher un message de chargement
+            addResultItem('info', 'Connexion à la base de données en cours...');
+            
+            // Simuler une connexion (dans une vraie application, cela ferait une requête AJAX)
+            setTimeout(() => {
+                if (dbHost && dbName && dbUser) {
+                    addResultItem('success', `Connexion à ${dbType} réussie !`);
+                    addResultItem('info', 'Base de données : ' + dbName);
+                } else {
+                    addResultItem('error', 'Échec de la connexion. Vérifiez vos paramètres.');
+                }
+            }, 1500);
+        }
+
+        // Fonction pour analyser la base de données
+        function analyzeDatabase() {
+            // Afficher un message de chargement
+            addResultItem('info', 'Analyse de la base de données en cours...');
+            
+            // Simuler une analyse (dans une vraie application, cela ferait une requête AJAX)
+            setTimeout(() => {
+                addResultItem('success', 'Analyse terminée !');
+                addResultItem('info', '5 tables détectées');
+                addResultItem('info', '8 relations identifiées');
+                addResultItem('info', '3 contraintes d\'intégrité trouvées');
+            }, 2000);
+        }
+
+        // Fonction pour générer le MCD
+        function generateMCD() {
+            // Afficher un message de chargement
+            addResultItem('info', 'Génération du MCD en cours...');
+            
+            // Simuler une génération (dans une vraie application, cela ferait une requête AJAX)
+            setTimeout(() => {
+                addResultItem('success', 'MCD généré avec succès !');
+                
+                // Générer des entités et des relations
+                generateEntities();
+                generateRelations();
+                
+                // Appliquer la disposition automatique si activée
+                if (document.getElementById('autoLayout').checked) {
+                    applyAutoLayout();
+                }
+            }, 2500);
+        }
+
+        // Fonction pour ajouter un élément de résultat
+        function addResultItem(type, text) {
+            const resultsContainer = document.getElementById('autoDrawResults');
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = `auto-draw-result-item ${type}`;
+            
+            let icon = '';
+            switch (type) {
+                case 'success':
+                    icon = '✓';
+                    break;
+                case 'error':
+                    icon = '✗';
+                    break;
+                case 'warning':
+                    icon = '⚠';
+                    break;
+                case 'info':
+                    icon = 'ℹ';
+                    break;
+            }
+            
+            resultItem.innerHTML = `
+                <div class="auto-draw-result-icon">${icon}</div>
+                <div class="auto-draw-result-text">${text}</div>
+            `;
+            
+            resultsContainer.appendChild(resultItem);
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+        }
+
+        // Fonction pour générer des entités
+        function generateEntities() {
+            // Exemple de génération d'entités
+            const entities = [
+                { name: 'Client', attributes: ['id', 'nom', 'prenom', 'email', 'telephone'] },
+                { name: 'Produit', attributes: ['id', 'nom', 'description', 'prix', 'stock'] },
+                { name: 'Commande', attributes: ['id', 'date', 'statut', 'total'] },
+                { name: 'Categorie', attributes: ['id', 'nom', 'description'] },
+                { name: 'Fournisseur', attributes: ['id', 'nom', 'adresse', 'telephone'] }
+            ];
+            
+            // Nettoyer le workspace
+            clearWorkspace();
+            
+            // Créer les entités
+            entities.forEach((entity, index) => {
+                createEntityFromData(entity, 100 + (index * 200), 100);
+            });
+        }
+
+        // Fonction pour générer des relations
+        function generateRelations() {
+            // Exemple de relations
+            const relations = [
+                { source: 'Client', target: 'Commande', type: '1,n', attributes: ['date_commande'] },
+                { source: 'Commande', target: 'Produit', type: 'n,n', attributes: ['quantite', 'prix_unitaire'] },
+                { source: 'Produit', target: 'Categorie', type: 'n,1', attributes: [] },
+                { source: 'Produit', target: 'Fournisseur', type: 'n,1', attributes: [] }
+            ];
+            
+            // Créer les relations
+            relations.forEach(relation => {
+                createRelationFromData(relation);
+            });
+        }
+
+        // Fonction pour créer une entité à partir de données
+        function createEntityFromData(entityData, x, y) {
+            const entity = document.createElement('div');
+            entity.className = 'entity';
+            entity.style.left = x + 'px';
+            entity.style.top = y + 'px';
+            
+            const title = document.createElement('div');
+            title.className = 'entity-title';
+            title.textContent = entityData.name;
+            entity.appendChild(title);
+            
+            entityData.attributes.forEach(attr => {
+                const attribute = document.createElement('div');
+                attribute.className = 'entity-attribute';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'attribute-name';
+                nameSpan.textContent = attr;
+                
+                attribute.appendChild(nameSpan);
+                entity.appendChild(attribute);
+            });
+            
+            document.querySelector('.workspace').appendChild(entity);
+            makeElementsDraggable();
+        }
+
+        // Fonction pour créer une relation à partir de données
+        function createRelationFromData(relationData) {
+            const sourceEntity = document.querySelector(`.entity-title:contains('${relationData.source}')`).closest('.entity');
+            const targetEntity = document.querySelector(`.entity-title:contains('${relationData.target}')`).closest('.entity');
+            
+            if (!sourceEntity || !targetEntity) return;
+            
+            const sourceRect = sourceEntity.getBoundingClientRect();
+            const targetRect = targetEntity.getBoundingClientRect();
+            const workspaceRect = document.querySelector('.workspace').getBoundingClientRect();
+            
+            // Créer l'association
+            const association = document.createElement('div');
+            association.className = 'association';
+            
+            // Positionner l'association entre les deux entités
+            const centerX = (sourceRect.left + targetRect.left) / 2 - workspaceRect.left;
+            const centerY = (sourceRect.top + targetRect.top) / 2 - workspaceRect.top;
+            
+            association.style.left = centerX + 'px';
+            association.style.top = centerY + 'px';
+            
+            // Ajouter le titre de l'association
+            const title = document.createElement('div');
+            title.className = 'association-title';
+            title.textContent = relationData.attributes.length > 0 ? relationData.attributes[0] : 'Relation';
+            association.appendChild(title);
+            
+            // Ajouter les attributs de l'association
+            relationData.attributes.forEach(attr => {
+                const attribute = document.createElement('div');
+                attribute.className = 'association-attribute';
+                attribute.textContent = attr;
+                association.appendChild(attribute);
+            });
+            
+            // Ajouter les cardinalités
+            const [sourceCard, targetCard] = relationData.type.split(',');
+            
+            const sourceCardinality = document.createElement('div');
+            sourceCardinality.className = 'cardinality';
+            sourceCardinality.textContent = sourceCard;
+            sourceCardinality.style.left = (centerX - 50) + 'px';
+            sourceCardinality.style.top = (centerY - 20) + 'px';
+            
+            const targetCardinality = document.createElement('div');
+            targetCardinality.className = 'cardinality';
+            targetCardinality.textContent = targetCard;
+            targetCardinality.style.left = (centerX + 50) + 'px';
+            targetCardinality.style.top = (centerY - 20) + 'px';
+            
+            // Ajouter les flèches
+            const arrow1 = document.createElement('div');
+            arrow1.className = 'arrow';
+            arrow1.style.left = (sourceRect.left + sourceRect.width / 2 - workspaceRect.left) + 'px';
+            arrow1.style.top = (sourceRect.top + sourceRect.height / 2 - workspaceRect.top) + 'px';
+            arrow1.style.width = (centerX - (sourceRect.left + sourceRect.width / 2 - workspaceRect.left)) + 'px';
+            
+            const arrow2 = document.createElement('div');
+            arrow2.className = 'arrow';
+            arrow2.style.left = (targetRect.left + targetRect.width / 2 - workspaceRect.left) + 'px';
+            arrow2.style.top = (targetRect.top + targetRect.height / 2 - workspaceRect.top) + 'px';
+            arrow2.style.width = (centerX - (targetRect.left + targetRect.width / 2 - workspaceRect.left)) + 'px';
+            
+            // Ajouter les éléments au workspace
+            document.querySelector('.workspace').appendChild(association);
+            document.querySelector('.workspace').appendChild(sourceCardinality);
+            document.querySelector('.workspace').appendChild(targetCardinality);
+            document.querySelector('.workspace').appendChild(arrow1);
+            document.querySelector('.workspace').appendChild(arrow2);
+            
+            // Rendre les éléments déplaçables
+            makeElementsDraggable();
+        }
+
+        // Fonction pour nettoyer le workspace
+        function clearWorkspace() {
+            const workspace = document.querySelector('.workspace');
+            const elementsToRemove = workspace.querySelectorAll('.entity, .association, .arrow, .cardinality');
+            
+            elementsToRemove.forEach(element => {
+                workspace.removeChild(element);
+            });
+        }
+
+        // Fonction pour appliquer une disposition automatique
+        function applyAutoLayout() {
+            const entities = document.querySelectorAll('.entity');
+            const workspace = document.querySelector('.workspace');
+            const workspaceRect = workspace.getBoundingClientRect();
+            
+            // Disposition en grille
+            const gridSize = 3;
+            const cellWidth = workspaceRect.width / gridSize;
+            const cellHeight = workspaceRect.height / gridSize;
+            
+            entities.forEach((entity, index) => {
+                const row = Math.floor(index / gridSize);
+                const col = index % gridSize;
+                
+                const x = 100 + (col * cellWidth);
+                const y = 100 + (row * cellHeight);
+                
+                entity.style.left = x + 'px';
+                entity.style.top = y + 'px';
+            });
+            
+            // Ajuster les flèches
+            adjustArrows();
+        }
+    </script>
+</body>
+</html> 

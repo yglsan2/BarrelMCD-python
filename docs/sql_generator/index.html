@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - sql_generator</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>sql_generator</a></li>
+            <li><a href='#SaveManager'>SaveManager</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module sql_generator</h1>
+<h2>Classes</h2>
+<div class='class' id='SQLDialect'>
+<h3>SQLDialect</h3>
+<h4>Méthodes</h4>
+</div>
+<div class='class' id='SQLGenerator'>
+<h3>SQLGenerator</h3>
+<h4>Méthodes</h4>
+<div class='method' id='SQLGenerator.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>dialect</li>
+</ul>
+</div>
+<div class='method' id='SQLGenerator.get_supported_sql_dialects'>
+<h5>get_supported_sql_dialects</h5>
+<h6>Retourne</h6>
+<p>List[str]</p>
+</div>
+<div class='method' id='SQLGenerator.generate_sql'>
+<h5>generate_sql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_postgresql'>
+<h5>_generate_postgresql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_table_postgresql'>
+<h5>_generate_table_postgresql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_column_postgresql'>
+<h5>_generate_column_postgresql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>attribute</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_association_table_postgresql'>
+<h5>_generate_association_table_postgresql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>association</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_foreign_keys_postgresql'>
+<h5>_generate_foreign_keys_postgresql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>association</li>
+</ul>
+<h6>Retourne</h6>
+<p>List[str]</p>
+</div>
+<div class='method' id='SQLGenerator._map_data_type'>
+<h5>_map_data_type</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>type_</li>
+<li>dialect</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._sanitize_name'>
+<h5>_sanitize_name</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>name</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_mysql'>
+<h5>_generate_mysql</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_sqlite'>
+<h5>_generate_sqlite</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_oracle'>
+<h5>_generate_oracle</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_sqlserver'>
+<h5>_generate_sqlserver</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_db2'>
+<h5>_generate_db2</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_firebird'>
+<h5>_generate_firebird</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_h2'>
+<h5>_generate_h2</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_hsqldb'>
+<h5>_generate_hsqldb</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_informix'>
+<h5>_generate_informix</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_sybase'>
+<h5>_generate_sybase</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_teradata'>
+<h5>_generate_teradata</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+<div class='method' id='SQLGenerator._generate_vertica'>
+<h5>_generate_vertica</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entities</li>
+<li>associations</li>
+</ul>
+<h6>Retourne</h6>
+<p>str</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - touch_optimizer</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>touch_optimizer</a></li>
+            <li><a href='#TouchButton'>TouchButton</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module touch_optimizer</h1>
+<h2>Classes</h2>
+<div class='class' id='TouchOptimizer'>
+<h3>TouchOptimizer</h3>
+<div class='class-description'>
+Optimiseur des interactions tactiles
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='TouchOptimizer.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.process_touch_start'>
+<h5>process_touch_start</h5>
+<div class='method-description'>
+Traite le début d'un contact tactile
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.process_touch_move'>
+<h5>process_touch_move</h5>
+<div class='method-description'>
+Traite le mouvement d'un contact tactile
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.process_touch_end'>
+<h5>process_touch_end</h5>
+<div class='method-description'>
+Traite la fin d'un contact tactile
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.smooth_velocity'>
+<h5>smooth_velocity</h5>
+<div class='method-description'>
+Lisse la vélocité du mouvement
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>delta</li>
+</ul>
+<h6>Retourne</h6>
+<p>QPointF</p>
+</div>
+<div class='method' id='TouchOptimizer.detect_pan_gesture'>
+<h5>detect_pan_gesture</h5>
+<div class='method-description'>
+Détecte un geste de panning
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.detect_pinch_gesture'>
+<h5>detect_pinch_gesture</h5>
+<div class='method-description'>
+Détecte un geste de pincement
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.handle_swipe'>
+<h5>handle_swipe</h5>
+<div class='method-description'>
+Gère un geste de swipe
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.handle_double_tap'>
+<h5>handle_double_tap</h5>
+<div class='method-description'>
+Gère un double tap
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.handle_long_press'>
+<h5>handle_long_press</h5>
+<div class='method-description'>
+Gère un appui long
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+</div>
+<div class='method' id='TouchOptimizer.get_smoothed_position'>
+<h5>get_smoothed_position</h5>
+<div class='method-description'>
+Retourne une position lissée
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>pos</li>
+</ul>
+<h6>Retourne</h6>
+<p>QPointF</p>
+</div>
+<div class='method' id='TouchOptimizer.get_gesture_scale'>
+<h5>get_gesture_scale</h5>
+<div class='method-description'>
+Calcule le facteur d'échelle pour le zoom
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+</ul>
+<h6>Retourne</h6>
+<p>float</p>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

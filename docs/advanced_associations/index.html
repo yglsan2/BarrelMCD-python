@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation - advanced_associations</title>
+    <link rel='stylesheet' href='../style.css'>
+</head>
+<body>
+<nav class='navigation'>
+    <div class='nav-header'>
+        <h2>Navigation</h2>
+    </div>
+    <div class='nav-content'>
+        <ul>
+            <li><a href='../index.html'>Accueil</a></li>
+            <li><a href='index.html'>advanced_associations</a></li>
+            <li><a href='#SQLGenerator'>SQLGenerator</a></li>
+        </ul>
+    </div>
+</nav>
+<div class='content'>
+<h1>Module advanced_associations</h1>
+<h2>Classes</h2>
+<div class='class' id='AdvancedAssociations'>
+<h3>AdvancedAssociations</h3>
+<div class='class-description'>
+Gestionnaire des associations avancées
+</div>
+<h4>Méthodes</h4>
+<div class='method' id='AdvancedAssociations.__init__'>
+<h5>__init__</h5>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+</ul>
+</div>
+<div class='method' id='AdvancedAssociations.create_generalization'>
+<h5>create_generalization</h5>
+<div class='method-description'>
+Crée une relation de généralisation
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+<li>child</li>
+</ul>
+<h6>Retourne</h6>
+<p>Association</p>
+</div>
+<div class='method' id='AdvancedAssociations.create_specialization'>
+<h5>create_specialization</h5>
+<div class='method-description'>
+Crée une relation de spécialisation
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+<li>child</li>
+</ul>
+<h6>Retourne</h6>
+<p>Association</p>
+</div>
+<div class='method' id='AdvancedAssociations.create_aggregation'>
+<h5>create_aggregation</h5>
+<div class='method-description'>
+Crée une relation d'agrégation
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>whole</li>
+<li>part</li>
+</ul>
+<h6>Retourne</h6>
+<p>Association</p>
+</div>
+<div class='method' id='AdvancedAssociations.create_composition'>
+<h5>create_composition</h5>
+<div class='method-description'>
+Crée une relation de composition
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>whole</li>
+<li>part</li>
+</ul>
+<h6>Retourne</h6>
+<p>Association</p>
+</div>
+<div class='method' id='AdvancedAssociations._validate_entities'>
+<h5>_validate_entities</h5>
+<div class='method-description'>
+Valide les entités pour une association
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity1</li>
+<li>entity2</li>
+</ul>
+<h6>Retourne</h6>
+<p>bool</p>
+</div>
+<div class='method' id='AdvancedAssociations._setup_inherited_attributes'>
+<h5>_setup_inherited_attributes</h5>
+<div class='method-description'>
+Configure les attributs hérités
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>parent</li>
+<li>child</li>
+</ul>
+</div>
+<div class='method' id='AdvancedAssociations._setup_specific_attributes'>
+<h5>_setup_specific_attributes</h5>
+<div class='method-description'>
+Configure les attributs spécifiques
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>entity</li>
+</ul>
+</div>
+<div class='method' id='AdvancedAssociations.draw_association'>
+<h5>draw_association</h5>
+<div class='method-description'>
+Dessine une association avancée
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>assoc</li>
+<li>source_pos</li>
+<li>target_pos</li>
+</ul>
+</div>
+<div class='method' id='AdvancedAssociations._draw_hollow_arrow'>
+<h5>_draw_hollow_arrow</h5>
+<div class='method-description'>
+Dessine une flèche creuse
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>source_pos</li>
+<li>target_pos</li>
+</ul>
+</div>
+<div class='method' id='AdvancedAssociations._draw_diamond_arrow'>
+<h5>_draw_diamond_arrow</h5>
+<div class='method-description'>
+Dessine une flèche en diamant
+</div>
+<h6>Paramètres</h6>
+<ul>
+<li>self</li>
+<li>painter</li>
+<li>source_pos</li>
+<li>target_pos</li>
+<li>filled</li>
+</ul>
+</div>
+</div>
+<h2>Fonctions</h2>
+</div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarrelMCD - Modélisation de données</title>
+    <link rel="stylesheet" href="css/barrel_theme.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- En-tête -->
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="img/BARREL v4 avec-dark.svg" alt="BarrelMCD Logo" class="app-logo">
+            </div>
+            <nav class="main-menu">
+                <ul>
+                    <li><a href="#" class="menu-item">Fichier</a></li>
+                    <li><a href="#" class="menu-item">Edition</a></li>
+                    <li><a href="#" class="menu-item">Affichage</a></li>
+                    <li><a href="#" class="menu-item">Outils</a></li>
+                    <li><a href="#" class="menu-item">Aide</a></li>
+                </ul>
+            </nav>
+            <button id="theme-toggle" class="theme-toggle">🌓</button>
+        </header>
+
+        <!-- Barre d'outils -->
+        <div class="toolbar">
+            <div class="model-buttons">
+                <button class="model-btn active" data-model="mcd">MCD</button>
+                <button class="model-btn" data-model="uml">UML</button>
+                <button class="model-btn" data-model="mld">MLD</button>
+                <button class="model-btn" data-model="mpd">MPD</button>
+                <button class="model-btn" data-model="sql">SQL</button>
+            </div>
+            <div class="toolbar-actions">
+                <button class="action-btn">Nouveau</button>
+                <button class="action-btn">Ouvrir</button>
+                <button class="action-btn">Enregistrer</button>
+                <button id="grid-toggle" class="action-btn">Grille</button>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Barre latérale -->
+            <aside class="sidebar">
+                <div class="entities-list">
+                    <h3>Entités</h3>
+                    <div class="entity" data-type="table">
+                        <span class="entity-icon">📊</span>
+                        <span class="entity-name">Table</span>
+                    </div>
+                    <div class="entity" data-type="class">
+                        <span class="entity-icon">📝</span>
+                        <span class="entity-name">Classe</span>
+                    </div>
+                    <div class="entity" data-type="interface">
+                        <span class="entity-icon">🔷</span>
+                        <span class="entity-name">Interface</span>
+                    </div>
+                </div>
+                <div class="relationships-list">
+                    <h3>Relations</h3>
+                    <div class="relationship" data-type="association">
+                        <span class="relationship-icon">➖</span>
+                        <span class="relationship-name">Association</span>
+                    </div>
+                    <div class="relationship" data-type="inheritance">
+                        <span class="relationship-icon">△</span>
+                        <span class="relationship-name">Héritage</span>
+                    </div>
+                    <div class="relationship" data-type="composition">
+                        <span class="relationship-icon">⬡</span>
+                        <span class="relationship-name">Composition</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Zone de travail -->
+            <div class="workspace">
+                <div class="diagram-area">
+                    <!-- La grille sera ajoutée dynamiquement -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Barre de statut -->
+        <footer class="status-bar">
+            <div class="status-info">Prêt</div>
+            <div class="status-position">Ligne: 1, Colonne: 1</div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html> 

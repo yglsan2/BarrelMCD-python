@@ -1,0 +1,172 @@
+/* Codes des couleurs des aperçus de BarrelMCD */
+
+/* Mode sombre (par défaut) */
+:root {
+    /* Couleurs principales */
+    --bg-primary: #121212;           /* Fond principal (noir) */
+    --bg-secondary: #1a1a2e;         /* Panneau de travail (bleu très foncé) */
+    --bg-tertiary: #2d2d44;          /* Barre d'outils (bleu foncé) */
+    
+    /* Entités */
+    --entity-bg: #2a2a3a;            /* Fond des entités */
+    --entity-border: #3d3d4d;        /* Bordure des entités */
+    
+    /* Associations */
+    --association-bg: #1a2a3a;       /* Fond des associations */
+    --association-border: #2d3d4d;   /* Bordure des associations */
+    
+    /* Texte */
+    --text-primary: #ffffff;          /* Texte principal (blanc) */
+    --text-secondary: #b3b3b3;        /* Texte secondaire (gris clair) */
+    
+    /* Grille */
+    --grid-color: rgba(255, 255, 255, 0.1); /* Grille (blanc semi-transparent) */
+    
+    /* Boutons */
+    --button-bg: #2d2d44;            /* Fond des boutons */
+    --button-hover: #3d3d4d;         /* Survol des boutons */
+    
+    /* Accent */
+    --accent-color: #6a1b9a;         /* Couleur d'accent (violet) */
+}
+
+/* Mode clair */
+.light-mode {
+    --bg-primary: #121212;           /* Fond principal (noir) */
+    --bg-secondary: #ffffff;          /* Panneau de travail (blanc) */
+    --bg-tertiary: #2d2d44;          /* Barre d'outils (bleu foncé) */
+    
+    /* Entités */
+    --entity-bg: #2a2a3a;            /* Fond des entités */
+    --entity-border: #3d3d4d;        /* Bordure des entités */
+    
+    /* Associations */
+    --association-bg: #1a2a3a;       /* Fond des associations */
+    --association-border: #2d3d4d;   /* Bordure des associations */
+    
+    /* Texte */
+    --text-primary: #ffffff;          /* Texte principal (blanc) */
+    --text-secondary: #b3b3b3;        /* Texte secondaire (gris clair) */
+    
+    /* Grille */
+    --grid-color: rgba(0, 0, 0, 0.15); /* Grille (noir semi-transparent) */
+    
+    /* Boutons */
+    --button-bg: #2d2d44;            /* Fond des boutons */
+    --button-hover: #3d3d4d;         /* Survol des boutons */
+    
+    /* Accent */
+    --accent-color: #6a1b9a;         /* Couleur d'accent (violet) */
+}
+
+/* Éléments interactifs */
+.button {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+}
+
+.button:hover {
+    background-color: var(--button-hover);
+}
+
+.button.active {
+    background-color: var(--button-hover);
+    color: var(--text-primary);
+}
+
+.notification {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.model-selector {
+    background-color: var(--bg-tertiary);
+}
+
+.model-selector:hover {
+    background-color: var(--button-hover);
+}
+
+.model-selector.active {
+    background-color: var(--button-hover);
+}
+
+/* Couleurs spécifiques pour l'héritage */
+.inheritance-parent {
+    border: 2px dashed #2c3e50;      /* Bordure (gris foncé) */
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.1), rgba(44, 62, 80, 0.05));
+}
+
+.inheritance-child {
+    border-left: 3px solid #3498db;   /* Bordure gauche (bleu) */
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.02));
+}
+
+/* Couleurs des modèles */
+.model-mcd {
+    --model-color: #4caf50;           /* Vert */
+}
+
+.model-uml {
+    --model-color: #2196f3;           /* Bleu */
+}
+
+.model-mld {
+    --model-color: #ff9800;           /* Orange */
+}
+
+.model-mpd {
+    --model-color: #9c27b0;           /* Violet */
+}
+
+.model-sql {
+    --model-color: #f44336;           /* Rouge */
+}
+
+/* Couleurs des attributs */
+.attribute-primary {
+    color: #4caf50;                   /* Vert */
+}
+
+.attribute-foreign {
+    color: #2196f3;                   /* Bleu */
+}
+
+.attribute-index {
+    color: #ff9800;                   /* Orange */
+}
+
+.attribute-required {
+    color: #f44336;                   /* Rouge */
+}
+
+/* Couleurs des cardinalités */
+.cardinality {
+    color: #9c27b0;                   /* Violet */
+}
+
+/* Couleurs des contraintes */
+.constraint {
+    color: #ff9800;                   /* Orange */
+}
+
+/* Couleurs des notifications */
+.notification-success {
+    background-color: #4caf50;        /* Vert */
+    color: white;
+}
+
+.notification-error {
+    background-color: #f44336;        /* Rouge */
+    color: white;
+}
+
+.notification-warning {
+    background-color: #ff9800;        /* Orange */
+    color: white;
+}
+
+.notification-info {
+    background-color: #2196f3;        /* Bleu */
+    color: white;
+} 
