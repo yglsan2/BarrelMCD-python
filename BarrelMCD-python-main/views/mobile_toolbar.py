@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QToolBar, QWidget, QHBoxLayout, QSizePolicy
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QPainter, QColor, QPen
+from PyQt5.QtWidgets import QToolBar, QWidget, QHBoxLayout, QSizePolicy
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon, QPainter, QColor, QPen
 
 from .touch_button import TouchButton
 from .responsive_styles import ResponsiveStyles

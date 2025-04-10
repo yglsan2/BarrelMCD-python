@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, Any, Optional
-from PyQt6.QtCore import QTimer, QObject, pyqtSignal
+from PyQt5.QtCore import QTimer, QObject, pyqtSignal
 
 from .bar_format import BarFormat
 

@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, Qt, QPointF, QRectF, QTimer
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QFont, QPainterPath
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
+from PyQt5.QtCore import QObject, Qt, QPointF, QRectF, QTimer
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QFont, QPainterPath
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from .styles import AppStyles
 from .error_handler import ErrorHandler
 

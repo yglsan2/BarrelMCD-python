@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, pyqtSignal, Qt, QPointF
-from PyQt6.QtGui import QKeySequence, QShortcut, QGestureRecognizer, QGestureEvent
-from PyQt6.QtWidgets import QWidget
+from PyQt5.QtCore import QObject, pyqtSignal, Qt, QPointF
+from PyQt5.QtGui import QKeySequence, QShortcut, QGestureRecognizer, QGestureEvent
+from PyQt5.QtWidgets import QWidget
 
 class GestureManager(QObject):
     """Gestionnaire de gestes tactiles et raccourcis clavier"""

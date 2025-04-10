@@ -48,51 +48,41 @@ const ATTRIBUTE_COLORS = {
 };
 
 export const themeManager = {
+    themes: ["dark-theme", "light-theme"],
+    modelColors: {
+        mcd: { dark: "#6a1b9a", light: "#6a1b9a" },
+        uml: { dark: "#2b73b9", light: "#2b73b9" },
+        mld: { dark: "#f6a316", light: "#f6a316" },
+        mpd: { dark: "#43a047", light: "#43a047" },
+        sql: { dark: "#e53935", light: "#e53935" }
+    },
+    
     init() {
-        // Vérifier si un thème est déjà enregistré
-        const savedTheme = localStorage.getItem('barrel-theme');
-        if (savedTheme) {
-            document.body.className = savedTheme;
-        } else {
-            // Par défaut, utiliser le thème sombre
-            document.body.className = 'dark-theme';
-        }
-
-        // Initialiser le bouton de changement de thème
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => this.toggleTheme());
+        this.loadSavedTheme();
+        this.initThemeToggle();
+    },
+    
+    loadSavedTheme() {
+        const savedTheme = localStorage.getItem("theme") || "dark-theme";
+        document.body.className = savedTheme;
+    },
+    
+    initThemeToggle() {
+        const toggleBtn = document.getElementById("theme-toggle");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => this.toggleTheme());
         }
     },
-
+    
     toggleTheme() {
-        const currentTheme = document.body.className;
-        const newTheme = currentTheme === 'dark-theme' ? 'light-theme' : 'dark-theme';
-        
+        const newTheme = document.body.className === this.themes[0] ? this.themes[1] : this.themes[0];
         document.body.className = newTheme;
-        localStorage.setItem('barrel-theme', newTheme);
+        localStorage.setItem("theme", newTheme);
     },
-
+    
     getModelColor(modelType) {
-        const theme = document.body.className;
-        const colors = {
-            'dark-theme': {
-                'mcd': '#6a1b9a',
-                'uml': '#2b73b9',
-                'mld': '#f6a316',
-                'mpd': '#4caf50',
-                'sql': '#e91e63'
-            },
-            'light-theme': {
-                'mcd': '#2b73b9',
-                'uml': '#6a1b9a',
-                'mld': '#f6a316',
-                'mpd': '#4caf50',
-                'sql': '#e91e63'
-            }
-        };
-
-        return colors[theme][modelType] || colors[theme]['mcd'];
+        const theme = document.body.className.includes("dark-theme") ? "dark" : "light";
+        return this.modelColors[modelType]?.[theme] || "#666";
     }
 };
 

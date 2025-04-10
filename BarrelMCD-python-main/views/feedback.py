@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, Qt, QTimer, QPointF
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QFont
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsTextItem
+from PyQt5.QtCore import QObject, Qt, QTimer, QPointF
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QFont
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem
 
 class FeedbackManager(QObject):
     """Gestionnaire des retours visuels et notifications"""

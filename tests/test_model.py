@@ -1,6 +1,6 @@
 import unittest
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt, QPointF
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import Qt, QPointF
 from BarrelMCD-python-main.models.entity import Entity
 from BarrelMCD-python-main.models.data_types import DataTypeManager
 import sys

@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, QPropertyAnimation, QEasingCurve, QPointF, QRectF
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
-from PyQt6.QtWidgets import QGraphicsItem
+from PyQt5.QtCore import QObject, QPropertyAnimation, QEasingCurve, QPointF, QRectF
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt5.QtWidgets import QGraphicsItem
 
 class AnimationManager(QObject):
     """Gestionnaire d'animations et de transitions visuelles"""

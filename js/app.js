@@ -1,4 +1,6 @@
 import { themeManager } from './theme_manager.js';
+import { entityManager } from '../dist/js/entity_manager.min.js';
+import { relationshipManager } from '../dist/js/relationship_manager.min.js';
 
 class BarrelApp {
     constructor() {
@@ -8,8 +10,10 @@ class BarrelApp {
     }
 
     init() {
-        // Initialiser le gestionnaire de thème
+        // Initialiser les gestionnaires
         themeManager.init();
+        entityManager.init();
+        relationshipManager.init();
         
         // Initialiser les écouteurs d'événements
         this.initializeEventListeners();
@@ -20,7 +24,7 @@ class BarrelApp {
 
     initializeEventListeners() {
         // Gestion des boutons de modèle
-        const modelButtons = document.querySelectorAll('.model-button');
+        const modelButtons = document.querySelectorAll('.model-btn');
         modelButtons.forEach(button => {
             button.addEventListener('click', () => this.handleModelChange(button.dataset.model));
         });
@@ -32,6 +36,12 @@ class BarrelApp {
         }
 
         // Gestion du drag & drop pour les entités
+        const entities = document.querySelectorAll('.entity');
+        entities.forEach(entity => {
+            entity.setAttribute('draggable', 'true');
+            entity.addEventListener('dragstart', (e) => this.handleDragStart(e));
+        });
+
         const diagramArea = document.querySelector('.diagram-area');
         if (diagramArea) {
             diagramArea.addEventListener('dragover', (e) => this.handleDragOver(e));
@@ -42,19 +52,19 @@ class BarrelApp {
     initializeGrid() {
         const diagramArea = document.querySelector('.diagram-area');
         if (diagramArea) {
-            diagramArea.style.backgroundImage = this.gridVisible ? 
-                'linear-gradient(#2b73b9 1px, transparent 1px), linear-gradient(90deg, #2b73b9 1px, transparent 1px)' : 
-                'none';
-            diagramArea.style.backgroundSize = '20px 20px';
+            if (this.gridVisible) {
+                diagramArea.classList.add('show-grid');
+            } else {
+                diagramArea.classList.remove('show-grid');
+            }
         }
     }
 
     handleModelChange(modelType) {
         this.currentModel = modelType;
-        document.documentElement.style.setProperty('--model-color', themeManager.getModelColor(modelType));
         
         // Mettre à jour les boutons actifs
-        document.querySelectorAll('.model-button').forEach(button => {
+        document.querySelectorAll('.model-btn').forEach(button => {
             button.classList.toggle('active', button.dataset.model === modelType);
         });
     }
@@ -62,6 +72,10 @@ class BarrelApp {
     toggleGrid() {
         this.gridVisible = !this.gridVisible;
         this.initializeGrid();
+    }
+
+    handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.dataset.type);
     }
 
     handleDragOver(e) {
@@ -80,17 +94,21 @@ class BarrelApp {
     }
 
     createEntity(type, x, y) {
-        const entity = document.createElement('div');
-        entity.className = 'entity';
-        entity.style.left = `${x}px`;
-        entity.style.top = `${y}px`;
+        const entity = entityManager.createEntity(type, x, y);
+        
+        // Créer l'élément visuel
+        const entityElement = document.createElement('div');
+        entityElement.className = 'entity-diagram';
+        entityElement.dataset.id = entity.id;
+        entityElement.style.left = `${x}px`;
+        entityElement.style.top = `${y}px`;
         
         const title = document.createElement('div');
         title.className = 'entity-title';
         title.textContent = type;
         
-        entity.appendChild(title);
-        document.querySelector('.diagram-area').appendChild(entity);
+        entityElement.appendChild(title);
+        document.querySelector('.diagram-area').appendChild(entityElement);
     }
 }
 

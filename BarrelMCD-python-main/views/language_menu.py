@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QMenu, QAction
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QMenu, QAction
+from PyQt5.QtCore import Qt, pyqtSignal
 from i18n import get_available_languages, set_language, get_current_language, get_text
 
 class LanguageMenu(QMenu):

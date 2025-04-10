@@ -1,5 +1,5 @@
-from PyQt6.QtCore import QObject, pyqtSignal, QPointF
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QPainterPath
+from PyQt5.QtCore import QObject, pyqtSignal, QPointF
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QPainterPath
 from typing import List, Dict, Any
 from ..models.entity import Entity
 from ..models.association import Association

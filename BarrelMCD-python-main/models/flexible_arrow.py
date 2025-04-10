@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QGraphicsItem
-from PyQt6.QtCore import Qt, QRectF, QPointF, QLineF
-from PyQt6.QtGui import QPainter, QPen, QColor, QPainterPath, QPainterPathStroker, QFont
+from PyQt5.QtWidgets import QGraphicsItem
+from PyQt5.QtCore import Qt, QRectF, QPointF, QLineF
+from PyQt5.QtGui import QPainter, QPen, QColor, QPainterPath, QPainterPathStroker, QFont
 import os
 
 class FlexibleArrow(QGraphicsItem):

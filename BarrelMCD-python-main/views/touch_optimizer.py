@@ -1,5 +1,5 @@
-from PyQt6.QtCore import QObject, QPointF, QTimer, Qt
-from PyQt6.QtGui import QPainterPath
+from PyQt5.QtCore import QObject, QPointF, QTimer, Qt
+from PyQt5.QtGui import QPainterPath
 import math
 
 class TouchOptimizer(QObject):

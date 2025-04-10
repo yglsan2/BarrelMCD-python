@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtGui import QColor
+from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtGui import QColor
 
 class CustomType(QObject):
     """Représente un type personnalisé avec ses propriétés et quantités"""

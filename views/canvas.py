@@ -1,7 +1,7 @@
-from PyQt6.QtWidgets import (QGraphicsScene, QGraphicsView, QGraphicsItem,
+from PyQt5.QtWidgets import (QGraphicsScene, QGraphicsView, QGraphicsItem,
                              QMenu, QInputDialog, QColorDialog, QFontDialog, QMessageBox)
-from PyQt6.QtCore import Qt, QPointF, QRectF, QSizeF, QLineF, pyqtSignal
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QFont, QPainterPath
+from PyQt5.QtCore import Qt, QPointF, QRectF, QSizeF, QLineF, pyqtSignal
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QFont, QPainterPath
 from .gestures import GestureManager
 from .animations import AnimationManager
 from .loop_animations import LoopAnimationManager

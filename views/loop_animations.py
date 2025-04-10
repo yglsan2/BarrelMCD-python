@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, QPropertyAnimation, QEasingCurve, QPointF, QRectF, QTimer
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
-from PyQt6.QtWidgets import QGraphicsItem
+from PyQt5.QtCore import QObject, QPropertyAnimation, QEasingCurve, QPointF, QRectF, QTimer
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt5.QtWidgets import QGraphicsItem
 
 class LoopAnimationManager(QObject):
     """Gestionnaire d'animations en boucle pour les éléments graphiques"""
@@ -141,7 +141,7 @@ class LoopAnimationManager(QObject):
             
     def stop_all_loops(self):
         """Arrête toutes les animations en boucle"""
-        for item in list(self.loop_animations.keys()):
+        for item in self.loop_animations.keys():
             self.stop_loop(item)
             
     def _reverse_pulse(self, item: QGraphicsItem, scale_factor: float, duration: int):

@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QPushButton, QSizePolicy
-from PyQt6.QtCore import Qt, QSize, QPoint
-from PyQt6.QtGui import QPainter, QColor, QPainterPath, QFont
+from PyQt5.QtWidgets import QPushButton, QSizePolicy
+from PyQt5.QtCore import Qt, QSize, QPoint
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QFont
 
 class TouchButton(QPushButton):
     """Bouton tactile optimisé pour mobile"""

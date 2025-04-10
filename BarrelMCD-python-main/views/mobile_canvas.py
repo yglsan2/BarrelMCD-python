@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene
-from PyQt6.QtCore import Qt, QRectF, QPointF
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt5.QtCore import Qt, QRectF, QPointF
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 
 from .responsive_styles import ResponsiveStyles
 

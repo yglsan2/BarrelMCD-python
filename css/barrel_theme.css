@@ -3,17 +3,15 @@
  * Utilisez la classe .dark-theme pour le mode sombre et .light-theme pour le mode clair
  */
 
-/* Codes des couleurs des aperçus de BarrelMCD */
-
 /* Mode sombre (par défaut) */
 :root {
     /* Couleurs principales */
-    --bg-primary: #121212;           /* Fond principal (bleu très foncé) */
-    --bg-secondary: #1a1a2e;         /* Panneau de travail (bleu gris foncé) */
+    --bg-primary: #121212;           /* Fond principal (noir) */
+    --bg-secondary: #1a1a2e;         /* Panneau de travail (bleu très foncé) */
     --bg-tertiary: #2d2d44;          /* Barre d'outils (bleu foncé) */
     
     /* Entités */
-    --entity-bg: #1a1a2e;            /* Fond des entités (bleu très foncé) */
+    --entity-bg: #2a2a3a;            /* Fond des entités */
     --entity-border: #3d3d4d;        /* Bordure des entités */
     
     /* Associations */
@@ -32,11 +30,14 @@
     --button-hover: #3d3d4d;         /* Survol des boutons */
     
     /* Accent */
-    --accent-color: #2a2a3a;         /* Couleur d'accent (bleu gris foncé) */
-    --accent-primary: #1a5276;
-    --accent-secondary: #2d2d44;
-    --border-color: #3d3d4d;
-    --button-active: #154360;
+    --accent-color: #1a5276;         /* Couleur d'accent (bleu sombre) */
+    
+    /* Couleurs des modèles */
+    --mcd-color: #6a1b9a;            /* Violet */
+    --uml-color: #2b73b9;            /* Bleu */
+    --mld-color: #f6a316;            /* Orange */
+    --mpd-color: #43a047;            /* Vert */
+    --sql-color: #e53935;            /* Rouge */
 }
 
 /* Styles communs */
@@ -55,14 +56,14 @@ body {
 }
 
 /* En-tête */
-.header {
+.app-header {
     display: flex;
     height: 60px;
     align-items: center;
     padding: 0 20px;
     justify-content: space-between;
     background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--entity-border);
 }
 
 /* Logo */
@@ -71,44 +72,83 @@ body {
 }
 
 .app-logo {
-    height: 60px;
+    height: 40px;
     width: auto;
 }
 
-/* Media queries pour le logo */
-@media (max-width: 768px) {
-    .app-logo {
-        content: url('../images/barrelSans.svg');
-    }
-}
-
-@media (min-width: 769px) {
-    .app-logo {
-        content: url('../images/barrelAvec.svg');
-    }
-}
-
 /* Menu */
-.menu-items {
+.main-menu {
     display: flex;
     gap: 20px;
     margin-right: auto;
 }
 
+.main-menu ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
 .menu-item {
     color: var(--text-primary);
-    cursor: pointer;
+    text-decoration: none;
     padding: 5px 10px;
+    cursor: pointer;
 }
 
 .menu-item:hover {
-    color: var(--accent-primary);
+    color: var(--accent-color);
 }
 
-/* Boutons de modèle */
+/* Barre d'outils */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--entity-border);
+}
+
 .model-buttons {
     display: flex;
     gap: 10px;
+}
+
+.model-btn {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.model-btn:hover {
+    background-color: var(--button-hover);
+}
+
+.model-btn.active {
+    background-color: var(--accent-color);
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background-color: var(--button-hover);
 }
 
 /* Contenu principal */
@@ -120,232 +160,190 @@ body {
 
 /* Barre latérale */
 .sidebar {
-    width: 280px;
+    width: 250px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--entity-border);
     padding: 20px;
     overflow-y: auto;
-    background-color: var(--bg-tertiary);
-    border-right: 1px solid var(--border-color);
 }
 
-/* Espace de travail */
+.entities-list, .relationships-list {
+    margin-bottom: 20px;
+}
+
+.entities-list h3, .relationships-list h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.entity, .relationship {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: var(--entity-bg);
+    border: 1px solid var(--entity-border);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.entity:hover, .relationship:hover {
+    background-color: var(--button-hover);
+}
+
+.entity-icon, .relationship-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.entity-name, .relationship-name {
+    color: var(--text-primary);
+}
+
+/* Zone de travail */
 .workspace {
     flex: 1;
     position: relative;
     overflow: auto;
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-primary);
 }
 
-/* Grille (optionnelle) */
-.workspace.show-grid {
+.diagram-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+}
+
+.diagram-area.show-grid {
     background-image: 
         linear-gradient(var(--grid-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: 20px 20px;
 }
 
-/* Bouton de grille */
-.grid-toggle {
-    padding: 8px;
-    border-radius: 4px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.9em;
-    margin-left: 10px;
-}
-
-.grid-toggle:hover {
-    background-color: var(--accent-secondary);
-}
-
-.grid-toggle.active {
-    background-color: var(--accent-primary);
-}
-
-/* Entités */
-.entity {
+/* Entités dans le diagramme */
+.entity-diagram {
+    position: absolute;
+    min-width: 150px;
     background-color: var(--entity-bg);
     border: 1px solid var(--entity-border);
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 10px;
-    margin: 10px;
-    min-width: 200px;
+    cursor: move;
 }
 
 .entity-title {
     font-weight: bold;
-    color: var(--accent-primary);
     margin-bottom: 10px;
-    padding-bottom: 5px;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.entity-attributes {
+    margin-top: 10px;
+}
+
+.attribute {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
     border-bottom: 1px solid var(--entity-border);
 }
 
-/* Attributs */
-.attribute {
-    padding: 4px 8px;
-    margin: 2px 0;
-    border-radius: 4px;
-    font-size: 0.9em;
-    background-color: var(--bg-primary);
-    color: var(--text-secondary);
-}
-
-/* Associations */
-.association {
-    background-color: var(--association-bg);
-    border: 1px solid var(--association-border);
-    border-radius: 50%;
-    padding: 5px;
-    margin: 5px;
-    width: 60px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: absolute;
-    transform: translate(-50%, -50%);
-}
-
-.association-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.association-title {
-    font-weight: bold;
+.attribute-name {
     color: var(--text-primary);
-    font-size: 0.7em;
-    margin-bottom: 2px;
 }
 
-.association-attributes {
+.attribute-type {
     color: var(--text-secondary);
-    font-size: 0.7em;
 }
 
-/* Relations et Cardinalités */
-.relation-container {
+/* Relations */
+.relationship-diagram {
     position: absolute;
     pointer-events: none;
 }
 
-.relation-line {
+.relationship-line {
     position: absolute;
     height: 2px;
-    background-color: var(--text-primary);
+    background-color: var(--association-border);
     transform-origin: left center;
 }
 
-.relation-line::after {
-    content: '';
-    position: absolute;
-    right: -6px;
-    top: -4px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid var(--text-primary);
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-}
-
-.relation-line.reversed::after {
-    right: auto;
-    left: -6px;
-    border-left: none;
-    border-right: 8px solid var(--text-primary);
-}
-
-/* Cardinalités */
 .cardinality {
     position: absolute;
+    background-color: var(--association-bg);
+    border: 1px solid var(--association-border);
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 12px;
     color: var(--text-primary);
-    font-size: 0.8em;
-    background-color: var(--bg-primary);
-    padding: 2px 4px;
-    border-radius: 3px;
-    white-space: nowrap;
-    pointer-events: none;
 }
 
 .cardinality-start {
-    left: 10px;
     top: -15px;
+    left: 0;
 }
 
 .cardinality-end {
-    right: 10px;
     top: -15px;
-}
-
-/* Boutons */
-.button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-}
-
-.button.primary {
-    background-color: var(--accent-primary);
-    color: white;
-}
-
-.button.primary:hover {
-    background-color: var(--button-hover);
-}
-
-.button.secondary {
-    background-color: var(--accent-secondary);
-    color: var(--text-primary);
-}
-
-.button.secondary:hover {
-    background-color: var(--button-active);
-}
-
-.button.active {
-    background-color: var(--accent-primary);
-    color: white;
+    right: 0;
 }
 
 /* Barre de statut */
 .status-bar {
-    height: 30px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    height: 30px;
     padding: 0 20px;
-    font-size: 0.9em;
     background-color: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--entity-border);
     color: var(--text-secondary);
+    font-size: 12px;
 }
 
 /* Mode clair */
 .light-theme {
-    --bg-primary: #ffffff;
-    --bg-secondary: #2b73b9;
-    --bg-tertiary: #f0f0f0;
-    --entity-bg: #ffffff;
-    --entity-border: #cccccc;
-    --association-bg: #f5f5f5;
-    --association-border: #dddddd;
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --grid-color: rgba(0, 0, 0, 0.1);
-    --button-bg: #e0e0e0;
-    --button-hover: #ffb74d;
-    --accent-color: #2b73b9;
-    --accent-primary: #f6a316;
-    --accent-secondary: #2b73b9;
-    --border-color: #dddddd;
-    --button-active: #f57c00;
+    --bg-primary: #ffffff;           /* Fond principal (blanc) */
+    --bg-secondary: #f0f0f0;         /* Panneau de travail (gris très clair) */
+    --bg-tertiary: #1a5276;          /* Barre d'outils (bleu sombre) */
+    
+    /* Entités */
+    --entity-bg: #ffffff;            /* Fond des entités */
+    --entity-border: #e0e0e0;        /* Bordure des entités */
+    
+    /* Associations */
+    --association-bg: #f5f5f5;       /* Fond des associations */
+    --association-border: #e0e0e0;   /* Bordure des associations */
+    
+    /* Texte */
+    --text-primary: #333333;         /* Texte principal (noir) */
+    --text-secondary: #666666;       /* Texte secondaire (gris) */
+    
+    /* Grille */
+    --grid-color: rgba(0, 0, 0, 0.15); /* Grille (noir semi-transparent) */
+    
+    /* Boutons */
+    --button-bg: #1a5276;            /* Fond des boutons */
+    --button-hover: #154360;         /* Survol des boutons */
+    
+    /* Accent */
+    --accent-color: #f6a316;         /* Couleur d'accent (orange) */
+}
+
+/* Bouton de changement de thème */
+.theme-toggle {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.theme-toggle:hover {
+    color: var(--accent-color);
 } 

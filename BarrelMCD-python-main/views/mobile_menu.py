@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QMenu, QWidget, QVBoxLayout, QPushButton, QLabel
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPainter, QColor, QPen, QFont
+from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QPushButton, QLabel
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QPainter, QColor, QPen, QFont
 
 from .responsive_styles import ResponsiveStyles
 

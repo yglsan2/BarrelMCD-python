@@ -15,7 +15,7 @@ yarn-debug.log
 yarn-error.log
 
 # Fichiers de build
-dist/
+# dist/
 build/
 
 # Fichiers temporaires

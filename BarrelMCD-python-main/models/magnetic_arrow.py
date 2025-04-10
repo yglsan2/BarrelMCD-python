@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsTextItem
-from PyQt6.QtCore import Qt, QRectF, QPointF, QLineF, QPropertyAnimation, QEasingCurve, QSizeF
-from PyQt6.QtGui import QPainter, QPen, QColor, QPainterPath, QPainterPathStroker, QFont, QPainterPathElement
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem
+from PyQt5.QtCore import Qt, QRectF, QPointF, QLineF, QPropertyAnimation, QEasingCurve, QSizeF
+from PyQt5.QtGui import QPainter, QPen, QColor, QPainterPath, QPainterPathStroker, QFont, QPainterPathElement
 
 class MagneticArrow(QGraphicsItem):
     """Représente une flèche magnétique qui s'adapte aux entités et associations"""
