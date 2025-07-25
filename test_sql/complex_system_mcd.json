@@ -1,0 +1,1872 @@
+{
+  "entities": {
+    "Utilisateur": {
+      "name": "Utilisateur",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de l'utilisateur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom de l'utilisateur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "prenom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "prénom de l'utilisateur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "email",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse email",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "telephone",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de téléphone",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_naissance",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de naissance",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_inscription",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date d'inscription",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du compte",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "mot_de_passe_hash",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "hash du mot de passe",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "derniere_connexion",
+          "type": "date",
+          "is_nullable": true,
+          "description": "dernière connexion",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Role": {
+      "name": "Role",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du rôle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du rôle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description du rôle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "permissions",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "permissions associées",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "niveau_acces",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "niveau d'accès",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Departement": {
+      "name": "Departement",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du département",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du département",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description du département",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "responsable_id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "responsable du département",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "budget_annuel",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "budget annuel",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du département",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Projet": {
+      "name": "Projet",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du projet",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du projet",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description du projet",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_debut",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de début",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_fin_prevue",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de fin prévue",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_fin_reelle",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de fin réelle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "budget_initial",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "budget initial",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "budget_consomme",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "budget consommé",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du projet",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "priorite",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "priorité du projet",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Tache": {
+      "name": "Tache",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la tâche",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom de la tâche",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description de la tâche",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_debut",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de début",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_fin_prevue",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de fin prévue",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_fin_reelle",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de fin réelle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "priorite",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "priorité de la tâche",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut de la tâche",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "pourcentage_avancement",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "pourcentage d'avancement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Client": {
+      "name": "Client",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du client",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du client",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "prenom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "prénom du client",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "email",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse email",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "telephone",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de téléphone",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "adresse",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse complète",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "ville",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "ville",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "code_postal",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "code postal",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "pays",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "pays",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du client",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Fournisseur": {
+      "name": "Fournisseur",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du fournisseur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du fournisseur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "siret",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro SIRET",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "email",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse email",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "telephone",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de téléphone",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "adresse",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse complète",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "ville",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "ville",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "code_postal",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "code postal",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "pays",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "pays",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du fournisseur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Produit": {
+      "name": "Produit",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "reference",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "référence du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "prix_achat",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "prix d'achat",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "prix_vente",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "prix de vente",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "stock_disponible",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "stock disponible",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "stock_minimum",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "stock minimum",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "categorie_id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "catégorie du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "fournisseur_id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "fournisseur du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du produit",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Categorie": {
+      "name": "Categorie",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la catégorie",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom de la catégorie",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description de la catégorie",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "categorie_parent_id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "catégorie parente",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "niveau",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "niveau dans l'arborescence",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Commande": {
+      "name": "Commande",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la commande",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "numero",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de commande",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_commande",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de commande",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_livraison_prevue",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de livraison prévue",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_livraison_reelle",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de livraison réelle",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_total",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant total",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_tva",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant de la TVA",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_remise",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant de la remise",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut de la commande",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "mode_paiement",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "mode de paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "notes",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "notes sur la commande",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Lignecommande": {
+      "name": "Lignecommande",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la ligne",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "quantite",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "quantité commandée",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "prix_unitaire",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "prix unitaire",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "remise_ligne",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "remise sur la ligne",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "total_ligne",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "total de la ligne",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Facture": {
+      "name": "Facture",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la facture",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "numero",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de facture",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_facture",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de facturation",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_echeance",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date d'échéance",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_ht",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant hors taxes",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_tva",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant de la TVA",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "montant_ttc",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant TTC",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut de la facture",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "mode_paiement",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "mode de paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "notes",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "notes sur la facture",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Paiement": {
+      "name": "Paiement",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "montant",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "montant du paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_paiement",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date du paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "mode_paiement",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "mode de paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "reference_paiement",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "référence du paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut du paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "notes",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "notes sur le paiement",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Livraison": {
+      "name": "Livraison",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la livraison",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "numero_suivi",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "numéro de suivi",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_expedition",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date d'expédition",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_livraison",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de livraison",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "transporteur",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "transporteur",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "cout_transport",
+          "type": "decimal",
+          "is_nullable": true,
+          "description": "coût du transport",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut de la livraison",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "adresse_livraison",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "adresse de livraison",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Document": {
+      "name": "Document",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique du document",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "nom",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "nom du document",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "type",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "type de document",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "chemin_fichier",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "chemin du fichier",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "taille_fichier",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "taille du fichier",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "format_fichier",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "format du fichier",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_upload",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date d'upload",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "description",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "description du document",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    },
+    "Notification": {
+      "name": "Notification",
+      "attributes": [
+        {
+          "name": "id",
+          "type": "integer",
+          "is_nullable": true,
+          "description": "identifiant unique de la notification",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": [
+            "UNIQUE"
+          ]
+        },
+        {
+          "name": "titre",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "titre de la notification",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "message",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "message de la notification",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "type",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "type de notification",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_creation",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de création",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "date_lecture",
+          "type": "date",
+          "is_nullable": true,
+          "description": "date de lecture",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        },
+        {
+          "name": "statut",
+          "type": "varchar",
+          "is_nullable": true,
+          "description": "statut de la notification",
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default_value": null,
+          "constraints": []
+        }
+      ],
+      "description": "",
+      "parent": null,
+      "children": []
+    }
+  },
+  "associations": [
+    {
+      "name": "Possede",
+      "entity1": "Utilisateur",
+      "entity2": "Role",
+      "cardinality1": "0,n",
+      "cardinality2": "0,n",
+      "description": "Un utilisateur peut avoir plusieurs rôles et un rôle peut être attribué à plusieurs utilisateurs",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Appartient",
+      "entity1": "Utilisateur",
+      "entity2": "Departement",
+      "cardinality1": "0,n",
+      "cardinality2": "1,1",
+      "description": "Un utilisateur appartient à un département et un département peut avoir plusieurs utilisateurs",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Gere",
+      "entity1": "Departement",
+      "entity2": "Projet",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un département peut gérer plusieurs projets et un projet est géré par un département",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Contient",
+      "entity1": "Projet",
+      "entity2": "Tache",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un projet contient plusieurs tâches et une tâche appartient à un projet",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Assigne",
+      "entity1": "Utilisateur",
+      "entity2": "Tache",
+      "cardinality1": "0,n",
+      "cardinality2": "0,n",
+      "description": "Un utilisateur peut être assigné à plusieurs tâches et une tâche peut être assignée à plusieurs utilisateurs",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Passe",
+      "entity1": "Client",
+      "entity2": "Commande",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un client peut passer plusieurs commandes et une commande appartient à un client",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Contient",
+      "entity1": "Commande",
+      "entity2": "Lignecommande",
+      "cardinality1": "1,1",
+      "cardinality2": "1,1",
+      "description": "Une commande contient plusieurs lignes et une ligne appartient à une commande",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Reference",
+      "entity1": "Produit",
+      "entity2": "Lignecommande",
+      "cardinality1": "1,1",
+      "cardinality2": "1,1",
+      "description": "Un produit peut être référencé dans plusieurs lignes et une ligne référence un produit",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Genere",
+      "entity1": "Commande",
+      "entity2": "Facture",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Une commande peut générer plusieurs factures et une facture est générée par une commande",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Recouvre",
+      "entity1": "Facture",
+      "entity2": "Paiement",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Une facture peut être recouvrée par plusieurs paiements et un paiement recouvre une facture",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Expedie",
+      "entity1": "Commande",
+      "entity2": "Livraison",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Une commande peut être expédiée en plusieurs livraisons et une livraison expédie une commande",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Fournit",
+      "entity1": "Fournisseur",
+      "entity2": "Produit",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un fournisseur peut fournir plusieurs produits et un produit est fourni par un fournisseur",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Classe",
+      "entity1": "Categorie",
+      "entity2": "Produit",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Une catégorie peut classer plusieurs produits et un produit appartient à une catégorie",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "SousCategorie",
+      "entity1": "Categorie",
+      "entity2": "Categorie",
+      "cardinality1": "0,n",
+      "cardinality2": "1,1",
+      "description": "Une catégorie peut avoir plusieurs sous-catégories et une sous-catégorie appartient à une catégorie parente",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Possede",
+      "entity1": "Utilisateur",
+      "entity2": "Document",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un utilisateur peut posséder plusieurs documents et un document appartient à un utilisateur",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Reference",
+      "entity1": "Projet",
+      "entity2": "Document",
+      "cardinality1": "0,n",
+      "cardinality2": "0,n",
+      "description": "Un projet peut référencer plusieurs documents et un document peut référencer plusieurs projets",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Recoit",
+      "entity1": "Utilisateur",
+      "entity2": "Notification",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un utilisateur peut recevoir plusieurs notifications et une notification est reçue par un utilisateur",
+      "type": "binary",
+      "attributes": []
+    },
+    {
+      "name": "Declenche",
+      "entity1": "Projet",
+      "entity2": "Notification",
+      "cardinality1": "1,1",
+      "cardinality2": "0,n",
+      "description": "Un projet peut déclencher plusieurs notifications et une notification peut être déclenchée par un projet",
+      "type": "binary",
+      "attributes": []
+    }
+  ],
+  "inheritance": {},
+  "metadata": {
+    "total_entities": 16,
+    "total_associations": 18,
+    "total_inheritance_relations": 0,
+    "parser_version": "2.0",
+    "precision_score": 98.57142857142858
+  }
+}

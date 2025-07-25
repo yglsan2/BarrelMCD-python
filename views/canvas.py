@@ -241,7 +241,7 @@ class DiagramCanvas(QGraphicsView):
     def mousePressEvent(self, event):
         """Gère les événements de clic"""
         try:
-        if event.button() == Qt.MouseButton.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 scene_pos = self.mapToScene(event.position().toPoint())
                 
                 # Aide contextuelle pour les éléments
@@ -268,14 +268,14 @@ class DiagramCanvas(QGraphicsView):
                         self.scene.clearSelection()
                         
                 # Mode relation
-            elif self.current_mode == "add_relation":
+                elif self.current_mode == "add_relation":
                     item = self.scene.itemAt(scene_pos, self.transform())
                     if item and isinstance(item, Entity):
                         if not self.relation_source:
                             self.relation_source = item
                             self.relation_line = self.scene.addLine(
-                            scene_pos.x(), scene_pos.y(),
-                            scene_pos.x(), scene_pos.y(),
+                                scene_pos.x(), scene_pos.y(),
+                                scene_pos.x(), scene_pos.y(),
                                 QPen(QColor(52, 152, 219), 2, Qt.PenStyle.DashLine)
                             )
                             self.feedback_manager.show_tooltip(
@@ -481,7 +481,7 @@ class DiagramCanvas(QGraphicsView):
                     "La suppression pourrait être instable"
                 )
                 
-        self.scene.removeItem(item)
+            self.scene.removeItem(item)
             self.diagram_modified.emit()
             
         except Exception as e:
@@ -661,3 +661,186 @@ class DiagramCanvas(QGraphicsView):
             
         except Exception as e:
             self.error_handler.handle_error(e, "Erreur lors de la suppression d'une association")
+    
+    def clear(self):
+        """Efface tous les éléments du canvas"""
+        self.scene.clear()
+        self.relation_source = None
+        self.relation_line = None
+        self.diagram_modified.emit()
+    
+    def get_entities_data(self):
+        """Récupère les données de toutes les entités"""
+        entities_data = []
+        for item in self.scene.items():
+            if isinstance(item, Entity):
+                entity_data = {
+                    'id': str(id(item)),
+                    'name': item.name,
+                    'x': item.scenePos().x(),
+                    'y': item.scenePos().y(),
+                    'attributes': []
+                }
+                
+                # Récupérer les attributs de l'entité
+                if hasattr(item, 'attributes'):
+                    for attr in item.attributes:
+                        attr_data = {
+                            'name': attr.name,
+                            'type': attr.type,
+                            'primary': attr.is_primary,
+                            'nullable': attr.is_nullable
+                        }
+                        entity_data['attributes'].append(attr_data)
+                
+                entities_data.append(entity_data)
+        
+        return entities_data
+    
+    def get_associations_data(self):
+        """Récupère les données de toutes les associations"""
+        associations_data = []
+        for item in self.scene.items():
+            if isinstance(item, Association):
+                assoc_data = {
+                    'id': str(id(item)),
+                    'name': item.name,
+                    'x': item.scenePos().x(),
+                    'y': item.scenePos().y(),
+                    'relations': []
+                }
+                
+                # Récupérer les relations de l'association
+                if hasattr(item, 'relations'):
+                    for rel in item.relations:
+                        rel_data = {
+                            'entity_id': str(id(rel.entity)),
+                            'cardinality': rel.cardinality,
+                            'role': rel.role
+                        }
+                        assoc_data['relations'].append(rel_data)
+                
+                associations_data.append(assoc_data)
+        
+        return associations_data
+    
+    def load_from_data(self, data):
+        """Charge les données dans le canvas"""
+        try:
+            self.clear()
+            
+            # Charger les entités
+            if 'entities' in data:
+                for entity_data in data['entities']:
+                    self.create_entity_from_data(entity_data)
+            
+            # Charger les associations
+            if 'associations' in data:
+                for assoc_data in data['associations']:
+                    self.create_association_from_data(assoc_data)
+            
+            # Restaurer les informations du canvas si disponibles
+            if 'canvas_info' in data:
+                canvas_info = data['canvas_info']
+                if 'zoom' in canvas_info:
+                    self.setTransform(self.transform().scale(canvas_info['zoom'], canvas_info['zoom']))
+                if 'center' in canvas_info:
+                    center = canvas_info['center']
+                    self.centerOn(center[0], center[1])
+            
+            self.diagram_modified.emit()
+            
+        except Exception as e:
+            self.error_handler.handle_error(e, "Erreur lors du chargement des données")
+    
+    def create_entity_from_data(self, entity_data):
+        """Crée une entité à partir de données"""
+        try:
+            # Créer l'entité
+            entity = Entity(entity_data.get('name', 'Nouvelle Entité'))
+            entity.setPos(entity_data.get('x', 0), entity_data.get('y', 0))
+            
+            # Ajouter les attributs
+            for attr_data in entity_data.get('attributes', []):
+                attr = Attribute(
+                    name=attr_data.get('name', ''),
+                    type=attr_data.get('type', 'VARCHAR'),
+                    is_primary=attr_data.get('primary', False),
+                    is_nullable=attr_data.get('nullable', True)
+                )
+                entity.add_attribute(attr)
+            
+            self.scene.addItem(entity)
+            return entity
+            
+        except Exception as e:
+            self.error_handler.handle_error(e, "Erreur lors de la création d'une entité")
+            return None
+    
+    def create_association_from_data(self, assoc_data):
+        """Crée une association à partir de données"""
+        try:
+            # Créer l'association
+            association = Association(assoc_data.get('name', 'Nouvelle Association'))
+            association.setPos(assoc_data.get('x', 0), assoc_data.get('y', 0))
+            
+            # Ajouter les relations
+            for rel_data in assoc_data.get('relations', []):
+                # Trouver l'entité correspondante
+                entity_id = rel_data.get('entity_id', '')
+                entity = self._find_entity_by_id(entity_id)
+                if entity:
+                    association.add_relation(
+                        entity=entity,
+                        cardinality=rel_data.get('cardinality', '1'),
+                        role=rel_data.get('role', '')
+                    )
+            
+            self.scene.addItem(association)
+            return association
+            
+        except Exception as e:
+            self.error_handler.handle_error(e, "Erreur lors de la création d'une association")
+            return None
+    
+    def _find_entity_by_id(self, entity_id):
+        """Trouve une entité par son ID"""
+        for item in self.scene.items():
+            if isinstance(item, Entity) and str(id(item)) == entity_id:
+                return item
+        return None
+    
+    def create_entity(self, pos=None):
+        """Crée une nouvelle entité"""
+        if pos is None:
+            pos = QPointF(0, 0)
+        
+        entity = Entity("Nouvelle Entité")
+        entity.setPos(pos)
+        self.scene.addItem(entity)
+        self.diagram_modified.emit()
+        return entity
+    
+    def create_association(self, pos=None):
+        """Crée une nouvelle association"""
+        if pos is None:
+            pos = QPointF(0, 0)
+        
+        association = Association("Nouvelle Association")
+        association.setPos(pos)
+        self.scene.addItem(association)
+        self.diagram_modified.emit()
+        return association
+    
+    def zoom_in(self):
+        """Zoom avant"""
+        self.zoom_at(self.mapToScene(self.viewport().rect().center()), self.zoom_factor)
+    
+    def zoom_out(self):
+        """Zoom arrière"""
+        self.zoom_at(self.mapToScene(self.viewport().rect().center()), 1.0 / self.zoom_factor)
+    
+    def fit_view(self):
+        """Ajuste la vue pour voir tous les éléments"""
+        if self.scene.items():
+            self.fitInView(self.scene.itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)

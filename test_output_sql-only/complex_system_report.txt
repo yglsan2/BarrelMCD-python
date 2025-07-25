@@ -1,0 +1,225 @@
+============================================================
+RAPPORT DE CONVERSION MARKDOWN -> MCD
+============================================================
+
+📊 STATISTIQUES MCD
+------------------------------
+Entités: 16
+Associations: 18
+Score de précision: 98.6%
+
+📋 ENTITÉS DÉTECTÉES
+------------------------------
+• Utilisateur: 10 attributs
+  - id (integer)
+  - nom (varchar)
+  - prenom (varchar)
+  - email (varchar)
+  - telephone (varchar)
+  - date_naissance (date)
+  - date_inscription (datetime)
+  - statut (varchar)
+  - mot_de_passe_hash (varchar)
+  - derniere_connexion (datetime)
+• Role: 6 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - permissions (json)
+  - niveau_acces (integer)
+  - date_creation (datetime)
+• Departement: 7 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - responsable_id (integer)
+  - budget_annuel (decimal)
+  - date_creation (datetime)
+  - statut (varchar)
+• Projet: 10 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - date_debut (date)
+  - date_fin_prevue (date)
+  - date_fin_reelle (date)
+  - budget_initial (decimal)
+  - budget_consomme (decimal)
+  - statut (varchar)
+  - priorite (integer)
+• Tache: 9 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - date_debut (date)
+  - date_fin_prevue (date)
+  - date_fin_reelle (date)
+  - priorite (integer)
+  - statut (varchar)
+  - pourcentage_avancement (integer)
+• Client: 11 attributs
+  - id (integer)
+  - nom (varchar)
+  - prenom (varchar)
+  - email (varchar)
+  - telephone (varchar)
+  - adresse (text)
+  - ville (varchar)
+  - code_postal (varchar)
+  - pays (varchar)
+  - date_creation (datetime)
+  - statut (varchar)
+• Fournisseur: 11 attributs
+  - id (integer)
+  - nom (varchar)
+  - siret (varchar)
+  - email (varchar)
+  - telephone (varchar)
+  - adresse (text)
+  - ville (varchar)
+  - code_postal (varchar)
+  - pays (varchar)
+  - date_creation (datetime)
+  - statut (varchar)
+• Produit: 12 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - reference (varchar)
+  - prix_achat (decimal)
+  - prix_vente (decimal)
+  - stock_disponible (integer)
+  - stock_minimum (integer)
+  - categorie_id (integer)
+  - fournisseur_id (integer)
+  - date_creation (datetime)
+  - statut (varchar)
+• Categorie: 6 attributs
+  - id (integer)
+  - nom (varchar)
+  - description (text)
+  - categorie_parent_id (integer)
+  - niveau (integer)
+  - date_creation (datetime)
+• Commande: 11 attributs
+  - id (integer)
+  - numero (varchar)
+  - date_commande (datetime)
+  - date_livraison_prevue (date)
+  - date_livraison_reelle (date)
+  - montant_total (decimal)
+  - montant_tva (decimal)
+  - montant_remise (decimal)
+  - statut (varchar)
+  - mode_paiement (varchar)
+  - notes (text)
+• Lignecommande: 5 attributs
+  - id (integer)
+  - quantite (integer)
+  - prix_unitaire (decimal)
+  - remise_ligne (decimal)
+  - total_ligne (decimal)
+• Facture: 10 attributs
+  - id (integer)
+  - numero (varchar)
+  - date_facture (date)
+  - date_echeance (date)
+  - montant_ht (decimal)
+  - montant_tva (decimal)
+  - montant_ttc (decimal)
+  - statut (varchar)
+  - mode_paiement (varchar)
+  - notes (text)
+• Paiement: 7 attributs
+  - id (integer)
+  - montant (decimal)
+  - date_paiement (datetime)
+  - mode_paiement (varchar)
+  - reference_paiement (varchar)
+  - statut (varchar)
+  - notes (text)
+• Livraison: 8 attributs
+  - id (integer)
+  - numero_suivi (varchar)
+  - date_expedition (datetime)
+  - date_livraison (datetime)
+  - transporteur (varchar)
+  - cout_transport (decimal)
+  - statut (varchar)
+  - adresse_livraison (text)
+• Document: 8 attributs
+  - id (integer)
+  - nom (varchar)
+  - type (varchar)
+  - chemin_fichier (varchar)
+  - taille_fichier (integer)
+  - format_fichier (varchar)
+  - date_upload (datetime)
+  - description (text)
+• Notification: 7 attributs
+  - id (integer)
+  - titre (varchar)
+  - message (text)
+  - type (varchar)
+  - date_creation (datetime)
+  - date_lecture (datetime)
+  - statut (varchar)
+
+🔗 ASSOCIATIONS DÉTECTÉES
+------------------------------
+• Utilisateur <-> Role: Possede
+  Cardinalités: 0,n / 0,n
+• Utilisateur <-> Departement: Appartient
+  Cardinalités: 0,n / 1,1
+• Departement <-> Projet: Gere
+  Cardinalités: 1,1 / 0,n
+• Projet <-> Tache: Contient
+  Cardinalités: 1,1 / 0,n
+• Utilisateur <-> Tache: Assigne
+  Cardinalités: 0,n / 0,n
+• Client <-> Commande: Passe
+  Cardinalités: 1,1 / 0,n
+• Commande <-> Lignecommande: Contient
+  Cardinalités: 1,1 / 1,1
+• Produit <-> Lignecommande: Reference
+  Cardinalités: 1,1 / 1,1
+• Commande <-> Facture: Genere
+  Cardinalités: 1,1 / 0,n
+• Facture <-> Paiement: Recouvre
+  Cardinalités: 1,1 / 0,n
+• Commande <-> Livraison: Expedie
+  Cardinalités: 1,1 / 0,n
+• Fournisseur <-> Produit: Fournit
+  Cardinalités: 1,1 / 0,n
+• Categorie <-> Produit: Classe
+  Cardinalités: 1,1 / 0,n
+• Categorie <-> Categorie: SousCategorie
+  Cardinalités: 0,n / 1,1
+• Utilisateur <-> Document: Possede
+  Cardinalités: 1,1 / 0,n
+• Projet <-> Document: Reference
+  Cardinalités: 0,n / 0,n
+• Utilisateur <-> Notification: Recoit
+  Cardinalités: 1,1 / 0,n
+• Projet <-> Notification: Declenche
+  Cardinalités: 1,1 / 0,n
+
+📊 STATISTIQUES MLD
+------------------------------
+Tables: 19
+Clés étrangères: 21
+Contraintes: 0
+
+📊 STATISTIQUES MPD
+------------------------------
+Tables: 19
+Index: 0
+SGBD: mysql
+
+📊 STATISTIQUES SQL
+------------------------------
+Longueur du script: 12083 caractères
+Nombre de lignes: 366
+Tables créées: 19
+Clés étrangères: 21
+Index créés: 45

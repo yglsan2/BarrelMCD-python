@@ -1,0 +1,1658 @@
+{
+  "tables": {
+    "utilisateur": {
+      "name": "utilisateur",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "prenom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "telephone",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_naissance",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_inscription",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "mot_de_passe_hash",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "derniere_connexion",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "departement_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "role": {
+      "name": "role",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "permissions",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "niveau_acces",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "departement": {
+      "name": "departement",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "responsable_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "budget_annuel",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "projet": {
+      "name": "projet",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_debut",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_fin_prevue",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_fin_reelle",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "budget_initial",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "budget_consomme",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "priorite",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "departement_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "tache": {
+      "name": "tache",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_debut",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_fin_prevue",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_fin_reelle",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "priorite",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "pourcentage_avancement",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "projet_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "client": {
+      "name": "client",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "prenom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "telephone",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "adresse",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "ville",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "code_postal",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "pays",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "fournisseur": {
+      "name": "fournisseur",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "siret",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "telephone",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "adresse",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "ville",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "code_postal",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "pays",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "produit": {
+      "name": "produit",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "reference",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "prix_achat",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "prix_vente",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "stock_disponible",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "stock_minimum",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "categorie_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "fournisseur_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "lignecommande_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "fournisseur_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "categorie_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "categorie": {
+      "name": "categorie",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "categorie_parent_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "niveau",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "categorie_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "commande": {
+      "name": "commande",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "numero",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_commande",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_livraison_prevue",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_livraison_reelle",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_total",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_tva",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_remise",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "mode_paiement",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "notes",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "client_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "lignecommande_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id",
+        "numero"
+      ]
+    },
+    "lignecommande": {
+      "name": "lignecommande",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "quantite",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "prix_unitaire",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "remise_ligne",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "total_ligne",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "facture": {
+      "name": "facture",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "numero",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_facture",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_echeance",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_ht",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_tva",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant_ttc",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "mode_paiement",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "notes",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "commande_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id",
+        "numero"
+      ]
+    },
+    "paiement": {
+      "name": "paiement",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "montant",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_paiement",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "mode_paiement",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "reference_paiement",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "notes",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "facture_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "livraison": {
+      "name": "livraison",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "numero_suivi",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_expedition",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_livraison",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "transporteur",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "cout_transport",
+          "type": "DECIMAL(10,2)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "adresse_livraison",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "commande_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "document": {
+      "name": "document",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "nom",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "chemin_fichier",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "taille_fichier",
+          "type": "INTEGER",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "format_fichier",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_upload",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "utilisateur_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "notification": {
+      "name": "notification",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "titre",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "message",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_creation",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "date_lecture",
+          "type": "DATE",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "statut",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "size": null,
+          "precision": null,
+          "scale": null,
+          "default": null
+        },
+        {
+          "name": "utilisateur_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "projet_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "id"
+      ]
+    },
+    "utilisateur_role": {
+      "name": "utilisateur_role",
+      "columns": [
+        {
+          "name": "utilisateur_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "role_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "utilisateur_id",
+        "role_id"
+      ]
+    },
+    "utilisateur_tache": {
+      "name": "utilisateur_tache",
+      "columns": [
+        {
+          "name": "utilisateur_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "tache_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "utilisateur_id",
+        "tache_id"
+      ]
+    },
+    "projet_document": {
+      "name": "projet_document",
+      "columns": [
+        {
+          "name": "projet_id",
+          "type": "INTEGER",
+          "nullable": false
+        },
+        {
+          "name": "document_id",
+          "type": "INTEGER",
+          "nullable": false
+        }
+      ],
+      "primary_key": [
+        "projet_id",
+        "document_id"
+      ]
+    }
+  },
+  "foreign_keys": [
+    {
+      "table": "utilisateur_role",
+      "column": "utilisateur_id",
+      "referenced_table": "utilisateur",
+      "referenced_column": "id",
+      "constraint_name": "fk_utilisateur_role_utilisateur"
+    },
+    {
+      "table": "utilisateur_role",
+      "column": "role_id",
+      "referenced_table": "role",
+      "referenced_column": "id",
+      "constraint_name": "fk_utilisateur_role_role"
+    },
+    {
+      "table": "utilisateur",
+      "column": "departement_id",
+      "referenced_table": "departement",
+      "referenced_column": "id",
+      "constraint_name": "fk_utilisateur_departement"
+    },
+    {
+      "table": "projet",
+      "column": "departement_id",
+      "referenced_table": "departement",
+      "referenced_column": "id",
+      "constraint_name": "fk_projet_departement"
+    },
+    {
+      "table": "tache",
+      "column": "projet_id",
+      "referenced_table": "projet",
+      "referenced_column": "id",
+      "constraint_name": "fk_tache_projet"
+    },
+    {
+      "table": "utilisateur_tache",
+      "column": "utilisateur_id",
+      "referenced_table": "utilisateur",
+      "referenced_column": "id",
+      "constraint_name": "fk_utilisateur_tache_utilisateur"
+    },
+    {
+      "table": "utilisateur_tache",
+      "column": "tache_id",
+      "referenced_table": "tache",
+      "referenced_column": "id",
+      "constraint_name": "fk_utilisateur_tache_tache"
+    },
+    {
+      "table": "commande",
+      "column": "client_id",
+      "referenced_table": "client",
+      "referenced_column": "id",
+      "constraint_name": "fk_commande_client"
+    },
+    {
+      "table": "commande",
+      "column": "lignecommande_id",
+      "referenced_table": "lignecommande",
+      "referenced_column": "id",
+      "constraint_name": "fk_commande_lignecommande"
+    },
+    {
+      "table": "produit",
+      "column": "lignecommande_id",
+      "referenced_table": "lignecommande",
+      "referenced_column": "id",
+      "constraint_name": "fk_produit_lignecommande"
+    },
+    {
+      "table": "facture",
+      "column": "commande_id",
+      "referenced_table": "commande",
+      "referenced_column": "id",
+      "constraint_name": "fk_facture_commande"
+    },
+    {
+      "table": "paiement",
+      "column": "facture_id",
+      "referenced_table": "facture",
+      "referenced_column": "id",
+      "constraint_name": "fk_paiement_facture"
+    },
+    {
+      "table": "livraison",
+      "column": "commande_id",
+      "referenced_table": "commande",
+      "referenced_column": "id",
+      "constraint_name": "fk_livraison_commande"
+    },
+    {
+      "table": "produit",
+      "column": "fournisseur_id",
+      "referenced_table": "fournisseur",
+      "referenced_column": "id",
+      "constraint_name": "fk_produit_fournisseur"
+    },
+    {
+      "table": "produit",
+      "column": "categorie_id",
+      "referenced_table": "categorie",
+      "referenced_column": "id",
+      "constraint_name": "fk_produit_categorie"
+    },
+    {
+      "table": "categorie",
+      "column": "categorie_id",
+      "referenced_table": "categorie",
+      "referenced_column": "id",
+      "constraint_name": "fk_categorie_categorie"
+    },
+    {
+      "table": "document",
+      "column": "utilisateur_id",
+      "referenced_table": "utilisateur",
+      "referenced_column": "id",
+      "constraint_name": "fk_document_utilisateur"
+    },
+    {
+      "table": "projet_document",
+      "column": "projet_id",
+      "referenced_table": "projet",
+      "referenced_column": "id",
+      "constraint_name": "fk_projet_document_projet"
+    },
+    {
+      "table": "projet_document",
+      "column": "document_id",
+      "referenced_table": "document",
+      "referenced_column": "id",
+      "constraint_name": "fk_projet_document_document"
+    },
+    {
+      "table": "notification",
+      "column": "utilisateur_id",
+      "referenced_table": "utilisateur",
+      "referenced_column": "id",
+      "constraint_name": "fk_notification_utilisateur"
+    },
+    {
+      "table": "notification",
+      "column": "projet_id",
+      "referenced_table": "projet",
+      "referenced_column": "id",
+      "constraint_name": "fk_notification_projet"
+    }
+  ],
+  "constraints": []
+}

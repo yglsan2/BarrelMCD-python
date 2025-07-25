@@ -1,390 +1,478 @@
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
-from PyQt6.QtCore import Qt, QRectF, QPointF, QLineF
-from PyQt6.QtGui import QPainter, QPainterPath, QColor, QPen, QBrush, QFont
-import uuid
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Classe Association pour représenter les associations MCD selon la méthode Merise
+"""
+
+from PyQt5.QtWidgets import (
+    QGraphicsItemGroup, QGraphicsPolygonItem, QGraphicsTextItem,
+    QGraphicsDropShadowEffect, QInputDialog, QMenu, QAction,
+    QGraphicsItem
+)
+from PyQt5.QtCore import Qt, QRectF, QPointF, pyqtSignal, QObject
+from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPainter, QPolygonF, QPainterPath, QCursor
+
+from views.dark_theme import DarkTheme
+
+class AssociationSignals(QObject):
+    """Signaux pour l'association"""
+    association_renamed = pyqtSignal(str, str)  # old_name, new_name
+    cardinality_changed = pyqtSignal(str, str)  # entity, cardinality
+    attribute_added = pyqtSignal(str, str)  # name, type
+    attribute_removed = pyqtSignal(str)
 
 class Association(QGraphicsItem):
-    """Représente une association dans le diagramme MCD"""
+    """Classe représentant une association MCD selon Merise"""
     
-    def __init__(self, x: float, y: float, name: str = ""):
+    def __init__(self, name="Nouvelle association", pos=QPointF(0, 0)):
         super().__init__()
-        self.id = str(uuid.uuid4())
+        
+        # Créer l'objet de signaux
+        self.signals = AssociationSignals()
+        
+        # Propriétés de base
         self.name = name
         self.attributes = []
-        self.setPos(x, y)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges)
+        self.entities = []  # Liste des entités connectées
+        self.cardinalities = {}  # {entity_name: cardinality}
+        self.is_selected = False
         
-        # Style par défaut
-        self.style = {
-            "background": QColor(200, 200, 200),
-            "border": QColor(0, 0, 0),
-            "text": QColor(0, 0, 0),
-            "font": QFont("Arial", 10)
-        }
+        # Configuration visuelle
+        self.size = 60
+        self.min_size = 40
+        self.padding = 8
         
-        # Création des éléments graphiques
-        self.rect = QGraphicsRectItem(self)
-        self.title = QGraphicsTextItem(self)
-        self.title.setPlainText(name)
-        self.title.setDefaultTextColor(self.style['text'])
-        self.title.setFont(self.style['font'])
+        # Redimensionnement
+        self.resize_handles = []
+        self.is_resizing = False
+        self.resize_handle_size = 8
+        self.hovered_handle = None
         
-        # Mise à jour de la taille
-        self.update_size()
+        # Styles
+        self.setup_styles()
         
-    def boundingRect(self) -> QRectF:
-        """Retourne la zone englobante de l'association"""
-        return QRectF(-50, -30, 100, 60)
+        # Création des éléments visuels
+        self.create_visual_elements()
         
-    def paint(self, painter: QPainter, option, widget) -> None:
-        """Dessine l'association"""
-        # Dessiner le losange
-        painter.setPen(QPen(self.style["border"]))
-        painter.setBrush(QBrush(self.style["background"]))
+        # Position
+        self.setPos(pos)
         
-        rect = self.boundingRect()
-        center = rect.center()
-        width = rect.width()
-        height = rect.height()
+        # Configuration interactive
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+        self.setAcceptHoverEvents(True)
         
-        path = QPainterPath()
-        path.moveTo(center.x(), center.y() - height/2)
-        path.lineTo(center.x() + width/2, center.y())
-        path.lineTo(center.x(), center.y() + height/2)
-        path.lineTo(center.x() - width/2, center.y())
-        path.closeSubpath()
+        # Effet d'ombre
+        self.setup_shadow()
         
-        painter.drawPath(path)
+    def setup_styles(self):
+        """Configure les styles visuels"""
+        self.colors = DarkTheme.COLORS
+        self.style = DarkTheme.get_entity_style("association")
         
-        # Dessiner le nom
-        painter.setPen(self.style["text"])
-        painter.setFont(self.style["font"])
-        painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.name)
+        # Couleurs
+        self.bg_color = QColor(self.style["background"])
+        self.border_color = QColor(self.style["border"])
+        self.text_color = QColor(self.style["text"])
+        self.selected_color = QColor(self.style["selected"])
         
-    def setName(self, name: str) -> None:
-        """Définit le nom de l'association"""
-        self.name = name
-        self.update()
+        # Polices
+        self.title_font = QFont("Segoe UI", 10, QFont.Bold)
+        self.attribute_font = QFont("Segoe UI", 8)
         
-    def setStyle(self, style: dict) -> None:
-        """Définit le style de l'association"""
-        self.style = style
-        self.update()
+    def create_visual_elements(self):
+        """Crée les éléments visuels de l'association (losange)"""
+        # Les éléments seront dessinés dans paint()
+        pass
         
-    def addAttribute(self, name: str, type: str) -> None:
+    def create_diamond(self):
+        """Crée la forme de losange"""
+        diamond = QGraphicsPolygonItem()
+        
+        # Points du losange
+        center_x = self.size / 2
+        center_y = self.size / 2
+        half_size = self.size / 2
+        
+        points = [
+            QPointF(center_x, center_y - half_size),  # Haut
+            QPointF(center_x + half_size, center_y),  # Droite
+            QPointF(center_x, center_y + half_size),  # Bas
+            QPointF(center_x - half_size, center_y)   # Gauche
+        ]
+        
+        polygon = QPolygonF(points)
+        diamond.setPolygon(polygon)
+        diamond.setBrush(QBrush(self.bg_color))
+        diamond.setPen(QPen(self.border_color, 2))
+        
+        return diamond
+        
+    def setup_shadow(self):
+        """Configure l'effet d'ombre"""
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(8)
+        shadow.setColor(QColor(self.colors["shadow"]))
+        shadow.setOffset(1, 1)
+        self.setGraphicsEffect(shadow)
+        
+    def add_entity(self, entity_name, cardinality="1"):
+        """Ajoute une entité à l'association"""
+        if entity_name not in self.entities:
+            self.entities.append(entity_name)
+            self.cardinalities[entity_name] = cardinality
+            
+    def remove_entity(self, entity_name):
+        """Retire une entité de l'association"""
+        if entity_name in self.entities:
+            self.entities.remove(entity_name)
+            if entity_name in self.cardinalities:
+                del self.cardinalities[entity_name]
+                
+    def set_cardinality(self, entity_name, cardinality):
+        """Définit la cardinalité pour une entité"""
+        if entity_name in self.entities:
+            self.cardinalities[entity_name] = cardinality
+            self.signals.cardinality_changed.emit(entity_name, cardinality)
+            
+    def add_attribute(self, name, type_name):
         """Ajoute un attribut à l'association"""
-        self.attributes.append({
+        attribute = {
             "name": name,
-            "type": type
-        })
-        self.update()
-        
-    def removeAttribute(self, name: str) -> None:
-        """Supprime un attribut de l'association"""
-        self.attributes = [attr for attr in self.attributes if attr["name"] != name]
-        self.update()
-        
-    def to_dict(self) -> dict:
-        """Convertit l'association en dictionnaire pour la sauvegarde"""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "pos": {
-                "x": self.pos().x(),
-                "y": self.pos().y()
-            },
-            "attributes": self.attributes,
-            "style": {
-                "background": self.style["background"].name(),
-                "border": self.style["border"].name(),
-                "text": self.style["text"].name(),
-                "font": {
-                    "family": self.style["font"].family(),
-                    "size": self.style["font"].pointSize()
-                }
-            }
+            "type": type_name,
+            "is_primary_key": False,
+            "nullable": True
         }
+        self.attributes.append(attribute)
+        self.update_display()  # Redessiner l'association
+        self.signals.attribute_added.emit(name, type_name)
         
-    @classmethod
-    def from_dict(cls, data: dict) -> 'Association':
-        """Crée une association à partir d'un dictionnaire"""
-        association = cls(data["pos"]["x"], data["pos"]["y"], data["name"])
-        association.id = data["id"]
-        association.attributes = data["attributes"]
+    def remove_attribute(self, name):
+        """Supprime un attribut"""
+        for i, attribute in enumerate(self.attributes):
+            if attribute["name"] == name:
+                self.attributes.pop(i)
+                self.update_display()  # Redessiner l'association
+                self.signals.attribute_removed.emit(name)
+                break
+                
+    def update_display(self):
+        """Met à jour l'affichage de l'association avec les attributs"""
+        # Recalculer la taille selon les attributs
+        min_height = 60 + len(self.attributes) * 20
+        self.size = max(self.size, min_height)
         
-        # Restaurer le style
-        association.style = {
-            "background": QColor(data["style"]["background"]),
-            "border": QColor(data["style"]["border"]),
-            "text": QColor(data["style"]["text"]),
-            "font": QFont(
-                data["style"]["font"]["family"],
-                data["style"]["font"]["size"]
+        # Redessiner l'association
+        self.update()
+        
+    def rename(self, new_name):
+        """Renomme l'association"""
+        old_name = self.name
+        self.name = new_name
+        self.update()  # Redessiner l'association
+        self.signals.association_renamed.emit(old_name, new_name)
+        
+    def rename_association(self):
+        """Renomme l'association"""
+        new_name, ok = QInputDialog.getText(None, "Renommer l'association", 
+                                           "Nouveau nom:", text=self.name)
+        if ok and new_name.strip():
+            old_name = self.name
+            self.name = new_name.strip()
+            self.update_display()
+            self.signals.association_renamed.emit(old_name, self.name)
+            
+    def set_selected(self, selected):
+        """Définit l'état de sélection"""
+        self.is_selected = selected
+        if selected:
+            self.setZValue(10)  # Mettre au premier plan
+        else:
+            self.setZValue(0)  # Remettre au plan normal
+        self.update()  # Redessiner l'association
+            
+    def create_resize_handles(self):
+        """Crée les handles de redimensionnement"""
+        self.resize_handles = []
+        width = self.size * 1.5
+        height = self.size
+        
+        # 8 handles autour de l'ovoïde
+        handles = [
+            (-width/2, -height/2),  # Coin supérieur gauche
+            (0, -height/2),         # Milieu haut
+            (width/2, -height/2),   # Coin supérieur droit
+            (width/2, 0),           # Milieu droite
+            (width/2, height/2),    # Coin inférieur droit
+            (0, height/2),          # Milieu bas
+            (-width/2, height/2),   # Coin inférieur gauche
+            (-width/2, 0)           # Milieu gauche
+        ]
+        
+        for i, (x, y) in enumerate(handles):
+            self.resize_handles.append({
+                'pos': QPointF(x, y),
+                'cursor': self.get_resize_cursor(i),
+                'index': i
+            })
+    
+    def get_resize_cursor(self, handle_index):
+        """Retourne le curseur approprié pour chaque handle"""
+        cursors = [
+            Qt.SizeFDiagCursor,  # Coin supérieur gauche
+            Qt.SizeVerCursor,     # Milieu haut
+            Qt.SizeBDiagCursor,   # Coin supérieur droit
+            Qt.SizeHorCursor,     # Milieu droite
+            Qt.SizeFDiagCursor,   # Coin inférieur droit
+            Qt.SizeVerCursor,     # Milieu bas
+            Qt.SizeBDiagCursor,   # Coin inférieur gauche
+            Qt.SizeHorCursor      # Milieu gauche
+        ]
+        return cursors[handle_index]
+    
+    def get_handle_at_pos(self, pos):
+        """Retourne le handle à la position donnée"""
+        for handle in self.resize_handles:
+            handle_rect = QRectF(
+                handle['pos'].x() - self.resize_handle_size/2,
+                handle['pos'].y() - self.resize_handle_size/2,
+                self.resize_handle_size,
+                self.resize_handle_size
             )
-        }
-        
-        return association
-        
-    def update_size(self):
-        # Calcul de la taille en fonction du contenu
-        title_width = self.title.boundingRect().width()
-        title_height = self.title.boundingRect().height()
-        
-        # Espace pour les attributs
-        attr_height = len(self.attributes) * 20 if self.attributes else 0
-        
-        # Taille totale
-        width = max(title_width + 40, 150)  # Largeur minimale de 150
-        height = title_height + attr_height + 20
-        
-        # Mise à jour du rectangle
-        self.rect.setRect(0, 0, width, height)
-        
-        # Position du titre
-        self.title.setPos(10, 5)
-        
-        # Mise à jour des attributs
-        self.update_attributes()
-        
-    def update_attributes(self):
-        # Suppression des anciens attributs
-        for attr in self.attributes:
-            if hasattr(attr, 'text_item'):
-                self.scene().removeItem(attr['text_item'])
-        
-        # Création des nouveaux attributs
-        y = self.title.boundingRect().height() + 10
-        for attr in self.attributes:
-            text_item = QGraphicsTextItem(self)
-            text_item.setPlainText(f"{attr['name']}: {attr['type']}")
-            text_item.setDefaultTextColor(self.style['text'])
-            text_item.setFont(self.style['font'])
-            text_item.setPos(10, y)
-            attr['text_item'] = text_item
-            y += 20
-            
-    def add_attribute(self, name, type="VARCHAR(255)"):
-        self.attributes.append({
-            'name': name,
-            'type': type,
-            'constraints': []
-        })
-        self.update_size()
-        
-    def paint(self, painter, option, widget):
-        # Configuration du peintre
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # Création du chemin avec coins arrondis
-        path = QPainterPath()
-        rect = self.rect.rect()
-        radius = 3
-        
-        path.moveTo(rect.left() + radius, rect.top())
-        path.lineTo(rect.right() - radius, rect.top())
-        path.quadTo(rect.right(), rect.top(),
-                   rect.right(), rect.top() + radius)
-        path.lineTo(rect.right(), rect.bottom() - radius)
-        path.quadTo(rect.right(), rect.bottom(),
-                   rect.right() - radius, rect.bottom())
-        path.lineTo(rect.left() + radius, rect.bottom())
-        path.quadTo(rect.left(), rect.bottom(),
-                   rect.left(), rect.bottom() - radius)
-        path.lineTo(rect.left(), rect.top() + radius)
-        path.quadTo(rect.left(), rect.top(),
-                   rect.left() + radius, rect.top())
-        
-        # Dessin du fond
-        painter.setBrush(QBrush(self.style['background']))
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawPath(path)
-        
-        # Dessin de la bordure
-        pen = QPen(self.style['border'])
-        pen.setWidth(1)
-        painter.setPen(pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawPath(path)
-        
-        # Dessin de la ligne de séparation
-        if self.attributes:
-            y = self.title.boundingRect().height() + 5
-            painter.drawLine(rect.left() + 5, y, rect.right() - 5, y)
-            
+            if handle_rect.contains(pos):
+                return handle
+        return None
+    
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
+        """Gère l'événement de clic"""
+        if event.button() == Qt.LeftButton:
+            # Vérifier si on clique sur un handle de redimensionnement
+            handle = self.get_handle_at_pos(event.pos())
+            if handle:
+                self.is_resizing = True
+                self.hovered_handle = handle
+                self.setCursor(handle['cursor'])
+                event.accept()
+                return
+            
             self.setSelected(True)
-        super().mousePressEvent(event)
+            self.setFocus()
+            # Laisser le canvas gérer le déplacement
+            event.accept()
+        else:
+            super().mousePressEvent(event)
+    
+    def mouseMoveEvent(self, event):
+        """Gère l'événement de mouvement"""
+        if self.is_resizing and self.hovered_handle:
+            # Redimensionner selon le handle
+            self.resize_from_handle(event.pos(), self.hovered_handle)
+            event.accept()
+            return
         
+        # Vérifier le survol des handles
+        handle = self.get_handle_at_pos(event.pos())
+        if handle:
+            self.setCursor(handle['cursor'])
+        else:
+            self.setCursor(Qt.SizeAllCursor)
+        
+        super().mouseMoveEvent(event)
+    
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
+        """Gère l'événement de relâchement"""
+        if event.button() == Qt.LeftButton:
+            if self.is_resizing:
+                self.is_resizing = False
+                self.hovered_handle = None
+                self.setCursor(Qt.ArrowCursor)
+                event.accept()
+                return
+            
             self.setSelected(False)
         super().mouseReleaseEvent(event)
-
-class FlexibleArrow(QGraphicsItem):
-    def __init__(self, start_item, end_item):
-        super().__init__()
-        self.start_item = start_item
-        self.end_item = end_item
-        self.style = {
-            'color': QColor("#2C3E50"),
-            'width': 2,
-            'arrow_size': 10
+    
+    def resize_from_handle(self, pos, handle):
+        """Redimensionne l'association selon le handle"""
+        # Calculer la nouvelle taille selon la position du handle
+        width = self.size * 1.5
+        height = self.size
+        
+        # Ajuster selon le handle
+        if handle['index'] in [0, 2, 4, 6]:  # Coins
+            # Redimensionner proportionnellement
+            new_width = max(self.min_size * 1.5, abs(pos.x()) * 2)
+            new_height = max(self.min_size, abs(pos.y()) * 2)
+            self.size = min(new_width / 1.5, new_height)
+        elif handle['index'] in [1, 5]:  # Haut/Bas
+            new_height = max(self.min_size, abs(pos.y()) * 2)
+            self.size = new_height
+        elif handle['index'] in [3, 7]:  # Gauche/Droite
+            new_width = max(self.min_size * 1.5, abs(pos.x()) * 2)
+            self.size = new_width / 1.5
+        
+        # Mettre à jour les handles
+        self.create_resize_handles()
+        self.update()
+        
+    def hoverEnterEvent(self, event):
+        """Gère l'entrée de la souris"""
+        self.setCursor(Qt.SizeAllCursor)
+        super().hoverEnterEvent(event)
+        
+    def hoverLeaveEvent(self, event):
+        """Gère la sortie de la souris"""
+        self.setCursor(Qt.ArrowCursor)
+        super().hoverLeaveEvent(event)
+            
+    def mouseDoubleClickEvent(self, event):
+        """Gère le double-clic pour éditer l'association"""
+        if event.button() == Qt.LeftButton:
+            self.edit_association()
+            
+    def edit_association(self):
+        """Ouvre l'éditeur d'association"""
+        # Menu pour choisir ce qu'éditer
+        menu = QMenu()
+        rename_action = menu.addAction("Renommer l'association")
+        
+        # Connexions
+        rename_action.triggered.connect(self.rename_association)
+        
+        menu.exec_(QCursor.pos())
+        
+    def add_attribute_dialog(self):
+        """Dialogue pour ajouter un attribut"""
+        name, ok = QInputDialog.getText(None, "Ajouter un attribut", "Nom de l'attribut:")
+        if ok and name.strip():
+            attr_type, ok2 = QInputDialog.getItem(None, "Type d'attribut", 
+                                                "Type:", ["VARCHAR", "INTEGER", "DECIMAL", "DATE", "BOOLEAN"], 0, False)
+            if ok2:
+                self.add_attribute(name.strip(), attr_type)
+                
+    def edit_attributes_dialog(self):
+        """Dialogue pour éditer les attributs"""
+        # TODO: Implémenter un dialogue plus avancé pour éditer les attributs
+        pass
+            
+    def edit_cardinality(self, entity_name):
+        """Ouvre le dialogue d'édition de cardinalité"""
+        cardinalities = ["0,1", "1,1", "0,N", "1,N", "N,N"]
+        current = self.cardinalities.get(entity_name, "1,1")
+        
+        cardinality, ok = QInputDialog.getItem(
+            None, f"Cardinalité pour {entity_name}", 
+            "Cardinalité:", cardinalities, 
+            cardinalities.index(current) if current in cardinalities else 1, 
+            False
+        )
+        if ok:
+            self.set_cardinality(entity_name, cardinality)
+            
+    def center_association(self):
+        """Centre l'association dans la vue"""
+        scene_rect = self.scene().sceneRect()
+        center = scene_rect.center()
+        self.setPos(center.x() - self.size / 2, center.y() - self.size / 2)
+        
+    def align_to_grid(self):
+        """Aligne l'association sur la grille"""
+        pos = self.pos()
+        grid_size = 20
+        new_x = round(pos.x() / grid_size) * grid_size
+        new_y = round(pos.y() / grid_size) * grid_size
+        self.setPos(new_x, new_y)
+        
+    def get_data(self):
+        """Retourne les données de l'association pour export"""
+        return {
+            "name": self.name,
+            "position": {"x": self.pos().x(), "y": self.pos().y()},
+            "entities": self.entities.copy(),
+            "cardinalities": self.cardinalities.copy(),
+            "attributes": self.attributes.copy()
         }
         
-        # Cardinalités
-        self.start_cardinality = "1"
-        self.end_cardinality = "1"
+    def set_data(self, data):
+        """Charge les données dans l'association"""
+        self.name = data.get("name", "Nouvelle association")
         
-        # Style de la flèche
-        self.is_inheritance = False
+        pos_data = data.get("position", {"x": 0, "y": 0})
+        self.setPos(pos_data["x"], pos_data["y"])
         
-        # Mise à jour de la position
-        self.update_position()
+        # Charger les entités et cardinalités
+        self.entities = data.get("entities", [])
+        self.cardinalities = data.get("cardinalities", {})
         
-    def set_style(self, style):
-        self.style.update(style)
-        self.update()
+        # Charger les attributs
+        self.attributes = data.get("attributes", [])
         
-    def set_inheritance_style(self):
-        self.is_inheritance = True
-        self.style['arrow_size'] = 15
-        self.update()
-        
-    def update_position(self):
-        # Calcul des points de connexion
-        start_rect = self.start_item.sceneBoundingRect()
-        end_rect = self.end_item.sceneBoundingRect()
-        
-        # Point de départ
-        start_center = start_rect.center()
-        end_center = end_rect.center()
-        
-        # Calcul de l'intersection avec les rectangles
-        line = QLineF(start_center, end_center)
-        start_point = self.intersect_rect(start_rect, line)
-        end_point = self.intersect_rect(end_rect, line)
-        
-        # Mise à jour de la position
-        self.setPos(0, 0)
-        self.prepareGeometryChange()
-        self.start_point = start_point
-        self.end_point = end_point
-        
-    def intersect_rect(self, rect, line):
-        # Calcul de l'intersection entre une ligne et un rectangle
-        # Retourne le point d'intersection le plus proche
-        points = []
-        
-        # Intersection avec les côtés du rectangle
-        for i in range(4):
-            p1 = rect.topLeft() if i == 0 else rect.topRight() if i == 1 else rect.bottomRight() if i == 2 else rect.bottomLeft()
-            p2 = rect.topRight() if i == 0 else rect.bottomRight() if i == 1 else rect.bottomLeft() if i == 2 else rect.topLeft()
-            
-            side = QLineF(p1, p2)
-            intersection = QPointF()
-            if line.intersect(side, intersection) == QLineF.IntersectType.BoundedIntersection:
-                points.append(intersection)
-        
-        # Retourner le point le plus proche du centre de la ligne
-        if points:
-            line_center = line.center()
-            return min(points, key=lambda p: (p - line_center).manhattanLength())
-        return line.p1()
+        self.update()  # Redessiner l'association
         
     def boundingRect(self):
-        if not hasattr(self, 'start_point') or not hasattr(self, 'end_point'):
-            return QRectF()
-            
-        # Rectangle englobant avec marge pour la flèche
-        rect = QRectF(self.start_point, self.end_point).normalized()
-        margin = self.style['arrow_size']
-        rect.adjust(-margin, -margin, margin, margin)
-        return rect
+        """Retourne le rectangle englobant de l'association"""
+        # Calculer la taille selon les attributs
+        width = max(120, len(self.name) * 8 + 40)
+        height = 60 + len(self.attributes) * 20
+        return QRectF(-width/2, -height/2, width, height)
+        
+    def shape(self):
+        """Retourne la forme de l'association pour la détection de clic"""
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path
         
     def paint(self, painter, option, widget):
-        if not hasattr(self, 'start_point') or not hasattr(self, 'end_point'):
-            return
-            
-        # Configuration du peintre
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        """Dessine l'association (forme ovoïdale)"""
+        # Configuration de l'antialiasing
+        painter.setRenderHint(QPainter.Antialiasing)
         
-        # Style de la ligne
-        pen = QPen(self.style['color'])
-        pen.setWidth(self.style['width'])
-        if self.is_inheritance:
-            pen.setStyle(Qt.PenStyle.DashLine)
-        painter.setPen(pen)
+        # Dimensions de l'ovoïde
+        center_x = 0
+        center_y = 0
+        width = self.size * 1.5  # Plus large que haut pour l'effet ovoïdal
+        height = self.size
         
-        # Dessin de la ligne
-        painter.drawLine(self.start_point, self.end_point)
-        
-        # Dessin de la flèche
-        self.draw_arrow(painter, self.end_point, self.start_point)
-        
-        # Dessin des cardinalités
-        self.draw_cardinalities(painter)
-        
-    def draw_arrow(self, painter, end_point, start_point):
-        # Calcul des points de la flèche
-        angle = QLineF(end_point, start_point).angle()
-        arrow_size = self.style['arrow_size']
-        
-        # Points de la flèche
-        p1 = end_point + QPointF(
-            arrow_size * 0.5 * (angle + 30),
-            arrow_size * 0.5 * (angle - 30)
-        )
-        p2 = end_point + QPointF(
-            arrow_size * 0.5 * (angle - 30),
-            arrow_size * 0.5 * (angle + 30)
-        )
-        
-        # Dessin de la flèche
+        # Créer le chemin de l'ovoïde
         path = QPainterPath()
-        path.moveTo(end_point)
-        path.lineTo(p1)
-        path.lineTo(p2)
-        path.closeSubpath()
         
-        painter.setBrush(QBrush(self.style['color']))
+        # Dessiner une ellipse allongée (ovoïde)
+        rect = QRectF(-width/2, -height/2, width, height)
+        path.addEllipse(rect)
+        
+        # Couleur de remplissage
+        painter.setBrush(QBrush(self.bg_color))
+        
+        # Bordure selon l'état de sélection
+        if self.is_selected:
+            painter.setPen(QPen(self.selected_color, 3))
+        else:
+            painter.setPen(QPen(self.border_color, 2))
+            
         painter.drawPath(path)
         
-    def draw_cardinalities(self, painter):
-        # Configuration du texte
-        font = QFont("Arial", 8)
-        painter.setFont(font)
-        painter.setPen(self.style['color'])
+        # Dessiner le titre
+        painter.setPen(QPen(self.text_color))
+        painter.setFont(self.title_font)
         
-        # Position des cardinalités
-        start_text = self.start_cardinality
-        end_text = self.end_cardinality
+        # Centrer le texte dans l'ovoïde
+        text_rect = QRectF(-width/2, -height/2, width, height)
+        painter.drawText(text_rect, Qt.AlignCenter, self.name)
         
-        # Calcul des positions
-        line_center = QLineF(self.start_point, self.end_point).center()
-        normal = QLineF(self.start_point, self.end_point).normalVector().unitVector()
-        offset = 15
-        
-        # Dessin des cardinalités
-        start_pos = line_center + normal * offset
-        end_pos = line_center - normal * offset
-        
-        painter.drawText(start_pos, start_text)
-        painter.drawText(end_pos, end_text)
-        
-    def cycle_start_cardinality(self):
-        cardinalities = ["0", "1", "n", "0,1", "1,n", "0,n"]
-        current_index = cardinalities.index(self.start_cardinality)
-        self.start_cardinality = cardinalities[(current_index + 1) % len(cardinalities)]
-        self.update()
-        
-    def cycle_end_cardinality(self):
-        cardinalities = ["0", "1", "n", "0,1", "1,n", "0,n"]
-        current_index = cardinalities.index(self.end_cardinality)
-        self.end_cardinality = cardinalities[(current_index + 1) % len(cardinalities)]
-        self.update()
-        
-    def update_cardinality_display(self):
-        self.update()
+        # Dessiner les handles de redimensionnement si sélectionné
+        if self.is_selected:
+            self.create_resize_handles()
+            painter.setPen(QPen(QColor(255, 255, 255), 1))
+            painter.setBrush(QBrush(QColor(100, 150, 255)))
+            
+            for handle in self.resize_handles:
+                handle_rect = QRectF(
+                    handle['pos'].x() - self.resize_handle_size/2,
+                    handle['pos'].y() - self.resize_handle_size/2,
+                    self.resize_handle_size,
+                    self.resize_handle_size
+                )
+                painter.drawRect(handle_rect)

@@ -47,6 +47,7 @@ graph TD
 │  ▪ JSON        │
 │  ▪ CSV         │
 │  ▪ Excel       │
+│  ▪ Markdown    │ ✨ Nouveau !
 └─────────────────┘
 ```
 
@@ -76,6 +77,24 @@ MCD ──► UML
  └──► Documentation
 ```
 
+### 📝 Import Markdown ✨ Nouveau !
+- **Parsing automatique** des fichiers `.md`
+- **Détection intelligente** des entités et associations
+- **Validation en temps réel** du MCD
+- **Interface intuitive** avec prévisualisation
+- **Génération de templates** pour démarrer rapidement
+
+```markdown
+## Entité
+- attribut (type) : description
+- id (integer) PK : clé primaire
+
+### Entité1 <-> Entité2 : Association
+**Description de l'association**
+Entité1 : 1,1
+Entité2 : 0,n
+```
+
 ## 🚀 Démarrage rapide
 
 ### Prérequis
@@ -97,6 +116,35 @@ pip install -r requirements.txt
 ```
 
 ### Utilisation
+
+#### Import depuis Markdown
+```bash
+# Lancer l'application
+python main.py
+
+# Utiliser le raccourci Ctrl+M ou cliquer sur le bouton "Markdown"
+# Puis importer votre fichier .md ou éditer directement
+```
+
+#### Exemple de fichier Markdown
+```markdown
+# Système de Gestion de Bibliothèque
+
+## Livre
+- id (integer) PK : identifiant unique
+- titre (varchar) : titre du livre
+- auteur (varchar) : nom de l'auteur
+
+## Lecteur
+- id (integer) PK : identifiant unique
+- nom (varchar) : nom du lecteur
+- email (varchar) : adresse email
+
+### Livre <-> Lecteur : Emprunte
+**Un lecteur peut emprunter plusieurs livres**
+Livre : 1,1
+Lecteur : 0,n
+```
 
 ```bash
 # Lancer l'application

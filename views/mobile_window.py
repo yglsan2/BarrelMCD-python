@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPainter, QColor, QPen
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QPainter, QColor, QPen
 
 from .mobile_toolbar import MobileToolBar
 from .mobile_status_bar import MobileStatusBar

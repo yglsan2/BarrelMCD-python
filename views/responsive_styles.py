@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QFont, QColor, QIcon
-from PyQt6.QtWidgets import QSizePolicy
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QFont, QColor, QIcon
+from PyQt5.QtWidgets import QSizePolicy
 
 class ResponsiveStyles:
     """Gestion des styles responsifs"""

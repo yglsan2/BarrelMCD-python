@@ -1,0 +1,555 @@
+# Français
+
+msgid "Chargement des packages"
+msgstr "Chargement des packages"
+# Menu
+msgid "Katyusha!"
+msgstr "Katyusha!"
+
+
+msgid "Projet"
+msgstr "Projet"
+
+msgid "Modèle Merise"
+msgstr "Modèle Merise"
+
+msgid "Diagramme de classes"
+msgstr "Diagramme de classes"
+
+msgid "Base de données"
+msgstr "Base de données"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Aide"
+msgstr "Aide"
+
+msgid "Préférences"
+msgstr "Préférences"
+
+msgid "Mises à jour"
+msgstr "Mises à jour"
+
+msgid "Nouveau projet"
+msgstr "Nouveau projet"
+
+msgid "Sauvegarder le projet sous ..."
+msgstr "Sauvegarder le projet sous ..."
+
+msgid "Sauvegarder le projet"
+msgstr "Sauvegarder le projet"
+
+msgid "Charger un projet"
+msgstr "Charger un projet"
+
+msgid "Projets récents"
+msgstr "Projets récents"
+
+msgid "Supprimer la liste"
+msgstr "Supprimer la liste"
+
+msgid "Préférences du projet"
+msgstr "Préférences du projet"
+
+msgid "Quitter"
+msgstr "Quitter"
+
+msgid "Configurer la base de donnée"
+msgstr "Configurer la base de donnée"
+
+msgid "Connexion à une base de donnée"
+msgstr "Connexion à une base de donnée"
+
+msgid "Générer le script SQL du MCD"
+msgstr "Générer le script SQL du MCD"
+
+msgid "Générer le MCD d'un script SQL"
+msgstr "Générer le MCD d'un script SQL"
+
+msgid "Liste des objets du MCD"
+msgstr "Liste des objets du MCD"
+
+msgid "Ajouter une entité"
+msgstr "Ajouter une entité"
+
+msgid "Éditer une entité"
+msgstr "Éditer une entité"
+
+msgid "Supprimer une entité"
+msgstr "Supprimer une entité"
+
+msgid "Ajouter une relation"
+msgstr "Ajouter une relation"
+
+msgid "Éditer une relation"
+msgstr "Éditer une relation"
+
+msgid "Supprimer une relation"
+msgstr "Supprimer une relation"
+
+msgid "Exporter le MCD en SVG"
+msgstr "Exporter le MCD en SVG"
+
+msgid "Exporter le MCD en Post Script"
+msgstr "Exporter le MCD en Post Script"
+
+msgid "Vérifier l'intégrité du MCD"
+msgstr "Vérifier l'intégrité du MCD"
+
+msgid "À propos"
+msgstr "À propos"
+
+msgid "License"
+msgstr "License"
+
+msgid "Générer du code PHP"
+msgstr "Générer du code PHP"
+
+msgid "Générer du code PHP objet pour Doctrine ORM"
+msgstr "Générer du code PHP objet pour Doctrine ORM"
+
+# Génération de code
+msgid "Générer le code d'accès à la base de données pour PHP procédural"
+msgstr "Générer le code d'accès à la base de données pour PHP procédural"
+
+msgid "Code PHP procédural"
+msgstr "Code PHP procédural"
+
+msgid "Préfixe des fonctions : "
+msgstr "Préfixe des fonctions : "
+
+msgid "Toutes les fonctions dans un seul fichier : "
+msgstr "Toutes les fonctions dans un seul fichier : "
+
+msgid "Générer le code d'accès à la base de données pour l'ORM Doctrine"
+msgstr "Générer le code d'accès à la base de données pour l'ORM Doctrine"
+
+msgid "Code PHP objet des modèles pour Doctrine"
+msgstr "Code PHP objet des modèles pour Doctrine"
+
+msgid "Namespace : "
+msgstr "Namespace : "
+
+msgid "Préfixe des classes : "
+msgstr "Préfixe des classes : "
+
+msgid "Toutes les classes dans un seul fichier : "
+msgstr "Toutes les classes dans un seul fichier : "
+
+msgid "Attention, la génération de code pour Doctrine est encore expérimentale!"
+msgstr "Attention, la génération de code pour Doctrine est encore expérimentale!"
+
+# Génération SQL
+msgid "Sélectionner le SGBD cible :"
+msgstr "Sélectionner le SGBD cible :"
+
+msgid "Générer un script SQL"
+msgstr "Générer un script SQL"
+
+msgid "Script SQL enregistré automatiquement dans : "
+msgstr "Script SQL enregistré automatiquement dans : "
+
+msgid "Script SQL"
+msgstr "Script SQL"
+
+# Erreurs MCD
+msgid "Erreurs du MCD"
+msgstr "Erreurs du MCD"
+
+# Licence
+msgid "J'ai compris"
+msgstr "J'ai compris"
+
+msgid "License - GNU GPL v3.0"
+msgstr "License - GNU GPL v3.0"
+
+# Interface principale
+msgid "Ajouter une entité"
+msgstr "Ajouter une entité"
+
+msgid "Ajouter une relation"
+msgstr "Ajouter une relation"
+
+msgid "Ajouter un héritage"
+msgstr "Ajouter un héritage"
+
+msgid "Ajouter une étiquette"
+msgstr "Ajouter une étiquette"
+
+msgid "Ajouter une procédure stockée"
+msgstr "Ajouter une procédure stockée"
+
+msgid "Objets du MCD"
+msgstr "Objets du MCD"
+
+# Ajout d'une table
+msgid "Ajouter une entité"
+msgstr "Ajouter une entité"
+
+msgid "Éditer l'entité %s"
+msgstr "Éditer l'entité %s"
+
+msgid "Nom de l'entité : "
+msgstr "Nom de l'entité : "
+
+msgid "Entite_%s"
+msgstr "Entite_%s"
+
+msgid "Liste des attributs de l'entité"
+msgstr "Liste des attributs de l'entité"
+
+msgid "Nom"
+msgstr "Nom"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Taille"
+msgstr "Taille"
+
+msgid "Unique?"
+msgstr "Unique?"
+
+msgid "Non signé?"
+msgstr "Non signé?"
+
+msgid "Clef\nprimaire?"
+msgstr "Clef\nprimaire?"
+
+msgid "Incrémentation\nautomatique?"
+msgstr "Incrémentation\nautomatique?"
+
+msgid "Valeur\npar défaut"
+msgstr "Valeur\npar défaut"
+
+msgid "Ajouter une ligne"
+msgstr "Ajouter une ligne"
+
+msgid "Nom de la nouvelle entité :"
+msgstr "Nom de la nouvelle entité :"
+
+msgid "Le nom de l'entité ne peut pas être vide"
+msgstr "Le nom de l'entité ne peut pas être vide"
+
+msgid "Description de l'entité"
+msgstr "Description de l'entité"
+
+msgid "Ajouter des attributs"
+msgstr "Ajouter des attributs"
+
+msgid "Choisir une entité :"
+msgstr "Choisir une entité :"
+
+msgid "Choisir une entité"
+msgstr "Choisir une entité"
+
+# Ajout d'une association
+msgid "Ajouter une association"
+msgstr "Ajouter une association"
+
+msgid "Éditer l'association : %s"
+msgstr "Éditer l'association : %s"
+
+msgid "Nom de l'association : "
+msgstr "Nom de l'association : "
+
+msgid "Liste des liens de l'association"
+msgstr "Liste des liens de l'association"
+
+msgid "Entité concernée"
+msgstr "Entité concernée"
+
+msgid "Type de lien"
+msgstr "Type de lien"
+
+msgid "Identifiant relatif?"
+msgstr "Identifiant relatif?"
+
+msgid "Liste des attributs de l'association"
+msgstr "Liste des attributs de l'association"
+
+msgid "Les informations saisies sont incomplètes"
+msgstr "Les informations saisies sont incomplètes"
+
+# Ajout d'un lien à une relation
+msgid "Sélectionner l'entité concernée par le lien :"
+msgstr "Sélectionner l'entité concernée par le lien :"
+
+msgid "Entité"
+msgstr "Entité"
+
+msgid "Type de lien"
+msgstr "Type de lien"
+
+msgid "Relatif?"
+msgstr "Relatif?"
+
+msgid "Il n'y a pas assez d'entités dans le MCD."
+msgstr "Il n'y a pas assez d'entités dans le MCD."
+
+# Ajout d'une étiquette
+msgid "Étiquette_%s"
+msgstr "Étiquette_%s"
+
+msgid "Ajouter une étiquette"
+msgstr "Ajouter une étiquette"
+
+msgid "Éditer l'étiquette %s"
+msgstr "Éditer l'étiquette %s"
+
+msgid "Nom de l'étiquette : "
+msgstr "Nom de l'étiquette : "
+
+msgid "Texte de l'étiquette"
+msgstr "Texte de l'étiquette"
+
+# Supprimer une entité
+msgid "Sure de vouloir supprimer cette "
+msgstr "Sure de vouloir supprimer cette "
+
+# Ajout d'un attribut à une table ou une étiquette
+msgid "Ajouter un attribut"
+msgstr "Ajouter un attribut"
+
+msgid "Propriétés de l'attribut"
+msgstr "Propriétés de l'attribut"
+
+msgid "Nom de l'attribut : "
+msgstr "Nom de l'attribut : "
+
+msgid "Type de l'attribut : "
+msgstr "Type de l'attribut : "
+
+msgid "Complément du type de l'attribut : "
+msgstr "Complément du type de l'attribut : "
+
+msgid "Taille de l'attribut : "
+msgstr "Taille de l'attribut : "
+
+msgid "Attention, tous les type ne possèdent pas de taille. Si c'est le cas, ce paramètre sera simplement ignoré.\nLaisser \"0\" pour utiliser la valeur par défaut du SGBD."
+msgstr "Attention, tous les type ne possèdent pas de taille. Si c'est le cas, ce paramètre sera simplement ignoré.\nLaisser \"0\" pour utiliser la valeur par défaut du SGBD."
+
+msgid "Cocher si l'attribut peu être nul : "
+msgstr "Cocher si l'attribut peu être nul : "
+
+msgid "Valeur par défaut de l'attribut : "
+msgstr "Valeur par défaut de l'attribut : "
+
+msgid "Incrémentation automatique? : "
+msgstr "Incrémentation automatique? : "
+
+msgid "Cocher si l'attribut est une clef primaire : "
+msgstr "Cocher si l'attribut est une clef primaire : "
+
+msgid "Cocher si l'attribut est un identifiant : "
+msgstr "Cocher si l'attribut est un identifiant : "
+
+msgid "Accès de l'attribut : "
+msgstr "Accès de l'attribut : "
+
+# Supprimer un attribut
+msgid "Supprimer un attribut"
+msgstr "Supprimer un attribut"
+
+msgid "Sélectionner un attribut à supprimer"
+msgstr "Sélectionner un attribut à supprimer"
+
+msgid "Aucun attribut n'a été sélectionné"
+msgstr "Aucun attribut n'a été sélectionné"
+
+# Ajout d'un héritage
+msgid "Le MCD doit contenir au moins une entité pour ajouter un héritage"
+msgstr "Le MCD doit contenir au moins une entité pour ajouter un héritage"
+
+msgid "Ajouter un héritage"
+msgstr "Ajouter un héritage"
+
+msgid "Éditer l'héritage : %s"
+msgstr "Éditer l'héritage : %s"
+
+msgid "Entité mère : "
+msgstr "Entité mère : "
+
+msgid "Cliquer pour choisir une table mère"
+msgstr "Cliquer pour choisir une table mère"
+
+msgid "Liste des entités filles"
+msgstr "Liste des entités filles"
+
+
+##
+# UML
+##
+
+# Ajout d'une classe
+msgid "Liste des attributs de la classe"
+msgstr "Liste des attributs de la classe"
+
+msgid "Identifiant?"
+msgstr "Identifiant?"
+
+msgid "Accès"
+msgstr "Accès"
+
+msgid "Liste des méthodes de la classe"
+msgstr "Liste des méthodes de la classe"
+
+msgid "Ajouter une classe"
+msgstr "Ajouter une classe"
+
+msgid "Éditer la classe : %s"
+msgstr "Éditer la classe : %s"
+
+# Ajout d'une table mère à l'héritage
+msgid "Ajouter une entité mère à l'héritage"
+msgstr "Ajouter une entité mère à l'héritage"
+
+msgid "Entité mère : "
+msgstr "Entité mère : "
+
+# Ajout d'une table fille à l'héritage
+msgid "Ajouter une entité fille à l'héritage"
+msgstr "Ajouter une entité fille à l'héritage"
+
+msgid "Entité fille : "
+msgstr "Entité fille : "
+
+# Suppression d'une table fille à un héritage
+msgid "Sélectionner une entité fille à supprimer"
+msgstr "Sélectionner une entité fille à supprimer"
+
+msgid "Supprimer une entité fille"
+msgstr "Supprimer une entité fille"
+
+msgid "Aucune entité sélectionnée"
+msgstr "Aucune entité sélectionnée"
+
+# À propos
+msgid "À propos de Katyusha MCD"
+msgstr "À propos de Katyusha MCD"
+
+msgid "Katyusha MCD est un composant du Projet Phosphore\nDistribué sous licence GPL v3\nCopyleft (c) 2019 - 2023\n Mélanie Verdon Avizou"
+msgstr "Katyusha MCD est un composant du Projet Phosphore\nDistribué sous licence GPL v3\nCopyleft (c) 2019 - 2023\n Mélanie Verdon Avizou"
+
+# Supression entité
+msgid "Sure de vouloir supprimer cette entité?"
+msgstr "Sure de vouloir supprimer cette entité?"
+
+msgid "Sure de vouloir supprimer cette relation?"
+msgstr "Sure de vouloir supprimer cette relation?"
+
+# Préférences
+msgid "Préférences de Katyusha MCD"
+msgstr "Préférences de Katyusha MCD"
+
+msgid "Choix de la langue : "
+msgstr "Choix de la langue : "
+
+msgid "Taille de la fenêtre (auto pour une configuration automatique) : "
+msgstr "Taille de la fenêtre (auto pour une configuration automatique) : "
+
+msgid "Attention, la configuration automatique fonctionne mal avec les écrans multiples!"
+msgstr "Attention, la configuration automatique fonctionne mal avec les écrans multiples!"
+
+msgid "Nom par défaut de la base de donnée : "
+msgstr "Nom par défaut de la base de donnée : "
+
+msgid "SGBD à utiliser par défaut : "
+msgstr "SGBD à utiliser par défaut : "
+
+msgid "Taille du canvas : "
+msgstr "Taille du canvas : "
+
+msgid "Le changement de certaines configurations ne prendra effet qu'au redémarrage de Katyusha MCD."
+msgstr "Le changement de certaines configurations ne prendra effet qu'au redémarrage de Katyusha MCD."
+
+msgid "Taille de la fenêtre (auto pour une configuration automatique) : "
+msgstr "Taille de la fenêtre (auto pour une configuration automatique) : "
+
+msgid "Choisir les propriétés des attributs à afficher à l'intérieur des objets du MCD"
+msgstr "Choisir les propriétés des attributs à afficher à l'intérieur des objets du MCD"
+
+msgid "Clef primaire"
+msgstr "Clef primaire"
+
+msgid "Nom"
+msgstr "Nom"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Taille de l'attribut"
+msgstr "Taille de l'attribut"
+
+msgid "Si l'attribut peut être nul"
+msgstr "Si l'attribut peut être nul"
+
+msgid "Varleur par défaut"
+msgstr "Varleur par défaut"
+
+# Configurations BDD
+msgid "Configuration du projet"
+msgstr "Configuration du projet"
+
+msgid "Nom du projet : "
+msgstr "Nom du projet : "
+
+msgid "Liste des SGBD : "
+msgstr "Liste des SGBD : "
+
+# Sauvegarde
+msgid "MCD sauvegarder sous : "
+msgstr "MCD sauvegarder sous : "
+
+# Véréfication du MCD
+msgid "La relation %s doit posséder au moins 2 liens."
+msgstr "La relation %s doit posséder au moins 2 liens."
+
+msgid "L'entité mère de l'héritage %s est aussi une de ses entités filles."
+msgstr "L'entité mère de l'héritage %s est aussi une de ses entités filles."
+
+msgid "Plusieurs objets portent le nom %s"
+msgstr "Plusieurs objets portent le nom %s"
+
+# Fenêtre danger
+
+msgid "DANGER!"
+msgstr "DANGER!"
+
+msgid "Le système d'exploitation \"%s\" sur lequel cette instance de Katyusha! MCD à été initiée n'est pas un système libre.\nLe code source n'ayant pas pu être vérifié par un tiers de confiance, votre VIE PRIVÉE est donc en DANGER.\nÉteignez immédiatement votre ordinateur afin de redémarer sur un système d'exploitation libre et donc sûr."
+msgstr "Le système d'exploitation \"%s\" sur lequel cette instance de Katyusha! MCD à été initiée n'est pas un système libre.\nLe code source n'ayant pas pu être vérifié par un tiers de confiance, votre VIE PRIVÉE est donc en DANGER.\nÉteignez immédiatement votre ordinateur afin de redémarer sur un système d'exploitation libre et donc sûr."
+
+# Général
+msgid "Valider"
+msgstr "Valider"
+
+msgid "Retour"
+msgstr "Retour"
+
+msgid "J'ai compris"
+msgstr "J'ai compris"
+
+msgid "Éditer"
+msgstr "Éditer"
+
+msgid "Supprimer"
+msgstr "Supprimer"
+
+msgid "MCD correcte"
+msgstr "MCD correcte"
+
+msgid "Entités"
+msgstr "Entités"
+
+msgid "Relations"
+msgstr "Relations"
+
+msgid "Étiquettes"
+msgstr "Étiquettes"
+
+msgid "Héritages"
+msgstr "Héritages"
+
+msgid "Attention!! Votre vie privée est en danger!"
+msgstr "Attention!! Votre vie privée est en danger!"
