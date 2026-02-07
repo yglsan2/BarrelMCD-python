@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![Qt](https://img.shields.io/badge/Qt-5.15%2B-green)](https://www.qt.io/)
+[![Flutter](https://img.shields.io/badge/Flutter-Dart-02569B?logo=flutter)](https://flutter.dev/)
 
 *Un outil simple et intuitif pour la modélisation de données*
 
@@ -19,7 +19,11 @@
 
 ## 📖 À propos
 
-BarrelMCD est un logiciel de modélisation de données écrit en Python. Né d'une volonté de simplifier la création de modèles conceptuels de données (MCD), il propose une approche intuitive et accessible.
+BarrelMCD est un logiciel de modélisation de données (MCD/MLD/SQL). Né d'une volonté de simplifier la création de modèles conceptuels de données, il propose une approche intuitive et accessible.
+
+**Changement de stratégie :** le projet est désormais un projet **Python / Dart (Flutter)** :
+- **Backend Python** : logique métier (parsing Markdown, validation MCD, conversion MCD→MLD→SQL), exposée via une API FastAPI.
+- **Interface Flutter** : application desktop (Linux, Windows, macOS) et évolutive (web, mobile), connectée à l’API.
 
 > "La simplicité est la sophistication suprême" - Léonard de Vinci
 
@@ -47,24 +51,14 @@ graph TD
 │  ▪ JSON        │
 │  ▪ CSV         │
 │  ▪ Excel       │
-│  ▪ Markdown    │ ✨ Nouveau !
+│  ▪ Markdown    │
 └─────────────────┘
 ```
 
 ### 🧠 Analyse intelligente
-- **Détection automatique**
-  ```
-  Texte → Entités → Relations → Cardinalités
-  ```
+- **Détection automatique** : Texte → Entités → Relations → Cardinalités
 - **Analyse sémantique**
 - **Relations n-aires**
-
-### 🏢 Domaines métier intégrés
-| Domaine    | Entités pré-configurées | Relations types |
-|------------|------------------------|-----------------|
-| Commerce   | Client, Produit, etc.  | Commandes      |
-| Medical    | Patient, Médecin, etc. | Consultations  |
-| Education  | Étudiant, Cours, etc.  | Inscriptions   |
 
 ### 🔄 Conversions automatiques
 ```
@@ -77,128 +71,69 @@ MCD ──► UML
  └──► Documentation
 ```
 
-### 📝 Import Markdown ✨ Nouveau !
-- **Parsing automatique** des fichiers `.md`
-- **Détection intelligente** des entités et associations
-- **Validation en temps réel** du MCD
-- **Interface intuitive** avec prévisualisation
-- **Génération de templates** pour démarrer rapidement
+### 📝 Import Markdown
+- Parsing automatique des fichiers `.md`
+- Détection des entités et associations
+- Validation du MCD
+- Interface avec prévisualisation (Flutter)
+- Génération de templates
 
-```markdown
-## Entité
-- attribut (type) : description
-- id (integer) PK : clé primaire
-
-### Entité1 <-> Entité2 : Association
-**Description de l'association**
-Entité1 : 1,1
-Entité2 : 0,n
-```
+### 🖥️ Interface Flutter
+- Canvas interactif : entités, associations, liens avec cardinalités
+- Fichier : ouvrir / enregistrer (.bar, .json)
+- Annuler / rétablir, suppression, explorateur d’éléments
+- Panneau MLD / SQL (génération via l’API)
+- Thème sombre aligné sur l’outil de référence
 
 ## 🚀 Démarrage rapide
 
 ### Prérequis
-- Python 3.8 ou supérieur
-- pip (gestionnaire de paquets Python)
-- Qt 5.15 ou supérieur
+- **Python 3.8+** (backend API)
+- **Flutter SDK** (interface)
+- Environnement virtuel Python recommandé (venv) pour le backend
 
 ### Installation
 
 ```bash
 # Cloner le dépôt
 git clone https://github.com/yglsan2/BarrelMCD-python.git
-
-# Se déplacer dans le répertoire
 cd BarrelMCD-python
+```
 
-# Installer les dépendances
-pip install -r requirements.txt
+**Backend (API Python)**  
+Le script utilise un venv pour éviter les conflits avec le Python système (ex. Arch Linux) :
+
+```bash
+./run_api.sh
+```
+
+À la première exécution, un environnement virtuel `.venv` est créé et les dépendances sont installées. L’API est disponible sur http://127.0.0.1:8000.
+
+**Interface Flutter**
+
+```bash
+cd barrelmcd_flutter
+flutter pub get
+flutter run -d linux   # ou chrome, windows, etc.
 ```
 
 ### Utilisation
 
-#### Import depuis Markdown
-```bash
-# Lancer l'application
-python main.py
+1. Démarrer l’API : `./run_api.sh` (à la racine du projet).
+2. Lancer l’app Flutter : `cd barrelmcd_flutter && flutter run -d linux`.
+3. Dans l’interface : modes **Entité**, **Association**, **Lien** pour construire le MCD ; **Markdown** pour importer ; **MLD/SQL** pour voir le résultat.
 
-# Utiliser le raccourci Ctrl+M ou cliquer sur le bouton "Markdown"
-# Puis importer votre fichier .md ou éditer directement
-```
+Sans API, l’app Flutter reste utilisable (création, édition, sauvegarde .bar) ; l’import Markdown et la génération MLD/SQL nécessitent l’API.
 
-#### Exemple de fichier Markdown
-```markdown
-# Système de Gestion de Bibliothèque
+## 📁 Structure du projet
 
-## Livre
-- id (integer) PK : identifiant unique
-- titre (varchar) : titre du livre
-- auteur (varchar) : nom de l'auteur
-
-## Lecteur
-- id (integer) PK : identifiant unique
-- nom (varchar) : nom du lecteur
-- email (varchar) : adresse email
-
-### Livre <-> Lecteur : Emprunte
-**Un lecteur peut emprunter plusieurs livres**
-Livre : 1,1
-Lecteur : 0,n
-```
-
-```bash
-# Lancer l'application
-python main.py
-```
-
-## 📱 Interface utilisateur
-
-L'interface a été pensée pour être :
-- 🎨 Intuitive
-- 📱 Responsive
-- 🌙 Personnalisable
-- 🤝 Accessible
-
-### Aperçu de l'interface
-
-```
-┌─────────────────────────────────────────────┐
-│ BarrelMCD                             _ □ X │
-├─────────────────────┬───────────────────────┤
-│  Configuration      │                       │
-│ ┌───────────────┐  │      Visualisation    │
-│ │ Type: MCD     │  │                       │
-│ │ Source: JSON  │  │    [Diagramme MCD]    │
-│ └───────────────┘  │                       │
-│                    │                       │
-│  Données           │                       │
-│ ┌───────────────┐  │                       │
-│ │              ↓│  │                       │
-│ └───────────────┘  │                       │
-│                    │                       │
-│  Actions           │                       │
-│ [Générer] [Export] │                       │
-└─────────────────────┴───────────────────────┘
-```
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Voici comment participer :
-
-1. 🍴 Fork le projet
-2. 🌿 Créer une branche (`git checkout -b feature/amelioration`)
-3. ✍️ Commiter les changements (`git commit -am 'Ajout d'une fonctionnalité'`)
-4. 🚀 Pousser la branche (`git push origin feature/amelioration`)
-5. 🎉 Ouvrir une Pull Request
-
-### Guide de contribution
-
-```mermaid
-graph LR
-    A[Fork] -->|Clone| B[Branch]
-    B -->|Commit| C[Push]
-    C -->|Pull Request| D[Merge]
-```
+| Répertoire / Fichier | Rôle |
+|----------------------|------|
+| `api/`               | API FastAPI (parse Markdown, validate, MCD→MLD→SQL) |
+| `barrelmcd_flutter/` | Application Flutter (interface) |
+| `views/`, `models/`  | Logique Python (parser, convertisseur, analyseur) |
+| `main.py`            | Ancienne interface PyQt (optionnelle) |
+| `run_api.sh`         | Lancement de l’API avec venv |
 
 ## 📄 Licence
 
@@ -206,12 +141,12 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 
 ## 🙏 Remerciements
 
-Un grand merci à tous les contributeurs qui participent à l'amélioration de ce projet.
+Merci à tous les contributeurs qui participent à l’amélioration de ce projet.
 
 ---
 
 <div align="center">
-Fait avec ❤️ par la communauté Python
 
 [⬆ Retour en haut](#barrelmcd-python)
+
 </div>

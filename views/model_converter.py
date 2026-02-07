@@ -120,8 +120,9 @@ class ModelConverter:
                     "default": attr.get("default_value")
                 }
                 
-                # Détecter les clés primaires potentielles
-                if (attr["name"].lower() in ["id", "code", "numero"] or 
+                # Détecter les clés primaires (explicite ou par convention)
+                if (attr.get("primary_key", False) or
+                    attr["name"].lower() in ["id", "code", "numero"] or
                     "identifiant" in attr.get("description", "").lower()):
                     column["nullable"] = False
                     table["primary_key"].append(attr["name"])
