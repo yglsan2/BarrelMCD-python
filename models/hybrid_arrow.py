@@ -3,7 +3,7 @@
 
 """
 Système de flèches hybride parfait
-Combine le meilleur de Mocodo, Lucidchart, Draw.io et Katyusha
+Combine le meilleur de Mocodo, Lucidchart, Draw.io et outils de référence MCD
 """
 
 import math
@@ -18,7 +18,7 @@ class ArrowStyle(Enum):
     STRAIGHT = "straight"      # Mocodo - Ligne droite simple
     CURVED = "curved"          # Lucidchart - Courbe de Bézier élégante
     STEPPED = "stepped"        # Draw.io - Ligne en escalier
-    ORTHOGONAL = "orthogonal"  # Katyusha - Ligne orthogonale
+    ORTHOGONAL = "orthogonal"  # Ligne orthogonale
     SMART = "smart"            # Hybride - Détection automatique
 
 class HybridArrow(QGraphicsPathItem):
@@ -226,7 +226,7 @@ class HybridArrow(QGraphicsPathItem):
                 QPointF(mid_x, end_point.y()), end_point]
                 
     def calculate_orthogonal_points(self, start: QPointF, end: QPointF) -> list:
-        """Calcule les points pour une ligne orthogonale (style Katyusha)"""
+        """Calcule les points pour une ligne orthogonale"""
         start_point = self.get_border_point(start, end)
         end_point = self.get_border_point(end, start)
         
