@@ -7,10 +7,17 @@ Expose la logique MCD/MLD/SQL et le parsing Markdown sans dépendance Qt.
 
 import sys
 import os
+import logging
 
 # Ajouter la racine du projet au path pour importer views/models
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+// Garde les const pour prefer_const_constructors ; évite le conflit avec unnecessary_const.
+// ignore_for_file: unnecessary_const
+
 class HelpDialog {
   static void show(BuildContext context) {
     showDialog(
@@ -8,22 +11,22 @@ class HelpDialog {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.surface,
         title: const Text('Aide BarrelMCD'),
-        content: SingleChildScrollView(
-          child: Column(
+        content: const SingleChildScrollView(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Création :', style: TextStyle(fontWeight: FontWeight.bold)),
-              const Text('• E : Entité\n• A : Association\n• L : Lien\n• Ctrl+L : Auto-Liens'),
-              const SizedBox(height: 12),
-              const Text('Navigation :', style: TextStyle(fontWeight: FontWeight.bold)),
-              const Text('• Z : Zoom +  • X : Zoom -  • F : Ajuster  • G : Grille'),
-              const SizedBox(height: 12),
-              const Text('Édition :', style: TextStyle(fontWeight: FontWeight.bold)),
-              const Text('• Suppr : Supprimer  • Ctrl+Z : Annuler  • Ctrl+Y : Répéter'),
-              const SizedBox(height: 12),
-              const Text('Import/Export :', style: TextStyle(fontWeight: FontWeight.bold)),
-              const Text('• Ctrl+M : Markdown  • Ctrl+E : SQL  • Ctrl+P : Image  • Ctrl+D : PDF'),
+            children: const [
+              Text('Création :', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('• E : Entité\n• A : Association\n• L : Lien\n• Ctrl+L : Auto-Liens'),
+              SizedBox(height: 12),
+              Text('Navigation :', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('• Z : Zoom +  • X : Zoom -  • F : Ajuster  • G : Grille'),
+              SizedBox(height: 12),
+              Text('Édition :', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('• Suppr : Supprimer  • Ctrl+Z : Annuler  • Ctrl+Y : Répéter'),
+              SizedBox(height: 12),
+              Text('Import/Export :', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('• Ctrl+M : Markdown  • Ctrl+E : SQL  • Ctrl+P : Image  • Ctrl+D : PDF'),
             ],
           ),
         ),

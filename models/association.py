@@ -36,7 +36,12 @@ class Association(QGraphicsItem):
         self.attributes = []
         self.entities = []  # Liste des entités connectées
         self.cardinalities = {}  # {entity_name: cardinality}
+        self.roles = {}  # {entity_name: role} pour associations réflexives
         self.is_selected = False
+        self.is_reflexive = False  # Association réflexive
+        self.business_rules = []  # Règles de gestion
+        self.cif_constraints = []  # Contraintes d'intégrité fonctionnelle
+        self.can_be_entity = False  # Peut être transformée en entité
         
         # Configuration visuelle
         self.size = 60

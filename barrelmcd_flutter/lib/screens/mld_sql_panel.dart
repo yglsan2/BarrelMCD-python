@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../core/mcd_state.dart';
 import '../theme/app_theme.dart';
 
-/// Panneau MLD / SQL en temps réel (comme Looping) : affiche le MLD et le SQL générés.
-class MldSqlPanel extends StatelessWidget {
+/// Panneau MLD / SQL (comme Looping) : SGBD paramétrable, copie presse-papier.
+class MldSqlPanel extends StatefulWidget {
   const MldSqlPanel({super.key});
 
   static void show(BuildContext context) {
@@ -23,13 +24,20 @@ class MldSqlPanel extends StatelessWidget {
   }
 
   @override
+  State<MldSqlPanel> createState() => _MldSqlPanelState();
+}
+
+class _MldSqlPanelState extends State<MldSqlPanel> {
+  String _dbms = 'mysql';
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>?>(
       future: context.read<McdState>().generateMld(),
       builder: (context, mldSnap) {
         final mld = mldSnap.data;
         return FutureBuilder<String?>(
-          future: context.read<McdState>().generateSql(),
+          future: context.read<McdState>().generateSql(dbms: _dbms),
           builder: (context, sqlSnap) {
             final sql = sqlSnap.data ?? '';
             final loading = mldSnap.connectionState == ConnectionState.waiting || sqlSnap.connectionState == ConnectionState.waiting;
@@ -41,6 +49,20 @@ class MldSqlPanel extends StatelessWidget {
                   child: Row(
                     children: [
                       const Text('MLD / SQL', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 16),
+                      const Text('SGBD:', style: TextStyle(fontSize: 12)),
+                      const SizedBox(width: 6),
+                      DropdownButton<String>(
+                        value: _dbms,
+                        items: const [
+                          DropdownMenuItem(value: 'mysql', child: Text('MySQL')),
+                          DropdownMenuItem(value: 'postgresql', child: Text('PostgreSQL')),
+                          DropdownMenuItem(value: 'sqlite', child: Text('SQLite')),
+                        ],
+                        onChanged: (v) {
+                          if (v != null) setState(() => _dbms = v);
+                        },
+                      ),
                       const Spacer(),
                       if (loading) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                       IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
@@ -102,9 +124,33 @@ class _MldView extends StatelessWidget {
       }
       buf.writeln();
     }
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: SelectableText(buf.toString(), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+    final text = buf.toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.copy, size: 18),
+                label: const Text('Copier'),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: text));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MLD copié dans le presse-papier')));
+                },
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(text, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -119,9 +165,32 @@ class _SqlView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (loading) return const Center(child: CircularProgressIndicator());
     if (sql.isEmpty) return const Center(child: Text('Aucun SQL généré'));
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: SelectableText(sql, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.copy, size: 18),
+                label: const Text('Copier SQL'),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: sql));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('SQL copié dans le presse-papier')));
+                },
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(sql, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          ),
+        ),
+      ],
     );
   }
 }

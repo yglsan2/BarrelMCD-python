@@ -8,6 +8,9 @@ enum CanvasMode {
   createLink,
 }
 
+/// Activer les logs de changement de mode (aligné avec mcd_canvas.dart).
+const bool _kCanvasModeDebug = false;
+
 class CanvasModeState extends ChangeNotifier {
   CanvasModeState() : _mode = CanvasMode.select;
 
@@ -15,7 +18,11 @@ class CanvasModeState extends ChangeNotifier {
   CanvasMode get mode => _mode;
 
   void setMode(CanvasMode m) {
-    if (_mode == m) return;
+    if (_mode == m) {
+      if (_kCanvasModeDebug) debugPrint('[CanvasMode] setMode($m) ignoré (déjà actif)');
+      return;
+    }
+    if (_kCanvasModeDebug) debugPrint('[CanvasMode] setMode $_mode -> $m');
     _mode = m;
     _linkFirstTarget = null;
     notifyListeners();

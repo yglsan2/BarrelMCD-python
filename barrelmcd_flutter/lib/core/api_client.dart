@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 /// Client HTTP pour l'API BarrelMCD (Python).
+/// Chaque méthode appelle un endpoint du backend ; aucune logique métier (validation, parsing, MCD→MLD→SQL) n'est dupliquée ici.
+/// Voir docs/VERIFICATION_API_FLUTTER.md pour la correspondance endpoints ↔ consommation Flutter.
 class ApiClient {
   ApiClient({required this.baseUrl});
 
@@ -47,6 +49,11 @@ class ApiClient {
     return post('/api/parse-markdown', {'content': content});
   }
 
+  /// POST /api/parse-mots-codes — mots codés style Mocodo → format canvas
+  Future<Map<String, dynamic>> parseMotsCodes(String content) async {
+    return post('/api/parse-mots-codes', {'content': content});
+  }
+
   /// POST /api/validate
   Future<Map<String, dynamic>> validateMcd(Map<String, dynamic> mcd) async {
     return post('/api/validate', {'mcd': mcd});
@@ -57,9 +64,9 @@ class ApiClient {
     return post('/api/to-mld', {'mcd': mcd});
   }
 
-  /// POST /api/to-sql
-  Future<Map<String, dynamic>> mcdToSql(Map<String, dynamic> mcd) async {
-    return post('/api/to-sql', {'mcd': mcd});
+  /// POST /api/to-sql — dbms: mysql | postgresql | sqlite
+  Future<Map<String, dynamic>> mcdToSql(Map<String, dynamic> mcd, {String dbms = 'mysql'}) async {
+    return post('/api/to-sql', {'mcd': mcd, 'dbms': dbms});
   }
 
   /// POST /api/analyze-data

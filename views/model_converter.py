@@ -155,28 +155,39 @@ class ModelConverter:
         
         return mld
     
+    # Les 4 cardinalités MCD Merise : 0,1 | 1,1 | 0,n | 1,n
+    _MCD_CARDS = ("0,1", "1,1", "0,n", "1,n")
+
+    def _norm_card(self, c: str) -> str:
+        """Normalise vers une des 4 cardinalités MCD (1,N -> 1,n ; n,1 -> 1,n ; n,n -> 0,n)."""
+        if not c:
+            return "1,n"
+        s = str(c).strip().lower()
+        if s in self._MCD_CARDS:
+            return s
+        if s in ("n,1",):
+            return "1,n"
+        if s in ("n,n",):
+            return "0,n"
+        return "1,n"
+
     def _convert_association_to_foreign_keys(self, association: Dict, mld: Dict) -> None:
-        """Convertit une association MCD en clés étrangères MLD."""
+        """Convertit une association MCD en clés étrangères MLD (style Looping/Merise)."""
         entity1 = association["entity1"].lower()
         entity2 = association["entity2"].lower()
-        cardinality1 = association["cardinality1"]
-        cardinality2 = association["cardinality2"]
-        
-        # Règles de conversion des cardinalités vers clés étrangères
-        if cardinality1 == "1,1" and cardinality2 == "0,n":
-            # Relation 1,n : clé étrangère dans la table "many"
+        # MCD Merise : 4 cardinalités uniquement — 0,1 | 1,1 | 0,n | 1,n
+        c1 = self._norm_card(association.get("cardinality1", "1,1"))
+        c2 = self._norm_card(association.get("cardinality2", "0,n"))
+        one_side = ("1,1", "0,1")   # max = 1
+        many_side = ("0,n", "1,n")  # max = n
+
+        if c1 in one_side and c2 in many_side:
             self._add_foreign_key(mld, entity2, entity1, association["name"])
-            
-        elif cardinality1 == "0,n" and cardinality2 == "1,1":
-            # Relation n,1 : clé étrangère dans la table "many"
+        elif c1 in many_side and c2 in one_side:
             self._add_foreign_key(mld, entity1, entity2, association["name"])
-            
-        elif cardinality1 == "0,n" and cardinality2 == "0,n":
-            # Relation n,n : table de liaison
+        elif c1 in many_side and c2 in many_side:
             self._create_junction_table(mld, entity1, entity2, association)
-            
-        elif cardinality1 == "1,1" and cardinality2 == "1,1":
-            # Relation 1,1 : clé étrangère dans l'une des tables
+        else:
             self._add_foreign_key(mld, entity1, entity2, association["name"])
     
     def _add_foreign_key(self, mld: Dict, source_table: str, target_table: str, association_name: str) -> None:

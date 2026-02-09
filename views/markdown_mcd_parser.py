@@ -435,31 +435,22 @@ class MarkdownMCDParser:
         self.log(f"Attribut parsé: {attribute_info}")
         return attribute_info
     
+    # Les 4 cardinalités du MCD Merise : (min, max) avec min ∈ {0,1}, max ∈ {1,n}.
+    MCD_CARDINALITIES = ('0,1', '1,1', '0,n', '1,n')
+
     def _is_cardinality_improved(self, text: str) -> bool:
-        """Vérifie si un texte représente une cardinalité (version améliorée)"""
+        """Vérifie si un texte représente une des 4 cardinalités MCD Merise."""
         self.log(f"Vérification cardinalité: '{text}'")
-        
-        # CORRECTION FONDAMENTALE : Se concentrer sur les cardinalités standard
-        # qui sont les plus importantes pour un MCD de qualité
-        standard_cardinalities = [
-            '1,1', '1,n', 'n,1', 'n,n', '0,1', '0,n'
-        ]
-        
-        # Vérifier d'abord les cardinalités standard
-        if text in standard_cardinalities:
-            self.log(f"✅ Cardinalité standard valide: {text}")
+        t = text.strip().lower()
+        if t in self.MCD_CARDINALITIES:
+            self.log(f"✅ Cardinalité MCD valide: {text}")
             return True
-            
-        # CORRECTION : Ne pas accepter les cardinalités invalides
-        # Seules les cardinalités standard sont valides en MCD
-        self.log(f"❌ Cardinalité invalide: {text}")
+        self.log(f"❌ Cardinalité invalide (MCD: 0,1 | 1,1 | 0,n | 1,n): {text}")
         return False
-    
+
     def _contains_cardinality(self, text: str) -> bool:
-        """Vérifie si une ligne contient une cardinalité"""
-        # CORRECTION FONDAMENTALE : Se concentrer sur les cardinalités standard
-        cardinality_keywords = ['1,1', '1,n', 'n,1', 'n,n', '0,1', '0,n']
-        result = any(card in text for card in cardinality_keywords)
+        """Vérifie si une ligne contient une des 4 cardinalités MCD."""
+        result = any(card in text for card in self.MCD_CARDINALITIES)
         self.log(f"Contient cardinalité '{text}': {result}")
         return result
     

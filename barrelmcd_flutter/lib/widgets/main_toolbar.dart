@@ -1,20 +1,41 @@
 import 'dart:convert';
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../core/mcd_state.dart';
 import '../core/canvas_mode.dart';
+import 'mcd_canvas.dart';
 import '../theme/app_theme.dart';
-import '../screens/home_screen.dart';
 import '../screens/sql_export_dialog.dart';
+import '../screens/markdown_import_screen.dart';
 import '../screens/help_dialog.dart';
 import '../screens/elements_panel.dart';
 import '../screens/mld_sql_panel.dart';
 
 /// Barre d'outils équivalente à la toolbar Python (Fichier, Entité, Association, Zoom, etc.).
 class MainToolbar extends StatelessWidget {
-  const MainToolbar({super.key});
+  const MainToolbar({super.key, this.exportImageKey, this.canvasKey});
+
+  final GlobalKey? exportImageKey;
+  final GlobalKey<McdCanvasState>? canvasKey;
+
+  static void triggerNew(BuildContext context) {
+    context.read<McdState>().clear();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nouveau projet')));
+  }
+
+  static void triggerOpen(BuildContext context) {
+    MainToolbar.openProject(context);
+  }
+
+  static void triggerSave(BuildContext context) {
+    MainToolbar.saveProjectAs(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +58,57 @@ class MainToolbar extends StatelessWidget {
             _modeButton(context, CanvasMode.createLink, Icons.account_tree, 'Lien', 'L'),
             _toolButton(context, Icons.auto_awesome, 'Auto-Liens', 'Ctrl+L', () => _autoLinks(context)),
             const _ToolbarDivider(),
-            _toolButton(context, Icons.zoom_in, 'Zoom +', 'Z', () {}),
-            _toolButton(context, Icons.zoom_out, 'Zoom -', 'X', () {}),
-            _toolButton(context, Icons.fit_screen, 'Ajuster', 'F', () {}),
+            _toolButton(context, Icons.zoom_in, 'Zoom +', 'Z', () => canvasKey?.currentState?.zoomIn()),
+            _toolButton(context, Icons.zoom_out, 'Zoom -', 'X', () => canvasKey?.currentState?.zoomOut()),
+            _toolButton(context, Icons.fit_screen, 'Ajuster', 'F', () => canvasKey?.currentState?.fitToView()),
             _toolButton(context, Icons.grid_on, 'Grille', 'G', () => context.read<CanvasModeState>().toggleGrid()),
             const _ToolbarDivider(),
+            Consumer<McdState>(
+              builder: (_, state, __) {
+                final isEntity = state.selectedType == 'entity' && state.selectedIndex >= 0;
+                final isAssoc = state.selectedType == 'association' && state.selectedIndex >= 0;
+                if (!isEntity && !isAssoc) return const SizedBox.shrink();
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Tooltip(
+                        message: isEntity ? 'Modifier les attributs de l\'entité' : 'Modifier les attributs de l\'association',
+                        child: Material(
+                          color: AppTheme.buttonBg,
+                          borderRadius: BorderRadius.circular(4),
+                          child: InkWell(
+                            onTap: () {
+                              if (isEntity) canvasKey?.currentState?.openEntityAttributesDialog(context);
+                              else canvasKey?.currentState?.openAssociationAttributesDialog(context);
+                            },
+                            borderRadius: BorderRadius.circular(4),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.tune, size: 18, color: AppTheme.textPrimary),
+                                  const SizedBox(width: 4),
+                                  Text('Attributs', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 11, fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (isEntity)
+                      _toolButton(context, Icons.copy_all, 'Dupliquer l\'entité', '', () {
+                        final newIndex = state.duplicateEntity(state.selectedIndex!);
+                        if (newIndex >= 0) state.selectEntity(newIndex);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Entité dupliquée')));
+                      }),
+                  ],
+                );
+              },
+            ),
             _toolButton(context, Icons.delete_outline, 'Supprimer', 'Suppr', () => _deleteSelected(context)),
             Consumer<McdState>(
               builder: (_, state, __) => _toolButton(
@@ -63,12 +130,14 @@ class MainToolbar extends StatelessWidget {
             ),
             const _ToolbarDivider(),
             _toolButton(context, Icons.upload_file, 'Importer', 'Ctrl+I', () => _importData(context)),
-            _toolButton(context, Icons.text_snippet, 'Markdown', 'Ctrl+M', () => HomeScreen.openMarkdownImport(context)),
+            _toolButton(context, Icons.text_snippet, 'Markdown', 'Ctrl+M', () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarkdownImportScreen()))),
             _toolButton(context, Icons.schema, 'MLD/SQL', '', () => MldSqlPanel.show(context)),
+            _toolButton(context, Icons.check_circle_outline, 'Valider', '', () => _validateMcd(context)),
             _toolButton(context, Icons.code, 'SQL', 'Ctrl+E', () => _exportSql(context)),
             _toolButton(context, Icons.image, 'Image', 'Ctrl+P', () => _exportImage(context)),
             _toolButton(context, Icons.picture_as_pdf, 'PDF', 'Ctrl+D', () => _exportPdf(context)),
             const _ToolbarDivider(),
+            _toolButton(context, Icons.copy_all, 'Copier MCD', '', () => _copyMcdToClipboard(context)),
             _toolButton(context, Icons.list, 'Éléments', '', () => ElementsPanel.show(context)),
             _toolButton(context, Icons.help_outline, 'Aide', 'F1', () => HelpDialog.show(context)),
             _toolButton(context, Icons.bug_report, 'Console', 'F12', () => _showConsole(context)),
@@ -90,7 +159,22 @@ class MainToolbar extends StatelessWidget {
               color: selected ? AppTheme.primary.withValues(alpha: 0.3) : AppTheme.buttonBg,
               borderRadius: BorderRadius.circular(4),
               child: InkWell(
-                onTap: () => modeState.setMode(mode),
+                onTap: () {
+                  try {
+                    if (kDebugMode) debugPrint('[MainToolbar] mode tap: $mode (label=$label)');
+                    modeState.setMode(mode);
+                    if (mode == CanvasMode.createLink) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Mode Lien : cliquez sur une entité puis une association (ou l\'inverse) pour créer un lien et choisir la cardinalité (0,1 1,1 0,n 1,n).'),
+                          duration: Duration(seconds: 4),
+                        ),
+                      );
+                    }
+                  } catch (e, st) {
+                    debugPrint('[MainToolbar] mode tap ERROR: $e\n$st');
+                  }
+                },
                 borderRadius: BorderRadius.circular(4),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -121,13 +205,13 @@ class MainToolbar extends StatelessWidget {
             _newProject(context);
             break;
           case 'open':
-            _openProject(context);
+            MainToolbar.openProject(context);
             break;
           case 'save':
             _saveProject(context);
             break;
           case 'save_as':
-            _saveProjectAs(context);
+            MainToolbar.saveProjectAs(context);
             break;
           case 'quit':
             break;
@@ -142,15 +226,15 @@ class MainToolbar extends StatelessWidget {
         const PopupMenuDivider(),
         const PopupMenuItem(value: 'quit', child: Text('Quitter (Ctrl+Q)')),
       ],
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.folder_open, size: 20, color: AppTheme.textPrimary),
-            const SizedBox(width: 6),
+            Icon(Icons.folder_open, size: 20, color: AppTheme.textPrimary),
+            SizedBox(width: 6),
             Text('Fichier', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 12)),
-            const Icon(Icons.arrow_drop_down, color: AppTheme.textPrimary),
+            Icon(Icons.arrow_drop_down, color: AppTheme.textPrimary),
           ],
         ),
       ),
@@ -192,10 +276,10 @@ class MainToolbar extends StatelessWidget {
     }
   }
 
-  Future<void> _openProject(BuildContext context) async {
+  static Future<void> openProject(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['bar', 'json'],
+      allowedExtensions: ['bar', 'json', 'loo'],
       withData: false,
     );
     if (result == null || result.files.isEmpty || result.files.single.path == null) return;
@@ -204,15 +288,23 @@ class MainToolbar extends StatelessWidget {
       final file = File(path);
       final content = await file.readAsString();
       final data = jsonDecode(content) as Map<String, dynamic>;
-      final entities = data['entities'] as List?;
-      final associations = data['associations'] as List?;
-      final links = data['association_links'] as List?;
-      final inheritance = data['inheritance_links'] as List?;
+      // Support format Barrel/Flutter (position, association_links) et Looping/Barrel Python (x,y, relations)
+      final rawEntities = data['entities'] as List? ?? [];
+      final rawAssociations = data['associations'] as List? ?? [];
+      List<Map<String, dynamic>> entities = MainToolbar.normalizeEntities(rawEntities);
+      List<Map<String, dynamic>> associations = MainToolbar.normalizeAssociations(rawAssociations);
+      List<Map<String, dynamic>> associationLinks = MainToolbar.normalizeAssociationLinks(
+        data['association_links'] as List?,
+        rawAssociations,
+        rawEntities,
+      );
+      final inheritance = data['inheritance_links'] as List? ?? [];
+      if (!context.mounted) return;
       context.read<McdState>().loadFromCanvasFormat({
-        'entities': entities ?? [],
-        'associations': associations ?? [],
-        'association_links': links ?? [],
-        'inheritance_links': inheritance ?? [],
+        'entities': entities,
+        'associations': associations,
+        'association_links': associationLinks,
+        'inheritance_links': inheritance,
       });
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ouvert: $path')));
@@ -224,11 +316,95 @@ class MainToolbar extends StatelessWidget {
     }
   }
 
-  Future<void> _saveProject(BuildContext context) async {
-    await _saveProjectAs(context);
+  /// Normalise les entités : format Looping/Barrel (x, y, primary) → Flutter (position, is_primary_key).
+  static List<Map<String, dynamic>> normalizeEntities(List<dynamic> raw) {
+    final out = <Map<String, dynamic>>[];
+    for (final e in raw) {
+      final map = Map<String, dynamic>.from(e as Map);
+      if (map['position'] == null && (map['x'] != null || map['y'] != null)) {
+        map['position'] = {
+          'x': (map['x'] as num?)?.toDouble() ?? 100.0,
+          'y': (map['y'] as num?)?.toDouble() ?? 100.0,
+        };
+      }
+      map['position'] ??= {'x': 100.0, 'y': 100.0};
+      final attrs = (map['attributes'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      map['attributes'] = attrs.map((a) {
+        final m = Map<String, dynamic>.from(a);
+        if (m['is_primary_key'] == null && m['primary'] != null) {
+          m['is_primary_key'] = m['primary'] == true;
+        }
+        m['type'] ??= 'VARCHAR(255)';
+        return m;
+      }).toList();
+      map['name'] ??= 'Entité';
+      out.add(map);
+    }
+    return out;
   }
 
-  Future<void> _saveProjectAs(BuildContext context) async {
+  /// Normalise les associations : x,y → position.
+  static List<Map<String, dynamic>> normalizeAssociations(List<dynamic> raw) {
+    final out = <Map<String, dynamic>>[];
+    for (final a in raw) {
+      final map = Map<String, dynamic>.from(a as Map);
+      if (map['position'] == null && (map['x'] != null || map['y'] != null)) {
+        map['position'] = {
+          'x': (map['x'] as num?)?.toDouble() ?? 300.0,
+          'y': (map['y'] as num?)?.toDouble() ?? 300.0,
+        };
+      }
+      map['position'] ??= {'x': 300.0, 'y': 300.0};
+      map['name'] ??= 'Association';
+      map['entities'] ??= [];
+      map['cardinalities'] ??= {};
+      out.add(map);
+    }
+    return out;
+  }
+
+  /// Construit association_links : soit depuis le champ existant, soit depuis relations (format Looping/Barrel).
+  static List<Map<String, dynamic>> normalizeAssociationLinks(
+    List<dynamic>? links,
+    List<dynamic> rawAssociations,
+    List<dynamic> rawEntities,
+  ) {
+    if (links != null && links.isNotEmpty) {
+      return links.map((l) => Map<String, dynamic>.from(l as Map)).toList();
+    }
+    // Format Looping/Barrel : associations avec relations (entity_id, cardinality). On a besoin id -> nom entité.
+    final idToName = <String, String>{};
+    for (final e in rawEntities) {
+      final m = e as Map<String, dynamic>;
+      final id = m['id']?.toString();
+      final name = m['name']?.toString();
+      if (id != null && name != null) idToName[id] = name;
+    }
+    final result = <Map<String, dynamic>>[];
+    for (final a in rawAssociations) {
+      final assoc = a as Map<String, dynamic>;
+      final assocName = assoc['name']?.toString() ?? 'Association';
+      final relations = assoc['relations'] as List?;
+      if (relations != null) {
+        for (final r in relations) {
+          final rel = r as Map<String, dynamic>;
+          final entityId = rel['entity_id']?.toString();
+          final entityName = entityId != null ? idToName[entityId] : null;
+          final card = rel['cardinality']?.toString() ?? '1,n';
+          if (entityName != null) {
+            result.add({'association': assocName, 'entity': entityName, 'cardinality': card});
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  Future<void> _saveProject(BuildContext context) async {
+    await MainToolbar.saveProjectAs(context);
+  }
+
+  static Future<void> saveProjectAs(BuildContext context) async {
     final path = await FilePicker.platform.saveFile(
       dialogTitle: 'Enregistrer le projet',
       fileName: 'projet.bar',
@@ -236,6 +412,7 @@ class MainToolbar extends StatelessWidget {
       allowedExtensions: ['bar', 'json'],
     );
     if (path == null) return;
+    if (!context.mounted) return;
     try {
       final state = context.read<McdState>();
       final data = {
@@ -271,8 +448,72 @@ class MainToolbar extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Utilisez Markdown (Ctrl+M) ou Ouvrir un fichier .bar/.json')));
   }
 
-  void _exportImage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export image : à intégrer (capture du canvas)')));
+  Future<void> _exportImage(BuildContext context) async {
+    final key = exportImageKey;
+    if (key?.currentContext == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export image indisponible')));
+      return;
+    }
+    final boundary = key!.currentContext!.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export image indisponible')));
+      return;
+    }
+    try {
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) throw Exception('toByteData null');
+      final path = await FilePicker.platform.saveFile(
+        dialogTitle: 'Enregistrer l\'image',
+        fileName: 'mcd.png',
+        type: FileType.custom,
+        allowedExtensions: ['png'],
+      );
+      if (path != null) {
+        final file = File(path);
+        await file.writeAsBytes(byteData.buffer.asUint8List());
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image enregistrée: $path')));
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur export: $e')));
+      }
+    }
+  }
+
+  Future<void> _validateMcd(BuildContext context) async {
+    final state = context.read<McdState>();
+    final errors = await state.validateMcd();
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Validation MCD'),
+        content: SizedBox(
+          width: 400,
+          child: errors.isEmpty
+              ? const Text('Aucune erreur. Le modèle est valide.')
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: errors.map((e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.error_outline, size: 20, color: AppTheme.error),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(e)),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Fermer'))],
+      ),
+    );
   }
 
   void _exportPdf(BuildContext context) {
@@ -291,6 +532,13 @@ class MainToolbar extends StatelessWidget {
         );
       }
     }
+  }
+
+  void _copyMcdToClipboard(BuildContext context) {
+    final state = context.read<McdState>();
+    final json = const JsonEncoder.withIndent('  ').convert(state.mcdData);
+    Clipboard.setData(ClipboardData(text: json));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('MCD copié dans le presse-papier (JSON)')));
   }
 
   void _showConsole(BuildContext context) {

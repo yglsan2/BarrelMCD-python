@@ -49,7 +49,7 @@ class LinkArrow {
 
     final mid = Offset((start.dx + end.dx) / 2, (start.dy + end.dy) / 2);
     final textPainter = TextPainter(
-      text: TextSpan(text: cardinality, style: TextStyle(color: AppTheme.textPrimary, fontSize: 11, fontWeight: FontWeight.w500)),
+      text: TextSpan(text: cardinality, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 11, fontWeight: FontWeight.w500)),
       textDirection: TextDirection.ltr,
     )..layout();
     textPainter.paint(

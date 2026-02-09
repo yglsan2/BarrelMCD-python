@@ -40,11 +40,14 @@ class Entity(QGraphicsItem):
         self.attributes = []
         self.is_weak = False
         self.is_selected = False
+        self.is_fictitious = False  # Entité fictive (non générée dans MLD)
+        self.business_rules = []  # Règles de gestion
         
         # Héritage
         self.parent_entity = None  # Entité parente (généralisation)
         self.child_entities = []   # Entités enfants (spécialisations)
         self.inheritance_links = []  # Liens d'héritage visuels
+        self.inheritance_type = None  # "specialization" ou "generalization"
         
         # Configuration visuelle
         self.width = 200
@@ -551,18 +554,44 @@ class Entity(QGraphicsItem):
         return path
         
     def paint(self, painter, option, widget):
-        """Dessine l'entité"""
-        # Rectangle principal
-        rect = self.boundingRect()
-        painter.setBrush(QBrush(self.bg_color))
+        """Dessine l'entité avec style moderne"""
+        # Configuration de l'antialiasing pour un rendu lisse
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
         
-        # Bordure selon l'état de sélection
+        # Rectangle principal avec coins arrondis
+        rect = self.boundingRect()
+        corner_radius = 8
+        
+        # Créer un dégradé pour le fond
+        from PyQt5.QtGui import QLinearGradient
+        gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft())
         if self.is_selected:
-            painter.setPen(QPen(self.selected_color, 3))
+            gradient.setColorAt(0, QColor(self.selected_color).lighter(120))
+            gradient.setColorAt(1, QColor(self.selected_color))
         else:
-            painter.setPen(QPen(self.border_color, 2))
+            gradient.setColorAt(0, QColor(self.bg_color).lighter(110))
+            gradient.setColorAt(1, self.bg_color)
+        
+        painter.setBrush(QBrush(gradient))
+        
+        # Bordure selon l'état de sélection avec effet de lueur
+        if self.is_selected:
+            # Effet de lueur pour la sélection
+            glow_pen = QPen(QColor(self.selected_color).lighter(150), 4)
+            glow_pen.setCapStyle(Qt.RoundCap)
+            glow_pen.setJoinStyle(Qt.RoundJoin)
+            painter.setPen(glow_pen)
+            painter.drawRoundedRect(rect.adjusted(-1, -1, 1, 1), corner_radius, corner_radius)
             
-        painter.drawRect(rect)
+            pen = QPen(self.selected_color, 3)
+        else:
+            pen = QPen(self.border_color, 2)
+            
+        pen.setCapStyle(Qt.RoundCap)
+        pen.setJoinStyle(Qt.RoundJoin)
+        painter.setPen(pen)
+        painter.drawRoundedRect(rect, corner_radius, corner_radius)
         
         # Titre
         painter.setPen(QPen(self.text_color))

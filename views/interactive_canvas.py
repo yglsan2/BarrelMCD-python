@@ -32,6 +32,7 @@ import json
 from models.hybrid_arrow import HybridArrow
 from models.smart_connector import SmartConnector, SmartConnection
 from models.flexible_arrow import FlexibleArrow
+from models.performance_arrow import PerformanceArrow
 import math
 
 class InteractiveCanvas(QGraphicsView):
@@ -1167,14 +1168,11 @@ class InteractiveCanvas(QGraphicsView):
 
     def update_association_links(self):
         """Met à jour les positions des liens d'association"""
-        for assoc, entity, line in self.association_links:
-            if assoc and entity and line and line in self.scene.items():
-                # Recalculer les positions
-                assoc_pos = assoc.pos()
-                entity_pos = entity.pos()
-                
-                # Mettre à jour la ligne
-                line.setLine(assoc_pos.x(), assoc_pos.y(), entity_pos.x(), entity_pos.y())
+        for assoc, entity, arrow in self.association_links:
+            if assoc and entity and arrow and arrow in self.scene.items():
+                # Mettre à jour la flèche (elle se met à jour automatiquement)
+                if hasattr(arrow, 'update_path'):
+                    arrow.update_path()
                 print(f"[Canvas] Lien mis à jour entre {assoc.name} et {entity.name}")
                 
     def update_inheritance_links(self):
@@ -1234,29 +1232,32 @@ class InteractiveCanvas(QGraphicsView):
         print(f"[Canvas] Liens supprimés pour l'élément {item.name if hasattr(item, 'name') else 'inconnu'}")
 
     def create_association_link(self, association, entity, cardinality="1,N"):
-        """Crée un lien simple entre une association et une entité"""
+        """Crée un lien performant entre une association et une entité avec flèche flexible"""
         print(f"[Canvas] Création de lien entre {association.name} et {entity.name}")
         try:
-            # Créer une ligne simple entre l'association et l'entité
-            from PyQt5.QtWidgets import QGraphicsLineItem
-            from PyQt5.QtGui import QPen, QColor
+            # Parser la cardinalité (format "1,N" ou "start,end")
+            if "," in cardinality:
+                parts = cardinality.split(",")
+                cardinality_start = parts[0] if len(parts) > 0 else "1"
+                cardinality_end = parts[1] if len(parts) > 1 else "N"
+            else:
+                cardinality_start = "1"
+                cardinality_end = cardinality if cardinality else "N"
             
-            # Calculer les positions
-            assoc_pos = association.pos()
-            entity_pos = entity.pos()
+            # Créer une flèche performante
+            arrow = PerformanceArrow(association, entity, cardinality_start, cardinality_end)
             
-            # Créer la ligne
-            line = QGraphicsLineItem(assoc_pos.x(), assoc_pos.y(), entity_pos.x(), entity_pos.y())
-            
-            # Style de la ligne
-            pen = QPen(QColor(255, 255, 255), 2)  # Ligne blanche de 2px
-            line.setPen(pen)
+            # Connecter les signaux pour mettre à jour la flèche quand les éléments bougent
+            if hasattr(association, 'position_changed'):
+                association.position_changed.connect(arrow.update_path)
+            if hasattr(entity, 'position_changed'):
+                entity.position_changed.connect(arrow.update_path)
             
             # Ajouter à la scène
-            self.scene.addItem(line)
+            self.scene.addItem(arrow)
             
             # Stocker le lien
-            self.association_links.append((association, entity, line))
+            self.association_links.append((association, entity, arrow))
             
             # Mettre à jour la cardinalité dans l'association
             if hasattr(association, 'set_cardinality'):
@@ -1266,7 +1267,13 @@ class InteractiveCanvas(QGraphicsView):
             if hasattr(association, 'add_entity'):
                 association.add_entity(entity.name, cardinality)
             
-            print(f"[Canvas] Lien créé avec succès")
+            # Connecter le signal de modification de la flèche
+            arrow.signals.arrow_modified.connect(self.diagram_modified.emit)
+            arrow.signals.cardinality_changed.connect(
+                lambda end, card: association.set_cardinality(entity.name, card) if end == "end" else None
+            )
+            
+            print(f"[Canvas] Lien créé avec succès avec flèche performante")
             self.diagram_modified.emit()
             
         except Exception as e:

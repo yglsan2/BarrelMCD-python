@@ -1,46 +1,48 @@
 import 'package:flutter/material.dart';
 
-/// Thème sombre aligné sur l'interface Python (DarkTheme).
+/// Thème sombre — charte graphique alignée sur le projet Python (views/dark_theme.py).
+/// Toutes les couleurs correspondent à DarkTheme.COLORS.
 class AppTheme {
-  // Couleurs de base - tons sombres
-  static const Color background = Color(0xFF0A0A0A);
-  static const Color surface = Color(0xFF1A1A1A);
-  static const Color surfaceLight = Color(0xFF2A2A2A);
-  static const Color surfaceDark = Color(0xFF151515);
-  static const Color surfaceElevated = Color(0xFF252525);
+  // Base — DarkTheme.COLORS
+  static const Color background = Color(0xFF0A0A0A);       // "background"
+  static const Color surface = Color(0xFF1A1A1A);         // "surface" / "dialog_bg" / "toolbar_bg"
+  static const Color surfaceLight = Color(0xFF2A2A2A);     // "surface_light" / "toolbar_border" / "button_bg"
+  static const Color surfaceDark = Color(0xFF151515);      // "surface_dark"
+  static const Color surfaceElevated = Color(0xFF252525);  // "surface_elevated"
 
   // Texte
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFB8B8B8);
-  static const Color textTertiary = Color(0xFF888888);
-  static const Color textDisabled = Color(0xFF555555);
+  static const Color textPrimary = Color(0xFFFFFFFF);      // "text_primary"
+  static const Color textSecondary = Color(0xFFB8B8B8);   // "text_secondary"
+  static const Color textTertiary = Color(0xFF888888);     // "text_tertiary"
+  static const Color textDisabled = Color(0xFF555555);     // "text_disabled"
 
   // Accent
-  static const Color primary = Color(0xFF00D4FF);
-  static const Color primaryDark = Color(0xFF0099CC);
-  static const Color secondary = Color(0xFFFF6B35);
-  static const Color success = Color(0xFF00E676);
-  static const Color error = Color(0xFFFF1744);
-  static const Color warning = Color(0xFFFFD600);
+  static const Color primary = Color(0xFF00D4FF);          // "primary"
+  static const Color primaryDark = Color(0xFF0099CC);     // "primary_dark"
+  static const Color secondary = Color(0xFFFF6B35);       // "secondary" / "relation_selected"
+  static const Color success = Color(0xFF00E676);          // "success"
+  static const Color error = Color(0xFFFF1744);            // "error"
+  static const Color warning = Color(0xFFFFD600);         // "warning"
 
-  // Entités / Associations
-  static const Color entityBg = Color(0xFF1E2A3A);
-  static const Color entityBorder = Color(0xFF2E3A4A);
-  static const Color entitySelected = Color(0xFF00D4FF);
-  static const Color associationBg = Color(0xFF4A1E3A);
-  static const Color associationBorder = Color(0xFF5A2E4A);
-  static const Color associationSelected = Color(0xFFFF6B35);
+  // Entités / Associations (MCD)
+  static const Color entityBg = Color(0xFF1E2A3A);        // "entity_bg"
+  static const Color entityBorder = Color(0xFF2E3A4A);    // "entity_border"
+  static const Color entitySelected = Color(0xFF00D4FF);  // "entity_selected"
+  static const Color associationBg = Color(0xFF4A1E3A);  // "relation_bg"
+  static const Color associationBorder = Color(0xFF5A2E4A); // "relation_border"
+  static const Color associationSelected = Color(0xFFFF6B35); // "relation_selected"
 
   // Toolbar / Boutons
-  static const Color toolbarBg = Color(0xFF1A1A1A);
-  static const Color buttonBg = Color(0xFF2A2A2A);
-  static const Color buttonHover = Color(0xFF3A3A3A);
-  static const Color buttonBorder = Color(0xFF3A3A3A);
+  static const Color toolbarBg = Color(0xFF1A1A1A);       // "toolbar_bg"
+  static const Color buttonBg = Color(0xFF2A2A2A);        // "button_bg"
+  static const Color buttonHover = Color(0xFF3A3A3A);     // "button_hover"
+  static const Color buttonBorder = Color(0xFF3A3A3A);    // "button_border"
 
   // Canvas
-  static const Color canvasBackground = Color(0xFF1E1E1E);
-  static const Color gridMajor = Color(0xFF333333);
-  static const Color gridMinor = Color(0xFF222222);
+  static const Color canvasBackground = Color(0xFF0A0A0A); // "background"
+  // Grille (DarkTheme) : tons légèrement éclaircis pour être visibles sur #0A0A0A
+  static const Color gridMajor = Color(0xFF484848);        // dérivé "grid_major"
+  static const Color gridMinor = Color(0xFF363636);        // dérivé "grid_minor"
 
   static ThemeData get darkTheme {
     return ThemeData(

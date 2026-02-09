@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../core/api_client.dart';
 import '../core/mcd_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/main_toolbar.dart';
@@ -8,8 +9,38 @@ import '../widgets/mcd_canvas.dart';
 import 'markdown_import_screen.dart';
 
 /// Écran principal : barre d'outils + canvas MCD (équivalent MainWindow Python).
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey _canvasRepaintKey = GlobalKey();
+  final GlobalKey<McdCanvasState> _canvasKey = GlobalKey<McdCanvasState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkApiHealth());
+  }
+
+  /// Consomme GET /health pour vérifier que l'API Python est joignable ; avertit l'utilisateur sinon.
+  Future<void> _checkApiHealth() async {
+    if (!mounted) return;
+    final api = context.read<ApiClient>();
+    final ok = await api.health();
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('API BarrelMCD injoignable. Lancez le serveur Python (ex. port 8001) pour Valider, MLD/SQL, Import.'),
+          duration: Duration(seconds: 5),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +50,10 @@ class HomeScreen extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.backspace): _DeleteIntent(),
         SingleActivator(LogicalKeyboardKey.keyZ, control: true): _UndoIntent(),
         SingleActivator(LogicalKeyboardKey.keyY, control: true): _RedoIntent(),
+        SingleActivator(LogicalKeyboardKey.keyN, control: true): _NewIntent(),
+        SingleActivator(LogicalKeyboardKey.keyO, control: true): _OpenIntent(),
+        SingleActivator(LogicalKeyboardKey.keyS, control: true): _SaveIntent(),
+        SingleActivator(LogicalKeyboardKey.keyM, control: true): _MarkdownIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -36,6 +71,22 @@ class HomeScreen extends StatelessWidget {
             if (state.canRedo) state.redo();
             return null;
           }),
+          _NewIntent: CallbackAction<_NewIntent>(onInvoke: (_) {
+            MainToolbar.triggerNew(context);
+            return null;
+          }),
+          _OpenIntent: CallbackAction<_OpenIntent>(onInvoke: (_) {
+            MainToolbar.triggerOpen(context);
+            return null;
+          }),
+          _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) {
+            MainToolbar.triggerSave(context);
+            return null;
+          }),
+          _MarkdownIntent: CallbackAction<_MarkdownIntent>(onInvoke: (_) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarkdownImportScreen()));
+            return null;
+          }),
         },
         child: Focus(
           autofocus: true,
@@ -44,11 +95,11 @@ class HomeScreen extends StatelessWidget {
             body: Column(
               children: [
                 _buildHeader(context),
-                const MainToolbar(),
+                MainToolbar(exportImageKey: _canvasRepaintKey, canvasKey: _canvasKey),
                 Expanded(
                   child: Container(
                     color: AppTheme.canvasBackground,
-                    child: const McdCanvas(),
+                    child: McdCanvas(key: _canvasKey, repaintBoundaryKey: _canvasRepaintKey),
                   ),
                 ),
                 _buildStatusBar(context),
@@ -71,10 +122,10 @@ class HomeScreen extends StatelessWidget {
             width: 28,
             height: 28,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Icon(Icons.storage, color: AppTheme.primary, size: 28),
+            errorBuilder: (_, __, ___) => const Icon(Icons.storage, color: AppTheme.primary, size: 28),
           ),
           const SizedBox(width: 10),
-          Text(
+          const Text(
             'Barrel',
             style: TextStyle(
               color: AppTheme.textSecondary,
@@ -82,7 +133,7 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
+          const Text(
             'MCD',
             style: TextStyle(
               color: AppTheme.textPrimary,
@@ -115,23 +166,26 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  static void openMarkdownImport(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => const MarkdownImportScreen(),
-      ),
-    );
-  }
 }
 
 class _DeleteIntent extends Intent {
   const _DeleteIntent();
 }
-
 class _UndoIntent extends Intent {
   const _UndoIntent();
 }
-
 class _RedoIntent extends Intent {
   const _RedoIntent();
+}
+class _NewIntent extends Intent {
+  const _NewIntent();
+}
+class _OpenIntent extends Intent {
+  const _OpenIntent();
+}
+class _SaveIntent extends Intent {
+  const _SaveIntent();
+}
+class _MarkdownIntent extends Intent {
+  const _MarkdownIntent();
 }

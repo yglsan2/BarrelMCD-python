@@ -12,9 +12,12 @@ class MarkdownImportScreen extends StatefulWidget {
   State<MarkdownImportScreen> createState() => _MarkdownImportScreenState();
 }
 
+enum _ImportFormat { markdown, motsCodes }
+
 class _MarkdownImportScreenState extends State<MarkdownImportScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _editorController = TextEditingController();
+  _ImportFormat _format = _ImportFormat.markdown;
   String _precisionLabel = 'Score de précision: --';
   Map<String, dynamic>? _parsedResult;
   bool _importEnabled = false;
@@ -34,25 +37,31 @@ class _MarkdownImportScreenState extends State<MarkdownImportScreen> with Single
   }
 
   void _onEditorChanged() {
-    _parseMarkdown();
+    _parseInput();
   }
 
-  Future<void> _parseMarkdown() async {
+  Future<void> _parseInput() async {
     final content = _editorController.text.trim();
     if (content.isEmpty) {
       setState(() {
         _parsedResult = null;
         _importEnabled = false;
-        _precisionLabel = 'Score de précision: --';
+        _precisionLabel = _format == _ImportFormat.motsCodes ? 'Format: Mots codés' : 'Score de précision: --';
       });
       return;
     }
     final state = context.read<McdState>();
-    final r = await state.parseMarkdown(content);
+    final Map<String, dynamic>? r = _format == _ImportFormat.motsCodes
+        ? await state.parseMotsCodes(content)
+        : await state.parseMarkdown(content);
     if (r == null) return;
     setState(() {
       _parsedResult = r;
-      _precisionLabel = 'Score de précision: ${(r['precision_score'] ?? 0).toStringAsFixed(1)}%';
+      if (_format == _ImportFormat.motsCodes) {
+        _precisionLabel = 'Format: Mots codés';
+      } else {
+        _precisionLabel = 'Score de précision: ${(r['precision_score'] ?? 0).toStringAsFixed(1)}%';
+      }
       _importEnabled = true;
     });
   }
@@ -64,7 +73,7 @@ class _MarkdownImportScreenState extends State<MarkdownImportScreen> with Single
     if (canvas != null) state.loadFromCanvasFormat(canvas);
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('MCD importé depuis Markdown')),
+      SnackBar(content: Text(_format == _ImportFormat.motsCodes ? 'MCD importé (mots codés)' : 'MCD importé depuis Markdown')),
     );
   }
 
@@ -88,7 +97,7 @@ Client : 1,1
 Produit : 0,n
 ''';
     _editorController.text = template;
-    _parseMarkdown();
+    _parseInput();
   }
 
   @override
@@ -114,6 +123,21 @@ Produit : 0,n
             color: AppTheme.surfaceDark,
             child: Row(
               children: [
+                SegmentedButton<_ImportFormat>(
+                  segments: const [
+                    ButtonSegment(value: _ImportFormat.markdown, label: Text('Markdown'), icon: Icon(Icons.text_snippet)),
+                    ButtonSegment(value: _ImportFormat.motsCodes, label: Text('Mots codés'), icon: Icon(Icons.code)),
+                  ],
+                  selected: {_format},
+                  onSelectionChanged: (Set<_ImportFormat> s) {
+                    setState(() {
+                      _format = s.first;
+                      _precisionLabel = _format == _ImportFormat.motsCodes ? 'Format: Mots codés' : 'Score de précision: --';
+                    });
+                    _parseInput();
+                  },
+                ),
+                const SizedBox(width: 16),
                 Text(_precisionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 const Spacer(),
               ],
@@ -152,14 +176,17 @@ Produit : 0,n
   }
 
   Widget _buildEditorTab() {
+    final syntaxHint = _format == _ImportFormat.motsCodes
+        ? 'Syntaxe : Entité: attr1, attr2 | Assoc, 11 Entité1, 1N Entité2 (11=1,1 1N=1,n 01=0,1 0N=0,n)'
+        : 'Syntaxe : ## Entité | - attribut (type) PK | ### Entité1 <-> Entité2 : Association | Cardinalités';
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Syntaxe : ## Entité | - attribut (type) PK | ### Entité1 <-> Entité2 : Association | Cardinalités',
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+          Text(
+            syntaxHint,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Expanded(
@@ -180,9 +207,16 @@ Produit : 0,n
   }
 
   Widget _buildPreviewTab() {
-    final entities = _parsedResult?['parsed']?['entities'] as Map?;
-    final associations = _parsedResult?['parsed']?['associations'] as List?;
-    if (entities == null && associations == null) {
+    // Markdown renvoie parsed.entities (Map) et parsed.associations ; mots codés renvoie canvas.entities (List) et canvas.associations
+    final parsed = _parsedResult?['parsed'];
+    final canvas = _parsedResult?['canvas'] as Map?;
+    final List<dynamic>? entitiesList = canvas?['entities'] as List?;
+    final Map? entitiesMap = parsed?['entities'] as Map?;
+    final List? associationsFromParsed = parsed?['associations'] as List?;
+    final List? associationsFromCanvas = canvas?['associations'] as List?;
+    final bool hasEntities = (entitiesMap != null && entitiesMap.isNotEmpty) || (entitiesList != null && entitiesList.isNotEmpty);
+    final bool hasAssoc = (associationsFromParsed != null && associationsFromParsed.isNotEmpty) || (associationsFromCanvas != null && associationsFromCanvas.isNotEmpty);
+    if (!hasEntities && !hasAssoc) {
       return const Center(child: Text('Aucune donnée à prévisualiser'));
     }
     return ListView(
@@ -190,24 +224,37 @@ Produit : 0,n
       children: [
         const Text('Entités détectées', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        ...(entities?.entries.map((e) => ListTile(
-              title: Text(e.key),
-              subtitle: Text('${(e.value as Map)['attributes']?.length ?? 0} attributs'),
-            )) ?? []),
+        if (entitiesMap != null)
+          ...entitiesMap.entries.map((e) => ListTile(
+                title: Text(e.key.toString()),
+                subtitle: Text('${(e.value as Map)['attributes']?.length ?? 0} attributs'),
+              )),
+        if (entitiesList != null)
+          ...entitiesList.map((e) => ListTile(
+                title: Text((e as Map)['name']?.toString() ?? ''),
+                subtitle: Text('${(e['attributes'] as List?)?.length ?? 0} attributs'),
+              )),
         const SizedBox(height: 16),
         const Text('Associations détectées', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        ...(associations?.map((a) => ListTile(
-              title: Text(a['name'] ?? ''),
-              subtitle: Text('${a['entity1']} <-> ${a['entity2']}'),
-            )) ?? []),
+        if (associationsFromParsed != null)
+          ...associationsFromParsed.map((a) => ListTile(
+                title: Text(a['name']?.toString() ?? ''),
+                subtitle: Text('${a['entity1']} <-> ${a['entity2']}'),
+              )),
+        if (associationsFromCanvas != null)
+          ...associationsFromCanvas.map((a) => ListTile(
+                title: Text((a as Map)['name']?.toString() ?? ''),
+                subtitle: Text((a['entities'] as List?)?.join(' <-> ') ?? ''),
+              )),
       ],
     );
   }
 
   Widget _buildValidationTab() {
     final state = context.read<McdState>();
-    final future = _parsedResult != null ? state.validateMcd() : null;
+    final canvas = _parsedResult?['canvas'] as Map<String, dynamic>?;
+    final future = _parsedResult != null ? state.validateMcd(canvas) : null;
     return FutureBuilder<List<String>>(
       future: future,
       builder: (context, snap) {
