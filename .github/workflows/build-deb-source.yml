@@ -28,11 +28,8 @@ jobs:
 
       - name: Build source package (Flutter + debuild)
         run: |
-          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
-          echo "PATH=$PATH" | tr ':' '\n' | head -20
-          which flutter || true
-          which debuild || true
-          bash -x barrelmcd_flutter/packaging/build_source_package.sh
+          cd "$GITHUB_WORKSPACE"
+          bash barrelmcd_flutter/packaging/build_source_package.sh
 
       - name: Upload Debian source artifacts
         uses: actions/upload-artifact@v4
