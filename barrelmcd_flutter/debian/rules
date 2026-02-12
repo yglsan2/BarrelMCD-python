@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_configure:
+	true
+
+override_dh_auto_build:
+	true
+
+override_dh_auto_install:
+	install -dm755 debian/barrelmcd-flutter/opt/barrelmcd-flutter
+	cp -r . debian/barrelmcd-flutter/opt/barrelmcd-flutter/
+	rm -rf debian/barrelmcd-flutter/opt/barrelmcd-flutter/debian
+	install -dm755 debian/barrelmcd-flutter/usr/bin
+	printf '%s\n' '#!/bin/sh' 'exec /opt/barrelmcd-flutter/barrelmcd_flutter "$$@"' > debian/barrelmcd-flutter/usr/bin/barrelmcd-flutter
+	chmod 755 debian/barrelmcd-flutter/usr/bin/barrelmcd-flutter
+	install -dm755 debian/barrelmcd-flutter/usr/share/applications
+	install -m644 debian/barrelmcd-flutter.desktop debian/barrelmcd-flutter/usr/share/applications/barrelmcd-flutter.desktop
