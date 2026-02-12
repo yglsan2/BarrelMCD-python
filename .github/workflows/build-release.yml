@@ -1,0 +1,81 @@
+# Build BarrelMCD Flutter for Windows (.exe) et macOS (.dmg)
+# Les artifacts sont disponibles dans l'onglet Actions après chaque run.
+
+name: Build Windows et macOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'barrelmcd_flutter/**'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+        working-directory: barrelmcd_flutter
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: barrelmcd_flutter
+
+      - name: Build Windows release
+        run: flutter build windows --release
+        working-directory: barrelmcd_flutter
+
+      - name: Zip Windows bundle
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "barrelmcd_flutter_windows_64.zip"
+        working-directory: barrelmcd_flutter
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarrelMCD-Flutter-Windows-x64
+          path: barrelmcd_flutter/barrelmcd_flutter_windows_64.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: barrelmcd_flutter
+
+      - name: Build macOS release
+        run: flutter build macos --release
+        working-directory: barrelmcd_flutter
+
+      - name: Create DMG
+        run: |
+          APP="build/macos/Build/Products/Release/barrelmcd_flutter.app"
+          DMG_DIR="dmg_stage"
+          mkdir -p "$DMG_DIR"
+          cp -R "$APP" "$DMG_DIR/"
+          ln -s /Applications "$DMG_DIR/Applications"
+          hdiutil create -volname "BarrelMCD Flutter 1.0.0" -srcfolder "$DMG_DIR" -ov -format UDZO "BarrelMCD_Flutter-1.0.0.dmg"
+        working-directory: barrelmcd_flutter
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarrelMCD-Flutter-macOS
+          path: barrelmcd_flutter/BarrelMCD_Flutter-1.0.0.dmg
