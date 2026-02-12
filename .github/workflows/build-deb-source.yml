@@ -44,4 +44,5 @@ jobs:
             barrelmcd-flutter_1.0.0.orig.tar.gz
             barrelmcd-flutter_1.0.0-1.dsc
             barrelmcd-flutter_1.0.0-1_source.changes
+            barrelmcd-flutter_1.0.0-1_source.buildinfo
             barrelmcd-flutter_1.0.0-1.debian.tar.xz
