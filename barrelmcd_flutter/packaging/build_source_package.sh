@@ -42,9 +42,9 @@ echo "==> Création de l'archive orig..."
 echo "==> Copie de debian/..."
 cp -r "$ROOT/debian" "$BUILD_DIR/"
 
-echo "==> Construction du paquet source (debuild -S -sa)..."
+echo "==> Construction du paquet source (debuild -S -sa -us -uc)..."
 cd "$BUILD_DIR"
-debuild -S -sa -d
+debuild -S -sa -d -us -uc
 
 DEST="$(dirname "$BUILD_DIR")"
 echo "==> Terminé. Fichiers dans $DEST:"
