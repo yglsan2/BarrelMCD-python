@@ -1,0 +1,40 @@
+# Build du paquet source Debian/PPA (barrelmcd-flutter) sur Ubuntu.
+# Produit les fichiers .dsc et .changes à télécharger puis envoyer au PPA avec dput.
+
+name: Build paquet source Debian
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'barrelmcd_flutter/**'
+      - '.github/workflows/build-deb-source.yml'
+  workflow_dispatch:
+
+jobs:
+  build-deb-source:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Debian packaging tools
+        run: sudo apt-get update && sudo apt-get install -y devscripts build-essential debhelper
+
+      - name: Build source package (Flutter + debuild)
+        run: ./barrelmcd_flutter/packaging/build_source_package.sh
+
+      - name: Upload Debian source artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Debian-source-package
+          path: |
+            barrelmcd-flutter_1.0.0.orig.tar.gz
+            barrelmcd-flutter_1.0.0-1.dsc
+            barrelmcd-flutter_1.0.0-1_source.changes
+            barrelmcd-flutter_1.0.0-1.debian.tar.xz
