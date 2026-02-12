@@ -1,5 +1,5 @@
-# Build BarrelMCD Flutter for Windows (.exe) et macOS (.dmg)
-# Les artifacts sont disponibles dans l'onglet Actions après chaque run.
+# Build BarrelMCD Flutter pour Windows (.exe) et macOS (.dmg)
+# Artifacts dans l'onglet Actions après chaque run.
 
 name: Build Windows et macOS
 
@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'barrelmcd_flutter/**'
+      - '.github/workflows/build-release.yml'
   workflow_dispatch:
 
 jobs:
@@ -24,6 +25,9 @@ jobs:
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
+
+      - name: Create Windows platform if missing
+        run: flutter create . --platforms=windows
         working-directory: barrelmcd_flutter
 
       - name: Get dependencies
@@ -35,9 +39,14 @@ jobs:
         working-directory: barrelmcd_flutter
 
       - name: Zip Windows bundle
-        run: |
-          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "barrelmcd_flutter_windows_64.zip"
         working-directory: barrelmcd_flutter
+        run: |
+          $releasePath = "build\windows\x64\runner\Release"
+          if (-not (Test-Path $releasePath)) {
+            Get-ChildItem -Path build -Recurse -Depth 4 | ForEach-Object { $_.FullName }
+            throw "Release folder not found at $releasePath"
+          }
+          Compress-Archive -Path "$releasePath\*" -DestinationPath "barrelmcd_flutter_windows_64.zip" -Force
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -47,6 +56,8 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    env:
+      CODE_SIGN_IDENTITY: "-"
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +66,10 @@ jobs:
         with:
           channel: stable
           cache: true
+
+      - name: Create macOS platform if missing
+        run: flutter create . --platforms=macos
+        working-directory: barrelmcd_flutter
 
       - name: Get dependencies
         run: flutter pub get
@@ -65,14 +80,21 @@ jobs:
         working-directory: barrelmcd_flutter
 
       - name: Create DMG
+        working-directory: barrelmcd_flutter
         run: |
           APP="build/macos/Build/Products/Release/barrelmcd_flutter.app"
+          if [ ! -d "$APP" ]; then
+            echo "App bundle not found at $APP, listing build dir:"
+            find build -type d -name "*.app" 2>/dev/null || true
+            exit 1
+          fi
           DMG_DIR="dmg_stage"
+          rm -rf "$DMG_DIR"
           mkdir -p "$DMG_DIR"
           cp -R "$APP" "$DMG_DIR/"
           ln -s /Applications "$DMG_DIR/Applications"
           hdiutil create -volname "BarrelMCD Flutter 1.0.0" -srcfolder "$DMG_DIR" -ov -format UDZO "BarrelMCD_Flutter-1.0.0.dmg"
-        working-directory: barrelmcd_flutter
+          rm -rf "$DMG_DIR"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
