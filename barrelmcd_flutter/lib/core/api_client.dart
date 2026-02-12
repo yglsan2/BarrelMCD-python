@@ -49,7 +49,7 @@ class ApiClient {
     return post('/api/parse-markdown', {'content': content});
   }
 
-  /// POST /api/parse-mots-codes — mots codés style Mocodo → format canvas
+  /// POST /api/parse-mots-codes — mots codés format BarrelMCD → format canvas
   Future<Map<String, dynamic>> parseMotsCodes(String content) async {
     return post('/api/parse-mots-codes', {'content': content});
   }
@@ -59,9 +59,49 @@ class ApiClient {
     return post('/api/validate', {'mcd': mcd});
   }
 
+  /// POST /api/validate-create-association — logique Barrel
+  Future<Map<String, dynamic>> validateCreateAssociation(Map<String, dynamic> mcd, String name) async {
+    return post('/api/validate-create-association', {'mcd': mcd, 'name': name});
+  }
+
+  /// POST /api/validate-add-link — logique Barrel
+  Future<Map<String, dynamic>> validateAddLink(
+    Map<String, dynamic> mcd,
+    String associationName,
+    String entityName,
+    String cardEntity,
+    String cardAssoc,
+  ) async {
+    return post('/api/validate-add-link', {
+      'mcd': mcd,
+      'association_name': associationName,
+      'entity_name': entityName,
+      'card_entity': cardEntity,
+      'card_assoc': cardAssoc,
+    });
+  }
+
+  /// POST /api/validate-association-after-update — logique Barrel (1,1 + rubriques)
+  Future<Map<String, dynamic>> validateAssociationAfterUpdate(
+    Map<String, dynamic> mcd,
+    String associationName,
+    List<Map<String, dynamic>>? newAttributes,
+  ) async {
+    return post('/api/validate-association-after-update', {
+      'mcd': mcd,
+      'association_name': associationName,
+      'new_attributes': newAttributes,
+    });
+  }
+
   /// POST /api/to-mld
   Future<Map<String, dynamic>> mcdToMld(Map<String, dynamic> mcd) async {
     return post('/api/to-mld', {'mcd': mcd});
+  }
+
+  /// POST /api/to-mpd — dbms: mysql | postgresql | sqlite | sqlserver
+  Future<Map<String, dynamic>> mcdToMpd(Map<String, dynamic> mcd, {String dbms = 'mysql'}) async {
+    return post('/api/to-mpd', {'mcd': mcd, 'dbms': dbms});
   }
 
   /// POST /api/to-sql — dbms: mysql | postgresql | sqlite

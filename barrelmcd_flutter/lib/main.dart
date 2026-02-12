@@ -8,7 +8,7 @@ import 'core/mcd_state.dart';
 void main() {
   runApp(
     Provider<ApiClient>(
-      create: (_) => ApiClient(baseUrl: 'http://127.0.0.1:8001'),
+      create: (_) => ApiClient(baseUrl: 'http://127.0.0.1:8000'),
       child: ChangeNotifierProvider<CanvasModeState>(
         create: (_) => CanvasModeState(),
         child: ChangeNotifierProvider<McdState>(

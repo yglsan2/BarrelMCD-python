@@ -3,7 +3,7 @@
 
 """
 Canvas interactif pour la création manuelle de MCD
-Inspiré de Looping et Power Designer
+Inspiré de Barrel et Power Designer
 """
 
 import time

@@ -1,4 +1,4 @@
-# Plan d'Amélioration BarrelMCD pour concurrencer Looping
+# Plan d'Amélioration BarrelMCD pour améliorer Barrel MCD
 
 ## 🎯 Objectif
 Rendre BarrelMCD au moins aussi performant que Looping, le logiciel de référence en modélisation MCD.
@@ -117,7 +117,7 @@ Rendre BarrelMCD au moins aussi performant que Looping, le logiciel de référen
 
 ## 📊 Métriques de Succès
 
-Pour être compétitif avec Looping, BarrelMCD doit :
+Pour être compétitif, BarrelMCD doit :
 - ✅ Support complet des fonctionnalités MCD standard
 - ✅ Performance fluide même avec 100+ entités
 - ✅ Interface intuitive et moderne

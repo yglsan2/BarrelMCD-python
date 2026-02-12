@@ -52,7 +52,7 @@
 ## 🎯 Résultat
 
 L'application BarrelMCD dispose maintenant de :
-- ✅ Flèches flexibles performantes comparables à Looping
+- ✅ Flèches flexibles performantes de qualité professionnelle
 - ✅ Design graphique moderne et professionnel
 - ✅ Rendu fluide même avec de nombreux éléments
 - ✅ Interface intuitive et facile à utiliser

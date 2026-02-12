@@ -340,7 +340,7 @@ class MainWindow(QMainWindow):
         export_bar_action.triggered.connect(lambda: self.export_project('bar'))
         export_menu.addAction(export_bar_action)
         
-        export_loo_action = QAction("Looping (.loo)", self)
+        export_loo_action = QAction("Barrel (.loo)", self)
         export_loo_action.triggered.connect(lambda: self.export_project('loo'))
         export_menu.addAction(export_loo_action)
         
@@ -1138,9 +1138,9 @@ class MainWindow(QMainWindow):
         export_bar_action.triggered.connect(lambda: self.export_project('bar'))
         export_menu.addAction(export_bar_action)
         
-        # Export en format .loo (Looping)
-        export_loo_action = QAction('Format &Looping (.loo)', self)
-        export_loo_action.setStatusTip('Exporter en format Looping')
+        # Export en format .loo
+        export_loo_action = QAction('Format &Barrel (.loo)', self)
+        export_loo_action.setStatusTip('Exporter en format .loo')
         export_loo_action.triggered.connect(lambda: self.export_project('loo'))
         export_menu.addAction(export_loo_action)
         
@@ -1364,7 +1364,7 @@ class MainWindow(QMainWindow):
         """Ouvre un projet existant"""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Ouvrir un projet", "", 
-            "Tous les formats (*.bar *.loo *.xml *.json);;Format BarrelMCD (*.bar);;Format Looping (*.loo);;Format XML (*.xml);;Format JSON (*.json);;Tous les fichiers (*)"
+            "Tous les formats (*.bar *.loo *.xml *.json);;Format BarrelMCD (*.bar);;Format .loo (*.loo);;Format XML (*.xml);;Format JSON (*.json);;Tous les fichiers (*)"
         )
         if file_path:
             try:
@@ -1388,7 +1388,7 @@ class MainWindow(QMainWindow):
         """Enregistre le projet sous un nouveau nom"""
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Enregistrer le projet sous", "", 
-            "Format BarrelMCD (*.bar);;Format Looping (*.loo);;Format XML (*.xml);;Format JSON (*.json);;Tous les fichiers (*)"
+            "Format BarrelMCD (*.bar);;Format .loo (*.loo);;Format XML (*.xml);;Format JSON (*.json);;Tous les fichiers (*)"
         )
         if file_path:
             try:
@@ -1436,7 +1436,7 @@ class MainWindow(QMainWindow):
         """Exporte le projet dans un format spécifique"""
         format_extensions = {
             'bar': ('.bar', 'Format BarrelMCD (*.bar)'),
-            'loo': ('.loo', 'Format Looping (*.loo)'),
+            'loo': ('.loo', 'Format .loo (*.loo)'),
             'xml': ('.xml', 'Format XML (*.xml)'),
             'json': ('.json', 'Format JSON (*.json)'),
             'sql': ('.sql', 'Format SQL (*.sql)')
@@ -1490,7 +1490,7 @@ class MainWindow(QMainWindow):
             json.dump(data, f, indent=2, ensure_ascii=False)
     
     def save_as_looping_format(self, file_path):
-        """Sauvegarde en format Looping (.loo)"""
+        """Sauvegarde en format .loo"""
         import json
         data = {
             'version': '1.0',
@@ -1597,7 +1597,7 @@ class MainWindow(QMainWindow):
         self.canvas.load_from_data(data)
     
     def load_from_looping_format(self, file_path):
-        """Charge depuis le format Looping (.loo)"""
+        """Charge depuis le format .loo"""
         import json
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)

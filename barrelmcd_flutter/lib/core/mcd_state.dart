@@ -1,5 +1,8 @@
 import 'api_client.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Offset;
+import '../utils/link_geometry.dart';
+import '../utils/auto_layout.dart';
 
 /// État global du MCD (entités, associations, liens) pour l'UI Flutter.
 class McdState extends ChangeNotifier {
@@ -11,31 +14,199 @@ class McdState extends ChangeNotifier {
   List<Map<String, dynamic>> _entities = [];
   List<Map<String, dynamic>> _associations = [];
   List<Map<String, dynamic>> _inheritanceLinks = [];
-  /// Lien entre une association et une entité (côté Merise: association <-> entité avec cardinalité).
-  /// Cardinalités MCD : 4 seulement — 0,1 | 1,1 | 0,n | 1,n
+  /// Liens association ↔ entité (un élément = un arc).
+  /// Chaque lien : association, entity, card_entity, card_assoc, arm_index (optionnel).
+  /// Cardinalités MCD : 0,1 | 1,1 | 0,n | 1,n
   List<Map<String, dynamic>> _associationLinks = [];
   List<String> _logMessages = [];
   String? _lastError;
 
-  /// Sélection: index dans la liste correspondante, -1 si aucun. type: 'entity' | 'association' | 'link' | 'inheritance'
-  String? _selectedType;
-  int _selectedIndex = -1;
-  String? get selectedType => _selectedType;
-  int get selectedIndex => _selectedIndex;
+  /// Sélection multiple : ensembles d'indices par type (séparément ou tout ensemble).
+  final Set<int> _selectedEntityIndices = {};
+  final Set<int> _selectedAssociationIndices = {};
+  final Set<int> _selectedLinkIndices = {};
+  final Set<int> _selectedInheritanceIndices = {};
+
+  Set<int> get selectedEntityIndices => Set<int>.from(_selectedEntityIndices);
+  Set<int> get selectedAssociationIndices => Set<int>.from(_selectedAssociationIndices);
+  Set<int> get selectedLinkIndices => Set<int>.from(_selectedLinkIndices);
+  Set<int> get selectedInheritanceIndices => Set<int>.from(_selectedInheritanceIndices);
+
+  /// Sélection « primaire » (pour barre d'outils / dialogue) : premier de chaque type.
+  String? get selectedType {
+    if (_selectedEntityIndices.isNotEmpty) return 'entity';
+    if (_selectedAssociationIndices.isNotEmpty) return 'association';
+    if (_selectedLinkIndices.isNotEmpty) return 'link';
+    if (_selectedInheritanceIndices.isNotEmpty) return 'inheritance';
+    return null;
+  }
+
+  int get selectedIndex {
+    if (_selectedEntityIndices.isNotEmpty) return _selectedEntityIndices.first;
+    if (_selectedAssociationIndices.isNotEmpty) return _selectedAssociationIndices.first;
+    if (_selectedLinkIndices.isNotEmpty) return _selectedLinkIndices.first;
+    if (_selectedInheritanceIndices.isNotEmpty) return _selectedInheritanceIndices.first;
+    return -1;
+  }
+
+  bool get hasSelection =>
+      _selectedEntityIndices.isNotEmpty ||
+      _selectedAssociationIndices.isNotEmpty ||
+      _selectedLinkIndices.isNotEmpty ||
+      _selectedInheritanceIndices.isNotEmpty;
+
+  int get selectionCount =>
+      _selectedEntityIndices.length +
+      _selectedAssociationIndices.length +
+      _selectedLinkIndices.length +
+      _selectedInheritanceIndices.length;
 
   final List<Map<String, dynamic>> _undoStack = [];
   final List<Map<String, dynamic>> _redoStack = [];
+
+  /// Si true, la transposition MLD/MPD utilise héritage et CIF/CIFF ; si false, uniquement entités et associations.
+  bool _useInheritanceAndCifForTransposition = false;
+  bool get useInheritanceAndCifForTransposition => _useInheritanceAndCifForTransposition;
+  set useInheritanceAndCifForTransposition(bool value) {
+    if (_useInheritanceAndCifForTransposition == value) return;
+    _useInheritanceAndCifForTransposition = value;
+    notifyListeners();
+  }
+
+  /// Si true, les cardinalités des liens sont affichées en notation UML (0..1, 1..*, etc.) au lieu du MCD (0,1, 1,n).
+  bool _showUmlCardinalities = false;
+  bool get showUmlCardinalities => _showUmlCardinalities;
+  set showUmlCardinalities(bool value) {
+    if (_showUmlCardinalities == value) return;
+    _showUmlCardinalities = value;
+    notifyListeners();
+  }
+  void toggleUmlCardinalities() {
+    _showUmlCardinalities = !_showUmlCardinalities;
+    notifyListeners();
+  }
+
+  /// Marge au début du trait de flèche (px). Utilisé par link_geometry et link_arrow.
+  double _arrowStartMargin = 10.0;
+  double get arrowStartMargin => _arrowStartMargin;
+  set arrowStartMargin(double value) {
+    final v = value.clamp(0.0, 50.0);
+    if (_arrowStartMargin == v) return;
+    _arrowStartMargin = v;
+    notifyListeners();
+  }
+
+  /// Marge à la pointe de flèche (px). Utilisé par link_geometry.
+  double _arrowTipMargin = 12.0;
+  double get arrowTipMargin => _arrowTipMargin;
+  set arrowTipMargin(double value) {
+    final v = value.clamp(0.0, 50.0);
+    if (_arrowTipMargin == v) return;
+    _arrowTipMargin = v;
+    notifyListeners();
+  }
+
+  /// Épaisseur par défaut du trait des liens (1–6). Utilisée quand un lien n'a pas de stroke_width personnalisé.
+  double _defaultStrokeWidth = 2.5;
+  double get defaultStrokeWidth => _defaultStrokeWidth;
+  set defaultStrokeWidth(double value) {
+    final v = value.clamp(1.0, 6.0);
+    if (_defaultStrokeWidth == v) return;
+    _defaultStrokeWidth = v;
+    notifyListeners();
+  }
+
+  /// Convertit une cardinalité MCD (0,1 1,1 0,n 1,n) en notation UML (0..1 1..1 0..* 1..*).
+  static String mcdToUmlCardinality(String mcd) {
+    final s = mcd.trim().toLowerCase().replaceAll(' ', '');
+    if (s.contains('..') || s.contains('*')) return mcd;
+    switch (s) {
+      case '0,1': return '0..1';
+      case '1,1': return '1..1';
+      case '0,n': return '0..*';
+      case '1,n': return '1..*';
+      default: return mcd;
+    }
+  }
+
+  /// Cache MLD / MPD / SQL (par dbms) pour sauvegarde projet et export sans régénération.
+  Map<String, dynamic>? _cachedMld;
+  final Map<String, Map<String, dynamic>> _cachedMpd = {};
+  final Map<String, String> _cachedSql = {};
+  /// Version SQL avec types d'origine (non traduits pour le SGBD), gardée en stock local.
+  final Map<String, String> _cachedSqlOriginal = {};
+  /// Liste des traductions automatiques (table, column, original_type, translated_type) pour bulle d'info.
+  final Map<String, List<Map<String, dynamic>>> _cachedSqlTranslations = {};
+
+  static const List<String> supportedDbms = ['mysql', 'postgresql', 'sqlite', 'sqlserver'];
+
+  Map<String, dynamic>? get cachedMld => _cachedMld != null ? Map<String, dynamic>.from(_cachedMld!) : null;
+  Map<String, dynamic>? getCachedMpd(String dbms) => _cachedMpd[dbms] != null ? Map<String, dynamic>.from(_cachedMpd[dbms]!) : null;
+  String? getCachedSql(String dbms) => _cachedSql[dbms];
+  String? getCachedSqlOriginal(String dbms) => _cachedSqlOriginal[dbms];
+  List<Map<String, dynamic>> getCachedSqlTranslations(String dbms) => List<Map<String, dynamic>>.from(_cachedSqlTranslations[dbms] ?? []);
+
+  void setCachedMld(Map<String, dynamic>? mld) {
+    _cachedMld = mld != null ? Map<String, dynamic>.from(mld) : null;
+    notifyListeners();
+  }
+
+  void restoreMldMpdSqlCache(Map<String, dynamic> data) {
+    final mld = data['mld'] as Map<String, dynamic>?;
+    _cachedMld = mld != null ? Map<String, dynamic>.from(mld) : null;
+    for (final dbms in supportedDbms) {
+      final mpd = data['mpd_$dbms'] as Map<String, dynamic>?;
+      if (mpd != null) _cachedMpd[dbms] = Map<String, dynamic>.from(mpd);
+      final sql = data['sql_$dbms'] as String?;
+      if (sql != null) _cachedSql[dbms] = sql;
+      final sqlOrig = data['sql_original_$dbms'] as String?;
+      if (sqlOrig != null) _cachedSqlOriginal[dbms] = sqlOrig;
+      final tr = data['sql_translations_$dbms'] as List?;
+      if (tr != null) _cachedSqlTranslations[dbms] = tr.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+    notifyListeners();
+  }
+
+  void clearMldMpdSqlCache() {
+    _cachedMld = null;
+    _cachedMpd.clear();
+    _cachedSql.clear();
+    _cachedSqlOriginal.clear();
+    _cachedSqlTranslations.clear();
+    notifyListeners();
+    _scheduleMldMpdSqlRefresh();
+  }
+
+  /// Rafraîchit MLD/MPD/SQL en arrière-plan après invalidation (transposition instantanée).
+  void _scheduleMldMpdSqlRefresh() {
+    Future.microtask(() async {
+      if (_entities.isEmpty) return;
+      await generateMld();
+      for (final dbms in supportedDbms) {
+        generateMpd(dbms: dbms);
+        generateSql(dbms: dbms);
+      }
+    });
+  }
 
   List<Map<String, dynamic>> get entities => List.unmodifiable(_entities);
   List<Map<String, dynamic>> get associations => List.unmodifiable(_associations);
   List<Map<String, dynamic>> get inheritanceLinks => List.unmodifiable(_inheritanceLinks);
   List<Map<String, dynamic>> get associationLinks => List.unmodifiable(_associationLinks);
+
+  /// Contraintes d'intégrité fonctionnelle (CIF/CIFF).
+  List<Map<String, dynamic>> get cifConstraints => List.unmodifiable(_cifConstraints);
+  List<Map<String, dynamic>> _cifConstraints = [];
+
+  /// Position du symbole d'héritage par parent (clé = nom entité parente). Null = position auto.
+  Map<String, Map<String, double>> get inheritanceSymbolPositions => Map.unmodifiable(_inheritanceSymbolPositions);
+  final Map<String, Map<String, double>> _inheritanceSymbolPositions = {};
   List<String> get logMessages => List.unmodifiable(_logMessages);
   String? get lastError => _lastError;
   bool get canUndo => _undoStack.isNotEmpty;
   bool get canRedo => _redoStack.isNotEmpty;
 
-  /// Format MCD pour l'API: associations avec entities/cardinalities remplis depuis associationLinks.
+  /// Format MCD pour l'API: associations avec entities + 4 cardinalités (côté entité et côté association par lien).
   Map<String, dynamic> get mcdData {
     final assocWithLinks = <Map<String, dynamic>>[];
     for (final a in _associations) {
@@ -43,13 +214,17 @@ class McdState extends ChangeNotifier {
       final linksToThis = _associationLinks.where((l) => l['association'] == name).toList();
       final entityNames = linksToThis.map((l) => l['entity'] as String).toSet().toList();
       final cardinalities = <String, String>{};
+      final cardinalitiesAssoc = <String, String>{};
       for (final l in linksToThis) {
-        cardinalities[l['entity'] as String] = l['cardinality'] as String? ?? '1,n';
+        final ent = l['entity'] as String;
+        cardinalities[ent] = l['card_entity'] as String? ?? l['cardinality'] as String? ?? '1,n';
+        cardinalitiesAssoc[ent] = l['card_assoc'] as String? ?? '1,n';
       }
       assocWithLinks.add({
         ...a,
         'entities': entityNames,
         'cardinalities': cardinalities,
+        'cardinalities_assoc': cardinalitiesAssoc,
       });
     }
     return {
@@ -57,8 +232,66 @@ class McdState extends ChangeNotifier {
       'associations': assocWithLinks,
       'inheritance_links': _inheritanceLinks,
       'association_links': _associationLinks,
+      'cif_constraints': _cifConstraints.map((c) => Map<String, dynamic>.from(c)).toList(),
+      'inheritance_symbol_positions': _inheritanceSymbolPositions.map((k, v) => MapEntry(k, Map<String, double>.from(v))),
     };
   }
+
+  /// Payload pour transposition MLD/MPD : pas d’héritage ni CIF/CIFF (symboles et liens restent visuels uniquement).
+  Map<String, dynamic> get mcdDataForTransposition {
+    final data = mcdData;
+    return {
+      ...data,
+      'inheritance_links': <Map<String, dynamic>>[],
+      'cif_constraints': <Map<String, dynamic>>[],
+      'inheritance_symbol_positions': <String, Map<String, double>>{},
+    };
+  }
+
+  void setInheritanceSymbolPosition(String parentName, double x, double y) {
+    _inheritanceSymbolPositions[parentName] = {'x': x, 'y': y};
+    notifyListeners();
+  }
+
+  /// Crée le symbole héritage « placable » sur le canvas s'il n'existe pas encore (quand on ouvre le panneau Héritage).
+  void ensureStandaloneInheritanceSymbol(double defaultX, double defaultY) {
+    if (_inheritanceSymbolPositions.containsKey('_standalone')) return;
+    _inheritanceSymbolPositions['_standalone'] = {'x': defaultX, 'y': defaultY};
+    notifyListeners();
+  }
+
+  void clearInheritanceSymbolPosition(String parentName) {
+    if (!_inheritanceSymbolPositions.containsKey(parentName)) return;
+    _pushUndo();
+    _inheritanceSymbolPositions.remove(parentName);
+    notifyListeners();
+  }
+
+  /// Supprime tous les liens d'héritage dont le parent est [parentName].
+  void removeInheritanceLinksForParent(String parentName) {
+    final linksToRemove = _inheritanceLinks.where((l) => (l['parent'] as String?) == parentName).toList();
+    if (linksToRemove.isEmpty) return;
+    _pushUndo();
+    final children = linksToRemove.map((l) => l['child'] as String?).whereType<String>().toSet().toList();
+    _inheritanceLinks.removeWhere((l) => (l['parent'] as String?) == parentName);
+    _inheritanceSymbolPositions.remove(parentName);
+    for (final child in children) {
+      _entities = _entities.map((e) => (e['name'] as String?) == child ? {...e, 'parent_entity': null} : Map<String, dynamic>.from(e)).toList();
+    }
+    notifyListeners();
+  }
+
+  void setCifConstraintPosition(int index, double x, double y) {
+    if (index < 0 || index >= _cifConstraints.length) return;
+    _cifConstraints[index] = {..._cifConstraints[index], 'position': {'x': x, 'y': y}};
+    notifyListeners();
+  }
+
+  /// À appeler une fois au début d’un déplacement de symbole héritage (pour undo).
+  void beginMoveInheritanceSymbol() => _pushUndo();
+
+  /// À appeler une fois au début d’un déplacement de forme CIF (pour undo).
+  void beginMoveCifConstraint() => _pushUndo();
 
   void _pushUndo() {
     _undoStack.add(_snapshot());
@@ -72,6 +305,8 @@ class McdState extends ChangeNotifier {
       'associations': _associations.map(_copyAssociationForSnapshot).toList(),
       'inheritance_links': _inheritanceLinks.map((l) => Map<String, dynamic>.from(l)).toList(),
       'association_links': _associationLinks.map((l) => Map<String, dynamic>.from(l)).toList(),
+      'cif_constraints': _cifConstraints.map((c) => Map<String, dynamic>.from(c)).toList(),
+      'inheritance_symbol_positions': _inheritanceSymbolPositions.map((k, v) => MapEntry(k, Map<String, double>.from(v))),
     };
   }
 
@@ -99,9 +334,62 @@ class McdState extends ChangeNotifier {
     _entities = (snap['entities'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
     _associations = (snap['associations'] as List?)?.map((a) => Map<String, dynamic>.from(a as Map)).toList() ?? [];
     _inheritanceLinks = (snap['inheritance_links'] as List?)?.map((l) => Map<String, dynamic>.from(l as Map)).toList() ?? [];
-    _associationLinks = (snap['association_links'] as List?)?.map((l) => Map<String, dynamic>.from(l as Map)).toList() ?? [];
-    _selectedType = null;
-    _selectedIndex = -1;
+    final rawLinks = (snap['association_links'] as List?)?.map((l) => Map<String, dynamic>.from(l as Map)).toList() ?? [];
+    _associationLinks = rawLinks.map(_normalizeLink).toList();
+    _cifConstraints = (snap['cif_constraints'] as List?)?.map((c) => Map<String, dynamic>.from(c as Map)).toList() ?? [];
+    _inheritanceSymbolPositions.clear();
+    final isp = snap['inheritance_symbol_positions'] as Map<String, dynamic>?;
+    if (isp != null) for (final e in isp.entries) _inheritanceSymbolPositions[e.key] = Map<String, double>.from((e.value as Map).map((k, v) => MapEntry(k as String, (v as num).toDouble())));
+    _selectedEntityIndices.clear();
+    _selectedAssociationIndices.clear();
+    _selectedLinkIndices.clear();
+    _selectedInheritanceIndices.clear();
+    notifyListeners();
+  }
+
+  /// Garantit card_entity, card_assoc, arm_index, entity_side (left|right|top|bottom), arrow_tip, entity_ratio, locks.
+  static Map<String, dynamic> _normalizeLink(Map<String, dynamic> l) {
+    final out = Map<String, dynamic>.from(l);
+    final legacy = l['cardinality'] as String?;
+    out['card_entity'] = l['card_entity'] as String? ?? legacy ?? '1,n';
+    out['card_assoc'] = l['card_assoc'] as String? ?? '1,n';
+    if (!out.containsKey('arm_index')) out['arm_index'] = 0;
+    if (!out.containsKey('entity_arm_index')) out['entity_arm_index'] = 0;
+    if (!out.containsKey('arrow_at_association')) out['arrow_at_association'] = false;
+    const sides = ['left', 'right', 'top', 'bottom'];
+    if (sides.contains(out['entity_side'])) {} else out.remove('entity_side');
+    final tipX = (out['arrow_tip_x'] as num?)?.toDouble();
+    final tipY = (out['arrow_tip_y'] as num?)?.toDouble();
+    if (tipX == null || tipY == null) { out.remove('arrow_tip_x'); out.remove('arrow_tip_y'); }
+    final ratio = (out['entity_ratio'] as num?)?.toDouble();
+    if (ratio == null || ratio < 0 || ratio > 1) out['entity_ratio'] = 0.5;
+    if (out['entity_attachment_locked'] != true) out['entity_attachment_locked'] = false;
+    if (out['arm_attachment_locked'] != true) out['arm_attachment_locked'] = false;
+    const lineStyles = ['straight', 'elbow_h', 'elbow_v', 'curved'];
+    if (!lineStyles.contains(out['line_style'])) out['line_style'] = 'straight';
+    if (out['arrow_reversed'] != true) out['arrow_reversed'] = false;
+    final sw = (out['stroke_width'] as num?)?.toDouble();
+    if (sw == null || sw < 1 || sw > 6) out['stroke_width'] = 2.5;
+    const arrowHeads = ['arrow', 'diamond', 'block', 'none'];
+    if (!arrowHeads.contains(out['arrow_head'])) out['arrow_head'] = 'arrow';
+    const startCaps = ['dot', 'diamond', 'square', 'none'];
+    if (!startCaps.contains(out['start_cap'])) out['start_cap'] = 'dot';
+    return out;
+  }
+
+  /// Met à jour le style d'affichage d'un lien (coudé, courbe, sens flèche, épaisseur, formes d'extrémité).
+  void updateLinkStyle(int index, {String? lineStyle, bool? arrowReversed, double? strokeWidth, String? arrowHead, String? startCap}) {
+    if (index < 0 || index >= _associationLinks.length) return;
+    final link = Map<String, dynamic>.from(_associationLinks[index]);
+    const lineStyles = ['straight', 'elbow_h', 'elbow_v', 'curved'];
+    if (lineStyle != null && lineStyles.contains(lineStyle)) link['line_style'] = lineStyle;
+    if (arrowReversed != null) link['arrow_reversed'] = arrowReversed;
+    if (strokeWidth != null && strokeWidth >= 1 && strokeWidth <= 6) link['stroke_width'] = strokeWidth;
+    const arrowHeads = ['arrow', 'diamond', 'block', 'none'];
+    if (arrowHead != null && arrowHeads.contains(arrowHead)) link['arrow_head'] = arrowHead;
+    const startCaps = ['dot', 'diamond', 'square', 'none'];
+    if (startCap != null && startCaps.contains(startCap)) link['start_cap'] = startCap;
+    _associationLinks[index] = _normalizeLink(link);
     notifyListeners();
   }
 
@@ -131,36 +419,94 @@ class McdState extends ChangeNotifier {
   }
 
   void selectNone() {
-    _selectedType = null;
-    _selectedIndex = -1;
+    _selectedEntityIndices.clear();
+    _selectedAssociationIndices.clear();
+    _selectedLinkIndices.clear();
+    _selectedInheritanceIndices.clear();
     notifyListeners();
   }
 
-  void selectEntity(int index) {
+  void selectEntity(int index, {bool toggle = false}) {
     if (index < 0 || index >= _entities.length) return;
-    _selectedType = 'entity';
-    _selectedIndex = index;
+    if (toggle) {
+      if (_selectedEntityIndices.contains(index)) {
+        _selectedEntityIndices.remove(index);
+      } else {
+        _selectedEntityIndices.add(index);
+      }
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+    } else {
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+      _selectedEntityIndices.add(index);
+    }
     notifyListeners();
   }
 
-  void selectAssociation(int index) {
+  void selectAssociation(int index, {bool toggle = false}) {
     if (index < 0 || index >= _associations.length) return;
-    _selectedType = 'association';
-    _selectedIndex = index;
+    if (toggle) {
+      if (_selectedAssociationIndices.contains(index)) {
+        _selectedAssociationIndices.remove(index);
+      } else {
+        _selectedAssociationIndices.add(index);
+      }
+      _selectedEntityIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+    } else {
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+      _selectedAssociationIndices.add(index);
+    }
     notifyListeners();
   }
 
-  void selectLink(int index) {
+  void selectLink(int index, {bool toggle = false}) {
     if (index < 0 || index >= _associationLinks.length) return;
-    _selectedType = 'link';
-    _selectedIndex = index;
+    if (toggle) {
+      if (_selectedLinkIndices.contains(index)) {
+        _selectedLinkIndices.remove(index);
+      } else {
+        _selectedLinkIndices.add(index);
+      }
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedInheritanceIndices.clear();
+    } else {
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+      _selectedLinkIndices.add(index);
+    }
     notifyListeners();
   }
 
-  void selectInheritance(int index) {
+  void selectInheritance(int index, {bool toggle = false}) {
     if (index < 0 || index >= _inheritanceLinks.length) return;
-    _selectedType = 'inheritance';
-    _selectedIndex = index;
+    if (toggle) {
+      if (_selectedInheritanceIndices.contains(index)) {
+        _selectedInheritanceIndices.remove(index);
+      } else {
+        _selectedInheritanceIndices.add(index);
+      }
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+    } else {
+      _selectedEntityIndices.clear();
+      _selectedAssociationIndices.clear();
+      _selectedLinkIndices.clear();
+      _selectedInheritanceIndices.clear();
+      _selectedInheritanceIndices.add(index);
+    }
     notifyListeners();
   }
 
@@ -178,13 +524,14 @@ class McdState extends ChangeNotifier {
     }
   }
 
-  bool isEntitySelected(int index) => _selectedType == 'entity' && _selectedIndex == index;
-  bool isAssociationSelected(int index) => _selectedType == 'association' && _selectedIndex == index;
-  bool isLinkSelected(int index) => _selectedType == 'link' && _selectedIndex == index;
-  bool isInheritanceSelected(int index) => _selectedType == 'inheritance' && _selectedIndex == index;
+  bool isEntitySelected(int index) => _selectedEntityIndices.contains(index);
+  bool isAssociationSelected(int index) => _selectedAssociationIndices.contains(index);
+  bool isLinkSelected(int index) => _selectedLinkIndices.contains(index);
+  bool isInheritanceSelected(int index) => _selectedInheritanceIndices.contains(index);
 
   void loadFromCanvasFormat(Map<String, dynamic> data) {
     _pushUndo();
+    clearMldMpdSqlCache();
     final rawEntities = (data['entities'] as List?) ?? [];
     final rawAssociations = (data['associations'] as List?) ?? [];
     _entities = List<Map<String, dynamic>>.from(
@@ -197,10 +544,18 @@ class McdState extends ChangeNotifier {
       (data['inheritance_links'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)) ?? [],
     );
     _associationLinks = List<Map<String, dynamic>>.from(
-      (data['association_links'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)) ?? [],
+      (data['association_links'] as List?)?.map((e) => _normalizeLoadedLink(Map<String, dynamic>.from(e as Map))) ?? [],
     );
-    _selectedType = null;
-    _selectedIndex = -1;
+    _cifConstraints = List<Map<String, dynamic>>.from(
+      (data['cif_constraints'] as List?)?.map((c) => Map<String, dynamic>.from(c as Map)) ?? [],
+    );
+    _inheritanceSymbolPositions.clear();
+    final isp = data['inheritance_symbol_positions'] as Map<String, dynamic>?;
+    if (isp != null && isp.isNotEmpty) for (final e in isp.entries) _inheritanceSymbolPositions[e.key] = Map<String, double>.from((e.value as Map).map((k, v) => MapEntry(k as String, (v as num).toDouble())));
+    _selectedEntityIndices.clear();
+    _selectedAssociationIndices.clear();
+    _selectedLinkIndices.clear();
+    _selectedInheritanceIndices.clear();
     notifyListeners();
   }
 
@@ -217,8 +572,19 @@ class McdState extends ChangeNotifier {
     out['is_weak'] = e['is_weak'] == true;
     out['is_fictive'] = e['is_fictive'] == true;
     out['parent_entity'] = e['parent_entity'];
+    final rawAngles = e['arm_angles'] as List?;
+    out['arm_angles'] = rawAngles != null
+        ? rawAngles.map((x) => (x as num).toDouble()).toList()
+        : [0.0, 180.0];
     if (e['comment'] != null) out['comment'] = e['comment'];
     if (e['description'] != null) out['description'] = e['description'];
+    return out;
+  }
+
+  static Map<String, dynamic> _normalizeLoadedLink(Map<String, dynamic> l) {
+    final out = _normalizeLink(Map<String, dynamic>.from(l));
+    out['arm_index'] = (l['arm_index'] as num?)?.toInt() ?? 0;
+    out['entity_arm_index'] = (l['entity_arm_index'] as num?)?.toInt() ?? 0;
     return out;
   }
 
@@ -234,6 +600,12 @@ class McdState extends ChangeNotifier {
     out['entities'] = List<String>.from(a['entities'] as List? ?? []);
     out['cardinalities'] = Map<String, String>.from(a['cardinalities'] as Map? ?? {});
     out['attributes'] = (out['attributes'] as List?) ?? [];
+    final rawAngles = a['arm_angles'] as List?;
+    out['arm_angles'] = rawAngles != null
+        ? rawAngles.map((x) => (x as num).toDouble()).toList()
+        : [0.0, 180.0];
+    out['width'] = (a['width'] as num?)?.toDouble() ?? 260.0;
+    out['height'] = (a['height'] as num?)?.toDouble() ?? 260.0;
     return out;
   }
 
@@ -247,6 +619,7 @@ class McdState extends ChangeNotifier {
         return;
       }
       _pushUndo();
+      clearMldMpdSqlCache();
       _entities.add({
         'id': 'e_${DateTime.now().millisecondsSinceEpoch}',
         'name': trimmed,
@@ -255,6 +628,8 @@ class McdState extends ChangeNotifier {
         'is_weak': false,
         'is_fictive': false,
         'parent_entity': null,
+        'arm_angles': [0.0, 180.0],
+        'width': 200.0,
       });
       addLog("Entité créée: $trimmed");
       notifyListeners();
@@ -278,6 +653,7 @@ class McdState extends ChangeNotifier {
         return;
       }
       _pushUndo();
+      clearMldMpdSqlCache();
       _associations.add({
         'id': 'a_${DateTime.now().millisecondsSinceEpoch}',
         'name': trimmed,
@@ -285,6 +661,9 @@ class McdState extends ChangeNotifier {
         'attributes': [],
         'entities': [],
         'cardinalities': {},
+        'arm_angles': [0.0, 180.0],
+        'width': 260.0,
+        'height': 260.0,
       });
       addLog("Association créée: $trimmed");
       notifyListeners();
@@ -298,23 +677,64 @@ class McdState extends ChangeNotifier {
     }
   }
 
-  void addAssociationLink(String associationName, String entityName, String cardinality) {
+  /// [arrowAtAssociation] true = tirage entité → association, pointe côté association.
+  /// [arrowTipX], [arrowTipY] = point de relâchement en scène (pointe de flèche exactement là où l'utilisateur a relâché).
+  /// [entitySide] = 'left' | 'right' selon le côté de l'entité d'où part (ou arrive) le lien.
+  void addAssociationLink(String associationName, String entityName, String cardEntity, String cardAssoc, {
+    bool arrowAtAssociation = false,
+    double? arrowTipX,
+    double? arrowTipY,
+    String? entitySide,
+  }) {
     final a = associationName.trim();
     final e = entityName.trim();
     if (a.isEmpty || e.isEmpty) return;
-    final card = _normalizeCardinality(cardinality);
+    final cEntity = _normalizeCardinality(cardEntity);
+    final cAssoc = _normalizeCardinality(cardAssoc);
     if (_associationLinks.any((l) => (l['association'] as String?) == a && (l['entity'] as String?) == e)) {
       if (kDebugMode) debugPrint('[McdState] addAssociationLink: lien $a — $e existe déjà');
       return;
     }
+    final linksForAssoc = _associationLinks.where((l) => (l['association'] as String?) == a).length;
+    final linksForEntity = _associationLinks.where((l) => (l['entity'] as String?) == e).length;
+    final assocIndex = _associations.indexWhere((x) => (x['name'] as String?) == a);
+    final entityIndex = _entities.indexWhere((x) => (x['name'] as String?) == e);
+    final armAngles = assocIndex >= 0 ? (_associations[assocIndex]['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0] : [0.0, 180.0];
+    final entityArmAngles = entityIndex >= 0 ? (_entities[entityIndex]['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0] : [0.0, 180.0];
+    final armIndex = linksForAssoc % armAngles.length;
+    final entityArmIndex = linksForEntity % entityArmAngles.length;
     _pushUndo();
-    _associationLinks.add({
+    clearMldMpdSqlCache();
+    final linkData = <String, dynamic>{
       'association': a,
       'entity': e,
-      'cardinality': card,
-    });
-    addLog("Lien: $a — $e ($card)");
+      'card_entity': cEntity,
+      'card_assoc': cAssoc,
+      'arm_index': armIndex,
+      'entity_arm_index': entityArmIndex,
+      'arrow_at_association': arrowAtAssociation,
+    };
+    if (arrowTipX != null && arrowTipY != null) {
+      linkData['arrow_tip_x'] = arrowTipX;
+      linkData['arrow_tip_y'] = arrowTipY;
+    }
+    if (entitySide != null && const ['left', 'right', 'top', 'bottom'].contains(entitySide)) linkData['entity_side'] = entitySide;
+    _associationLinks.add(_normalizeLink(linkData));
+    _syncAssociationEntitiesFromLinks(a);
+    addLog("Lien: $a — $e (entité: $cEntity, assoc: $cAssoc)");
     notifyListeners();
+  }
+
+  /// Met à jour association['entities'] pour refléter les liens actuels (une source de vérité).
+  void _syncAssociationEntitiesFromLinks(String associationName) {
+    final idx = _associations.indexWhere((x) => (x['name'] as String?) == associationName);
+    if (idx < 0) return;
+    final entityNames = _associationLinks
+        .where((l) => (l['association'] as String?) == associationName)
+        .map((l) => l['entity'] as String)
+        .toSet()
+        .toList();
+    _associations[idx] = {..._associations[idx], 'entities': entityNames};
   }
 
   static const List<String> _mcdCardinalities = ['0,1', '1,1', '0,n', '1,n'];
@@ -328,8 +748,12 @@ class McdState extends ChangeNotifier {
 
   void removeAssociationLinkAt(int index) {
     if (index < 0 || index >= _associationLinks.length) return;
+    final link = _associationLinks[index];
+    final assocName = link['association'] as String?;
     _pushUndo();
+    clearMldMpdSqlCache();
     _associationLinks.removeAt(index);
+    if (assocName != null) _syncAssociationEntitiesFromLinks(assocName);
     addLog('Lien supprimé');
     notifyListeners();
   }
@@ -346,9 +770,18 @@ class McdState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Redimensionne la largeur d'une entité (min 120, max 400).
+  void updateEntitySize(int index, double width) {
+    if (index < 0 || index >= _entities.length) return;
+    final w = width.clamp(120.0, 400.0);
+    _entities[index] = {..._entities[index], 'width': w};
+    notifyListeners();
+  }
+
   void updateEntityAt(int index, Map<String, dynamic> entity) {
     if (index < 0 || index >= _entities.length) return;
     _pushUndo();
+    clearMldMpdSqlCache();
     _entities[index] = Map<String, dynamic>.from(entity);
     notifyListeners();
   }
@@ -357,6 +790,7 @@ class McdState extends ChangeNotifier {
   int duplicateEntity(int index) {
     if (index < 0 || index >= _entities.length) return -1;
     _pushUndo();
+    clearMldMpdSqlCache();
     final src = _entities[index];
     final baseName = (src['name'] as String?)?.trim() ?? 'Entité';
     String newName = 'Copie de $baseName';
@@ -381,9 +815,262 @@ class McdState extends ChangeNotifier {
     return _entities.length - 1;
   }
 
-  void updateAssociationLinkCardinality(int index, String cardinality) {
+  void updateAssociationLinkCardinalities(int index, String cardEntity, String cardAssoc) {
     if (index < 0 || index >= _associationLinks.length) return;
-    _associationLinks[index] = {..._associationLinks[index], 'cardinality': cardinality};
+    clearMldMpdSqlCache();
+    _associationLinks[index] = {
+      ..._associationLinks[index],
+      'card_entity': _normalizeCardinality(cardEntity),
+      'card_assoc': _normalizeCardinality(cardAssoc),
+    };
+    notifyListeners();
+  }
+
+  /// À appeler une fois au début d'un déplacement de poignée de lien (pour undo).
+  void beginLinkAttachmentEdit() {
+    _pushUndo();
+  }
+
+  /// Recalcule les accroches de tous les liens (entity_side, arm_index) selon les positions actuelles pour un rendu plus propre.
+  /// Si [pushUndo] est false (ex. appel depuis applyAutoLayout), n'empile pas d'étape undo.
+  void recenterLinks({bool pushUndo = true}) {
+    if (_associationLinks.isEmpty) return;
+    if (pushUndo) _pushUndo();
+    clearMldMpdSqlCache();
+    for (int i = 0; i < _associationLinks.length; i++) {
+      final link = Map<String, dynamic>.from(_associationLinks[i]);
+      final assocName = link['association'] as String?;
+      final entityName = link['entity'] as String?;
+      if (assocName == null || entityName == null) continue;
+      Map<String, dynamic>? assoc;
+      Map<String, dynamic>? ent;
+      for (final a in _associations) { if ((a['name'] as String?) == assocName) { assoc = a; break; } }
+      for (final e in _entities) { if ((e['name'] as String?) == entityName) { ent = e; break; } }
+      if (assoc == null || ent == null) continue;
+      final centerAssoc = associationCenter(assoc);
+      final pos = ent['position'] as Map<String, dynamic>?;
+      final ex = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final ey = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final w = (ent['width'] as num?)?.toDouble() ?? 200;
+      final cx = ex + w / 2;
+      final cy = ey + entityHeight(ent) / 2;
+      final dx = centerAssoc.dx - cx;
+      final dy = centerAssoc.dy - cy;
+      link['entity_side'] = dx.abs() >= dy.abs() ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'bottom' : 'top');
+      link['arm_index'] = bestArmIndexForLink(assoc, ent);
+      _associationLinks[i] = _normalizeLink(link);
+    }
+    addLog('Liens recentrés');
+    notifyListeners();
+  }
+
+  /// Applique un auto-layout (force-directed ou hiérarchique) puis recalcule les accroches des liens.
+  /// [mode] : 'force' (Fruchterman-Reingold) ou 'hierarchical' (Sugiyama simplifié).
+  void applyAutoLayout(String mode) {
+    final allNodes = <LayoutNode>[];
+    final edges = <({String a, String b})>[];
+    final assocNames = {for (final a in _associations) (a['name'] as String?): true};
+
+    for (final e in _entities) {
+      final name = e['name'] as String? ?? '';
+      final pos = e['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final w = (e['width'] as num?)?.toDouble() ?? 200;
+      final h = entityHeight(e);
+      allNodes.add(LayoutNode(name, x + w / 2, y + h / 2, w / 2, h / 2));
+    }
+    for (final a in _associations) {
+      final name = a['name'] as String? ?? '';
+      final pos = a['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final w = effectiveAssociationWidth(a);
+      allNodes.add(LayoutNode(name, x + w / 2, y + w / 2, w / 2, w / 2));
+    }
+    // Pour le layout hiérarchique BarrelMCD : uniquement les liens association -> entité,
+    // pour avoir deux couches nettes (entités en haut, associations en bas). Les liens d'héritage ne sont pas utilisés.
+    for (final link in _associationLinks) {
+      final ent = link['entity'] as String?;
+      final assoc = link['association'] as String?;
+      if (ent != null && assoc != null) edges.add((a: ent, b: assoc));
+    }
+    final edgesForHierarchical = List<({String a, String b})>.from(edges);
+    // Pour le force-directed / circulaire on peut garder les mêmes arêtes ; pour hiérarchique on n'ajoute pas l'héritage
+    for (final link in _inheritanceLinks) {
+      final parent = link['parent'] as String?;
+      final child = link['child'] as String?;
+      if (parent != null && child != null) edges.add((a: parent, b: child));
+    }
+
+    if (allNodes.isEmpty) return;
+    _pushUndo();
+    clearMldMpdSqlCache();
+
+    // Centrage du diagramme pour un rendu professionnel BarrelMCD.
+    const targetCenter = Offset(450, 350);
+
+    LayoutResult newCenters;
+    if (mode == 'hierarchical') {
+      newCenters = runHierarchicalLayout(
+        nodes: allNodes,
+        edges: edgesForHierarchical,
+        isAssociation: (id) => assocNames[id] == true,
+        targetCenter: targetCenter,
+      );
+    } else if (mode == 'circular') {
+      newCenters = runCircularLayout(
+        nodes: allNodes,
+        targetCenter: targetCenter,
+      );
+    } else {
+      newCenters = runForceDirectedLayout(
+        nodes: allNodes,
+        edges: edges,
+        targetCenter: targetCenter,
+      );
+    }
+    // S'assurer que chaque nœud a une position (fallback position actuelle si le layout en omet).
+    final fullCenters = Map<String, Offset>.from(newCenters);
+    for (final node in allNodes) {
+      fullCenters.putIfAbsent(node.id, () => Offset(node.x, node.y));
+    }
+    newCenters = fullCenters;
+
+    // Appliquer les nouvelles positions
+    for (int i = 0; i < _entities.length; i++) {
+      final e = _entities[i];
+      final name = e['name'] as String? ?? '';
+      final c = newCenters[name];
+      final w = (e['width'] as num?)?.toDouble() ?? 200;
+      final h = entityHeight(e);
+      if (c != null) {
+        _entities[i] = {...e, 'position': {'x': c.dx - w / 2, 'y': c.dy - h / 2}};
+      }
+    }
+    for (int i = 0; i < _associations.length; i++) {
+      final a = _associations[i];
+      final name = a['name'] as String? ?? '';
+      final c = newCenters[name];
+      final w = effectiveAssociationWidth(a);
+      if (c != null) {
+        _associations[i] = {...a, 'position': {'x': c.dx - w / 2, 'y': c.dy - w / 2}};
+      }
+    }
+
+    // Réinitialiser les pointes personnalisées des liens pour des traits droits (bord à bord).
+    for (int i = 0; i < _associationLinks.length; i++) {
+      final link = Map<String, dynamic>.from(_associationLinks[i]);
+      link.remove('arrow_tip_x');
+      link.remove('arrow_tip_y');
+      _associationLinks[i] = _normalizeLink(link);
+    }
+    recenterLinks(pushUndo: false);
+    final msg = mode == 'hierarchical'
+        ? 'Auto-layout hiérarchique appliqué'
+        : mode == 'circular'
+            ? 'Auto-layout circulaire appliqué'
+            : 'Auto-layout force-directed appliqué';
+    addLog(msg);
+    notifyListeners();
+  }
+
+  /// Propose des liens association–entité manquants selon la proximité (centre à centre).
+  /// Pour chaque association, retourne jusqu'à [maxLinksPerAssociation] paires (association, entity)
+  /// vers les entités les plus proches qui ne sont pas déjà liées à cette association.
+  List<({String association, String entity})> suggestLinksByProximity({int maxLinksPerAssociation = 2}) {
+    final result = <({String association, String entity})>[];
+    for (final assoc in _associations) {
+      final assocName = assoc['name'] as String? ?? '';
+      final linkedEntities = _associationLinks
+          .where((l) => (l['association'] as String?) == assocName)
+          .map((l) => l['entity'] as String?)
+          .whereType<String>()
+          .toSet();
+      final assocCenter = associationCenter(assoc);
+      final candidates = <({String name, double dist})>[];
+      for (final e in _entities) {
+        final name = e['name'] as String? ?? '';
+        if (linkedEntities.contains(name)) continue;
+        final ec = entityCenterOffset(e);
+        final dist = (ec.dx - assocCenter.dx) * (ec.dx - assocCenter.dx) +
+            (ec.dy - assocCenter.dy) * (ec.dy - assocCenter.dy);
+        candidates.add((name: name, dist: dist));
+      }
+      candidates.sort((a, b) => a.dist.compareTo(b.dist));
+      for (var i = 0; i < candidates.length && i < maxLinksPerAssociation; i++) {
+        result.add((association: assocName, entity: candidates[i].name));
+      }
+    }
+    return result;
+  }
+
+  /// Applique les paramètres par défaut des flèches (marges + épaisseur) à tous les liens.
+  void applyDefaultArrowParamsToAllLinks() {
+    if (_associationLinks.isEmpty) return;
+    _pushUndo();
+    for (int i = 0; i < _associationLinks.length; i++) {
+      _associationLinks[i] = {
+        ..._associationLinks[i],
+        'stroke_width': _defaultStrokeWidth,
+      };
+    }
+    addLog('Paramètres par défaut des flèches appliqués à tous les liens');
+    notifyListeners();
+  }
+
+  /// Améliore les liens sans déplacer les nœuds : supprime les pointes personnalisées puis recalcule les accroches.
+  void improveLinksOnly() {
+    if (_associationLinks.isEmpty) return;
+    _pushUndo();
+    clearMldMpdSqlCache();
+    for (int i = 0; i < _associationLinks.length; i++) {
+      final link = Map<String, dynamic>.from(_associationLinks[i]);
+      link.remove('arrow_tip_x');
+      link.remove('arrow_tip_y');
+      _associationLinks[i] = _normalizeLink(link);
+    }
+    recenterLinks(pushUndo: false);
+    addLog('Liens améliorés (accroches recentrées, pointes réinitialisées)');
+    notifyListeners();
+  }
+
+  /// Applique l'épaisseur par défaut (defaultStrokeWidth) à tous les liens. Annulable.
+  void applyDefaultStrokeWidthToAllLinks() {
+    if (_associationLinks.isEmpty) return;
+    _pushUndo();
+    clearMldMpdSqlCache();
+    final def = _defaultStrokeWidth.clamp(1.0, 6.0);
+    for (int i = 0; i < _associationLinks.length; i++) {
+      final link = Map<String, dynamic>.from(_associationLinks[i]);
+      link['stroke_width'] = def;
+      _associationLinks[i] = _normalizeLink(link);
+    }
+    addLog('Épaisseur par défaut appliquée à tous les liens');
+    notifyListeners();
+  }
+
+  /// Met à jour les points d'accroche d'un lien (entité: side ; association: arm_index ; pointe: arrow_tip_x/y ; verrous).
+  void updateAssociationLinkAttachment(int index, {
+    int? armIndex,
+    String? entitySide,
+    double? entityRatio,
+    double? arrowTipX,
+    double? arrowTipY,
+    bool? entityAttachmentLocked,
+    bool? armAttachmentLocked,
+  }) {
+    if (index < 0 || index >= _associationLinks.length) return;
+    final link = Map<String, dynamic>.from(_associationLinks[index]);
+    if (armIndex != null) link['arm_index'] = armIndex;
+    const sides = ['left', 'right', 'top', 'bottom'];
+    if (entitySide != null && sides.contains(entitySide)) link['entity_side'] = entitySide;
+    if (entityRatio != null && entityRatio >= 0 && entityRatio <= 1) link['entity_ratio'] = entityRatio;
+    if (arrowTipX != null) link['arrow_tip_x'] = arrowTipX;
+    if (arrowTipY != null) link['arrow_tip_y'] = arrowTipY;
+    if (entityAttachmentLocked != null) link['entity_attachment_locked'] = entityAttachmentLocked;
+    if (armAttachmentLocked != null) link['arm_attachment_locked'] = armAttachmentLocked;
+    _associationLinks[index] = _normalizeLink(link);
     notifyListeners();
   }
 
@@ -391,6 +1078,7 @@ class McdState extends ChangeNotifier {
     if (parentName == childName) return;
     if (_inheritanceLinks.any((l) => (l['child'] as String?) == childName)) return;
     _pushUndo();
+    clearMldMpdSqlCache();
     _inheritanceLinks.add({'parent': parentName, 'child': childName});
     _entities = _entities.map((e) {
       if ((e['name'] as String?) == childName) return {...e, 'parent_entity': parentName};
@@ -404,6 +1092,7 @@ class McdState extends ChangeNotifier {
     if (index < 0 || index >= _inheritanceLinks.length) return;
     final child = _inheritanceLinks[index]['child'] as String?;
     _pushUndo();
+    clearMldMpdSqlCache();
     _inheritanceLinks.removeAt(index);
     if (child != null) {
       _entities = _entities.map((e) {
@@ -415,10 +1104,151 @@ class McdState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Ajoute une contrainte CIF/CIFF (type: functional, inter_association, unique, exclusion).
+  void addCifConstraint(Map<String, dynamic> constraint) {
+    _pushUndo();
+    final name = (constraint['name'] as String?)?.trim() ?? 'CIF';
+    final type = constraint['type'] as String?;
+    const allowed = ['functional', 'inter_association', 'unique', 'exclusion'];
+    final pos = constraint['position'] as Map<String, dynamic>?;
+    _cifConstraints.add({
+      'name': name,
+      'type': allowed.contains(type) ? type : 'functional',
+      'description': (constraint['description'] as String?)?.trim() ?? '',
+      'entities': List<String>.from(constraint['entities'] as List? ?? []),
+      'associations': List<String>.from(constraint['associations'] as List? ?? []),
+      'attributes': List<String>.from(constraint['attributes'] as List? ?? []),
+      'is_enabled': constraint['is_enabled'] != false,
+      if (pos != null) 'position': Map<String, dynamic>.from(pos),
+    });
+    addLog('CIF ajoutée: $name');
+    notifyListeners();
+  }
+
+  void removeCifConstraintAt(int index) {
+    if (index < 0 || index >= _cifConstraints.length) return;
+    _pushUndo();
+    _cifConstraints.removeAt(index);
+    addLog('CIF supprimée');
+    notifyListeners();
+  }
+
+  void updateCifConstraintAt(int index, Map<String, dynamic> constraint) {
+    if (index < 0 || index >= _cifConstraints.length) return;
+    _pushUndo();
+    const allowed = ['functional', 'inter_association', 'unique', 'exclusion'];
+    final pos = constraint['position'] as Map<String, dynamic>?;
+    final existing = _cifConstraints[index];
+    _cifConstraints[index] = {
+      'name': (constraint['name'] as String?)?.trim() ?? 'CIF',
+      'type': allowed.contains(constraint['type'] as String?) ? constraint['type'] : 'functional',
+      'description': (constraint['description'] as String?)?.trim() ?? '',
+      'entities': List<String>.from(constraint['entities'] as List? ?? []),
+      'associations': List<String>.from(constraint['associations'] as List? ?? []),
+      'attributes': List<String>.from(constraint['attributes'] as List? ?? []),
+      'is_enabled': constraint['is_enabled'] != false,
+      'position': pos != null ? Map<String, dynamic>.from(pos) : (existing['position'] as Map<String, dynamic>?),
+    };
+    notifyListeners();
+  }
+
   void updateAssociationAt(int index, Map<String, dynamic> association) {
     if (index < 0 || index >= _associations.length) return;
     _pushUndo();
-    _associations[index] = Map<String, dynamic>.from(association);
+    clearMldMpdSqlCache();
+    final prev = _associations[index];
+    final out = Map<String, dynamic>.from(association);
+    out['arm_angles'] = association['arm_angles'] ?? prev['arm_angles'];
+    out['width'] = (association['width'] as num?)?.toDouble() ?? (prev['width'] as num?)?.toDouble() ?? 260.0;
+    out['height'] = (association['height'] as num?)?.toDouble() ?? (prev['height'] as num?)?.toDouble() ?? 260.0;
+    _associations[index] = out;
+    notifyListeners();
+  }
+
+  /// Met à jour la taille affichée de l'association (pour le dessin des liens).
+  void updateAssociationSize(int index, double width, double height) {
+    if (index < 0 || index >= _associations.length) return;
+    _associations[index] = {..._associations[index], 'width': width, 'height': height};
+    notifyListeners();
+  }
+
+  /// À appeler une fois au début d'une rotation de bras (pour undo).
+  void beginArmAngleEdit() {
+    _pushUndo();
+  }
+
+  /// Met à jour l'angle d'un bras (degrés). Ne fait rien si le bras est verrouillé. Ne pousse pas undo.
+  void updateAssociationArmAngle(int index, int armIndex, double angleDegrees) {
+    if (index < 0 || index >= _associations.length) return;
+    final a = _associations[index];
+    final locked = (a['arm_locked'] as List?)?.cast<bool>();
+    if (locked != null && armIndex < locked.length && locked[armIndex]) return;
+    final angles = List<double>.from((a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    if (armIndex < 0 || armIndex >= angles.length) return;
+    angles[armIndex] = angleDegrees % 360;
+    _associations[index] = {...a, 'arm_angles': angles};
+    notifyListeners();
+  }
+
+  /// Met à jour l'angle d'un bras d'entité (degrés). 2 bras par défaut (gauche/droite), qui tournent autour du rectangle.
+  void updateEntityArmAngle(int index, int armIndex, double angleDegrees) {
+    if (index < 0 || index >= _entities.length) return;
+    final ent = _entities[index];
+    final angles = List<double>.from((ent['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    if (armIndex < 0 || armIndex >= angles.length) return;
+    angles[armIndex] = angleDegrees % 360;
+    _entities[index] = {...ent, 'arm_angles': angles};
+    notifyListeners();
+  }
+
+  /// Verrouille ou déverrouille un bras d'association (bloque la rotation quand verrouillé).
+  void setAssociationArmLocked(int index, int armIndex, bool locked) {
+    if (index < 0 || index >= _associations.length) return;
+    final a = _associations[index];
+    final angles = (a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 180.0];
+    if (armIndex < 0 || armIndex >= angles.length) return;
+    List<bool> locks = List<bool>.from((a['arm_locked'] as List?)?.cast<bool>() ?? List.filled(angles.length, false));
+    if (locks.length != angles.length) locks = List.filled(angles.length, false);
+    locks[armIndex] = locked;
+    _associations[index] = {...a, 'arm_locked': locks};
+    notifyListeners();
+  }
+
+  bool isAssociationArmLocked(int assocIndex, int armIndex) {
+    if (assocIndex < 0 || assocIndex >= _associations.length) return false;
+    final locks = (_associations[assocIndex]['arm_locked'] as List?)?.cast<bool>();
+    if (locks == null || armIndex >= locks.length) return false;
+    return locks[armIndex];
+  }
+
+  /// Fixe le nombre de bras (1, 2, 3, 4 ou plus). Répartit les angles uniformément. Réinitialise arm_locked.
+  void setAssociationArmCount(int index, int count) {
+    if (index < 0 || index >= _associations.length || count < 1) return;
+    _pushUndo();
+    final step = 360.0 / count;
+    final angles = List.generate(count, (i) => (i * step) % 360.0);
+    _associations[index] = {..._associations[index], 'arm_angles': angles, 'arm_locked': List.filled(count, false)};
+    notifyListeners();
+  }
+
+  /// Supprime un bras. Les liens qui utilisaient un arm_index >= nouvelle longueur utilisent le dernier bras.
+  void removeAssociationArm(int index, int armIndex) {
+    if (index < 0 || index >= _associations.length) return;
+    final angles = List<double>.from((_associations[index]['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    if (armIndex < 0 || armIndex >= angles.length || angles.length <= 1) return;
+    _pushUndo();
+    angles.removeAt(armIndex);
+    _associations[index] = {..._associations[index], 'arm_angles': angles};
+    final assocName = _associations[index]['name'] as String?;
+    for (final l in _associationLinks) {
+      if (l['association'] != assocName) continue;
+      int ai = (l['arm_index'] as num?)?.toInt() ?? 0;
+      if (ai == armIndex) {
+        l['arm_index'] = 0;
+      } else if (ai > armIndex) {
+        l['arm_index'] = ai - 1;
+      }
+    }
     notifyListeners();
   }
 
@@ -426,6 +1256,7 @@ class McdState extends ChangeNotifier {
   int duplicateAssociation(int index) {
     if (index < 0 || index >= _associations.length) return -1;
     _pushUndo();
+    clearMldMpdSqlCache();
     final src = _associations[index];
     final baseName = (src['name'] as String?)?.trim() ?? 'Association';
     String newName = 'Copie de $baseName';
@@ -444,6 +1275,9 @@ class McdState extends ChangeNotifier {
     copy['attributes'] = (src['attributes'] as List?)?.map((a) => Map<String, dynamic>.from(a as Map)).toList() ?? [];
     copy['entities'] = [];
     copy['cardinalities'] = {};
+    copy['arm_angles'] = List<double>.from((src['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    copy['width'] = (src['width'] as num?)?.toDouble() ?? 260.0;
+    copy['height'] = (src['height'] as num?)?.toDouble() ?? 260.0;
     _associations.add(copy);
     addLog('Association dupliquée: $newName');
     notifyListeners();
@@ -451,46 +1285,90 @@ class McdState extends ChangeNotifier {
   }
 
   void deleteSelected() {
-    if (_selectedType == null) return;
+    if (!hasSelection) return;
     _pushUndo();
-    if (_selectedType == 'entity') {
-      if (_selectedIndex >= 0 && _selectedIndex < _entities.length) {
-        final name = _entities[_selectedIndex]['name'] as String?;
-        _entities.removeAt(_selectedIndex);
-        _associationLinks.removeWhere((l) => l['entity'] == name);
-        _inheritanceLinks.removeWhere((l) => l['parent'] == name || l['child'] == name);
-        addLog('Entité supprimée: $name');
-      }
-    } else if (_selectedType == 'association') {
-      if (_selectedIndex >= 0 && _selectedIndex < _associations.length) {
-        final name = _associations[_selectedIndex]['name'] as String?;
-        _associations.removeAt(_selectedIndex);
-        _associationLinks.removeWhere((l) => l['association'] == name);
-        addLog('Association supprimée: $name');
-      }
-    } else if (_selectedType == 'link') {
-      if (_selectedIndex >= 0 && _selectedIndex < _associationLinks.length) {
-        _associationLinks.removeAt(_selectedIndex);
-        addLog('Lien supprimé');
-      }
-    } else if (_selectedType == 'inheritance') {
-      if (_selectedIndex >= 0 && _selectedIndex < _inheritanceLinks.length) {
-        removeInheritanceLinkAt(_selectedIndex);
+    clearMldMpdSqlCache();
+
+    // Suppression par ordre : héritages (indices décroissants), liens, associations, entités.
+    final inhList = _selectedInheritanceIndices.toList()..sort((a, b) => b.compareTo(a));
+    for (final i in inhList) {
+      if (i >= 0 && i < _inheritanceLinks.length) {
+        final child = _inheritanceLinks[i]['child'] as String?;
+        _inheritanceLinks.removeAt(i);
+        if (child != null) {
+          _entities = _entities.map((e) {
+            if ((e['name'] as String?) == child) return {...e, 'parent_entity': null};
+            return Map<String, dynamic>.from(e);
+          }).toList();
+        }
       }
     }
-    _selectedType = null;
-    _selectedIndex = -1;
+    if (inhList.isNotEmpty) addLog('Héritage(s) supprimé(s)');
+
+    final linkList = _selectedLinkIndices.toList()..sort((a, b) => b.compareTo(a));
+    for (final i in linkList) {
+      if (i >= 0 && i < _associationLinks.length) {
+        final link = _associationLinks[i];
+        _associationLinks.removeAt(i);
+        final assocName = link['association'] as String?;
+        if (assocName != null) _syncAssociationEntitiesFromLinks(assocName);
+      }
+    }
+    if (linkList.isNotEmpty) addLog('Lien(s) supprimé(s)');
+
+    final assocList = _selectedAssociationIndices.toList()..sort((a, b) => b.compareTo(a));
+    final assocNamesToRemove = <String>{};
+    for (final i in assocList) {
+      if (i >= 0 && i < _associations.length) {
+        assocNamesToRemove.add(_associations[i]['name'] as String? ?? '');
+      }
+    }
+    for (final i in assocList) {
+      if (i >= 0 && i < _associations.length) {
+        _associations.removeAt(i);
+      }
+    }
+    for (final name in assocNamesToRemove) {
+      _associationLinks.removeWhere((l) => l['association'] == name);
+    }
+    if (assocList.isNotEmpty) addLog('Association(s) supprimée(s)');
+
+    final entityList = _selectedEntityIndices.toList()..sort((a, b) => b.compareTo(a));
+    final entityNamesToRemove = <String>{};
+    for (final i in entityList) {
+      if (i >= 0 && i < _entities.length) {
+        entityNamesToRemove.add(_entities[i]['name'] as String? ?? '');
+      }
+    }
+    for (final i in entityList) {
+      if (i >= 0 && i < _entities.length) {
+        _entities.removeAt(i);
+      }
+    }
+    for (final name in entityNamesToRemove) {
+      _associationLinks.removeWhere((l) => l['entity'] == name);
+      _inheritanceLinks.removeWhere((l) => l['parent'] == name || l['child'] == name);
+    }
+    for (final a in _associations) _syncAssociationEntitiesFromLinks(a['name'] as String? ?? '');
+    if (entityList.isNotEmpty) addLog('Entité(s) supprimée(s)');
+
+    selectNone();
     notifyListeners();
   }
 
   void clear() {
     _pushUndo();
+    clearMldMpdSqlCache();
+    _cifConstraints = [];
+    _inheritanceSymbolPositions.clear();
     _entities = [];
     _associations = [];
     _inheritanceLinks = [];
     _associationLinks = [];
-    _selectedType = null;
-    _selectedIndex = -1;
+    _selectedEntityIndices.clear();
+    _selectedAssociationIndices.clear();
+    _selectedLinkIndices.clear();
+    _selectedInheritanceIndices.clear();
     addLog("Projet réinitialisé");
     notifyListeners();
   }
@@ -518,7 +1396,7 @@ class McdState extends ChangeNotifier {
     }
   }
 
-  /// Parse « mots codés » (style Mocodo) ; retourne { canvas } sans modifier l'état tant qu'on n'appelle pas loadFromCanvasFormat.
+  /// Parse « mots codés » (format BarrelMCD) ; retourne { canvas } sans modifier l'état tant qu'on n'appelle pas loadFromCanvasFormat.
   Future<Map<String, dynamic>?> parseMotsCodes(String content) async {
     setError(null);
     try {
@@ -544,10 +1422,16 @@ class McdState extends ChangeNotifier {
   }
 
   Future<String?> generateSql({String dbms = 'mysql'}) async {
-    setError(null);
     try {
       final r = await _api.mcdToSql(mcdData, dbms: dbms);
-      return r['sql'] as String?;
+      final sql = r['sql'] as String?;
+      if (sql != null && sql.isNotEmpty) _cachedSql[dbms] = sql;
+      final sqlOriginal = r['sql_original'] as String?;
+      if (sqlOriginal != null) _cachedSqlOriginal[dbms] = sqlOriginal;
+      final tr = r['translations'] as List?;
+      if (tr != null) _cachedSqlTranslations[dbms] = tr.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      setError(null);
+      return sql;
     } on ApiException catch (e) {
       setError(e.body);
       return null;
@@ -555,12 +1439,100 @@ class McdState extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>?> generateMld() async {
-    setError(null);
     try {
-      return await _api.mcdToMld(mcdData);
+      final data = useInheritanceAndCifForTransposition ? mcdData : mcdDataForTransposition;
+      if (kDebugMode) {
+        debugPrint('[McdState.generateMld] entities=${(data['entities'] as List?)?.length ?? 0} associations=${(data['associations'] as List?)?.length ?? 0}');
+      }
+      final mld = await _api.mcdToMld(data);
+      if (kDebugMode) debugPrint('[McdState.generateMld] response: ${mld != null ? "tables=${(mld['tables'] as Map?)?.length ?? 0}" : "null"}');
+      if (mld != null) _cachedMld = Map<String, dynamic>.from(mld);
+      setError(null);
+      return mld;
     } on ApiException catch (e) {
+      if (kDebugMode) debugPrint('[McdState.generateMld] ApiException: ${e.body}');
       setError(e.body);
       return null;
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.generateMld] ERROR: $e\n$st');
+      setError(e.toString());
+      return null;
+    }
+  }
+
+  /// Génère le MPD (Modèle Physique de Données) à partir du MCD courant.
+  Future<Map<String, dynamic>?> generateMpd({String dbms = 'mysql'}) async {
+    try {
+      final data = useInheritanceAndCifForTransposition ? mcdData : mcdDataForTransposition;
+      if (kDebugMode) debugPrint('[McdState.generateMpd] dbms=$dbms entities=${(data['entities'] as List?)?.length ?? 0}');
+      final r = await _api.mcdToMpd(data, dbms: dbms);
+      final mpd = r['mpd'] as Map<String, dynamic>?;
+      if (kDebugMode) debugPrint('[McdState.generateMpd] response: ${mpd != null ? "tables=${(mpd['tables'] as Map?)?.length ?? 0}" : "null"}');
+      if (mpd != null) _cachedMpd[dbms] = Map<String, dynamic>.from(mpd);
+      setError(null);
+      return mpd;
+    } on ApiException catch (e) {
+      if (kDebugMode) debugPrint('[McdState.generateMpd] ApiException: ${e.body}');
+      setError(e.body);
+      return null;
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.generateMpd] ERROR: $e\n$st');
+      setError(e.toString());
+      return null;
+    }
+  }
+
+  /// Valide la création d'une association. Retourne la liste des erreurs (vide si OK).
+  Future<List<String>> validateCreateAssociation(String name) async {
+    setError(null);
+    try {
+      final r = await _api.validateCreateAssociation(mcdData, name);
+      return List<String>.from((r['errors'] as List?) ?? []);
+    } on ApiException catch (e) {
+      setError(e.body);
+      return [e.body];
+    }
+  }
+
+  /// Valide l'ajout d'un lien association–entité. Retourne la liste des erreurs (vide si OK).
+  Future<List<String>> validateAddLink(
+    String associationName,
+    String entityName,
+    String cardEntity,
+    String cardAssoc,
+  ) async {
+    setError(null);
+    try {
+      final r = await _api.validateAddLink(
+        mcdData,
+        associationName,
+        entityName,
+        cardEntity,
+        cardAssoc,
+      );
+      return List<String>.from((r['errors'] as List?) ?? []);
+    } on ApiException catch (e) {
+      setError(e.body);
+      return [e.body];
+    }
+  }
+
+  /// Valide qu'après mise à jour (ex. ajout d'attributs), l'association reste cohérente (règle 1,1 + rubriques).
+  Future<List<String>> validateAssociationAfterUpdate(
+    String associationName,
+    List<Map<String, dynamic>>? newAttributes,
+  ) async {
+    setError(null);
+    try {
+      final r = await _api.validateAssociationAfterUpdate(
+        mcdData,
+        associationName,
+        newAttributes,
+      );
+      return List<String>.from((r['errors'] as List?) ?? []);
+    } on ApiException catch (e) {
+      setError(e.body);
+      return [e.body];
     }
   }
 }

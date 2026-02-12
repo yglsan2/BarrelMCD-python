@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QColor, QFont
 
 class AttributeEditorDialog(QDialog):
-    """Panneau moderne d'édition des attributs d'une entité façon Looping, mais plus moderne."""
+    """Panneau moderne d'édition des attributs d'une entité style Barrel, mais plus moderne."""
     def __init__(self, entity, parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"Attributs de l'entité : {entity.name}")

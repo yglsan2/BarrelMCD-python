@@ -33,9 +33,13 @@ env/
 # IDE
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 .DS_Store
+
+# Référence externe (dépôt embarqué, ne pas suivre)
+drawdb-ref/
 
 # Fichiers de sauvegarde
 *.bak
@@ -44,4 +48,10 @@ env/
 
 # Fichiers de logs
 *.log
-logs/ 
+logs/
+
+# Sortie analyse radare2 (Looping)
+docs/analysis_output/
+
+# Sortie analyse radare2 (Looping)
+docs/analysis_output/ 

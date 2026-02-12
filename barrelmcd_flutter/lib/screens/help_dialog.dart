@@ -17,7 +17,7 @@ class HelpDialog {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text('Création :', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('• E : Entité\n• A : Association\n• L : Lien\n• Ctrl+L : Auto-Liens'),
+              Text('• E : Entité\n• A : Association\n• L : Lien\n• Ctrl+L : Auto-layout (mise en page)'),
               SizedBox(height: 12),
               Text('Navigation :', style: TextStyle(fontWeight: FontWeight.bold)),
               Text('• Z : Zoom +  • X : Zoom -  • F : Ajuster  • G : Grille'),

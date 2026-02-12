@@ -5,6 +5,7 @@ import '../core/api_client.dart';
 import '../core/mcd_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/main_toolbar.dart';
+import '../widgets/export_toolbar.dart';
 import '../widgets/mcd_canvas.dart';
 import 'markdown_import_screen.dart';
 
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('API BarrelMCD injoignable. Lancez le serveur Python (ex. port 8001) pour Valider, MLD/SQL, Import.'),
+          content: Text('API BarrelMCD injoignable. Lancez le serveur Python (./run_api.sh sur le port 8000) pour Valider, MLD/SQL, Import.'),
           duration: Duration(seconds: 5),
         ),
       );
@@ -54,6 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SingleActivator(LogicalKeyboardKey.keyO, control: true): _OpenIntent(),
         SingleActivator(LogicalKeyboardKey.keyS, control: true): _SaveIntent(),
         SingleActivator(LogicalKeyboardKey.keyM, control: true): _MarkdownIntent(),
+        SingleActivator(LogicalKeyboardKey.keyF): _FitIntent(),
+        SingleActivator(LogicalKeyboardKey.keyL, control: true): _AutoLayoutIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -87,23 +90,35 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MarkdownImportScreen()));
             return null;
           }),
+          _FitIntent: CallbackAction<_FitIntent>(onInvoke: (_) {
+            _canvasKey.currentState?.fitToView(context.read<McdState>());
+            return null;
+          }),
+          _AutoLayoutIntent: CallbackAction<_AutoLayoutIntent>(onInvoke: (_) {
+            MainToolbar.showAutoLayoutDialog(context, canvasKey: _canvasKey);
+            return null;
+          }),
         },
         child: Focus(
           autofocus: true,
           child: Scaffold(
             backgroundColor: AppTheme.background,
-            body: Column(
-              children: [
-                _buildHeader(context),
-                MainToolbar(exportImageKey: _canvasRepaintKey, canvasKey: _canvasKey),
-                Expanded(
-                  child: Container(
-                    color: AppTheme.canvasBackground,
-                    child: McdCanvas(key: _canvasKey, repaintBoundaryKey: _canvasRepaintKey),
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  MainToolbar(exportImageKey: _canvasRepaintKey, canvasKey: _canvasKey),
+                  const ExportToolbar(),
+                  Expanded(
+                    child: Container(
+                      color: AppTheme.canvasBackground,
+                      child: McdCanvas(key: _canvasKey, repaintBoundaryKey: _canvasRepaintKey),
+                    ),
                   ),
-                ),
-                _buildStatusBar(context),
-              ],
+                  _buildStatusBar(context),
+                ],
+              ),
             ),
           ),
         ),
@@ -112,33 +127,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    const logoSize = 14.0;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       color: AppTheme.toolbarBg,
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/logo.png',
-            width: 28,
-            height: 28,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(Icons.storage, color: AppTheme.primary, size: 28),
+          SizedBox(
+            width: logoSize,
+            height: logoSize,
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(Icons.storage, color: AppTheme.primary, size: logoSize),
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
           const Text(
             'Barrel',
             style: TextStyle(
               color: AppTheme.textSecondary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
             ),
           ),
           const Text(
             'MCD',
             style: TextStyle(
               color: AppTheme.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
             ),
           ),
         ],
@@ -155,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: AppTheme.surfaceDark,
           alignment: Alignment.centerLeft,
           child: Text(
-            state.lastError ?? 'Prêt',
+            state.lastError ?? (state.selectedType == 'link' ? 'Lien sélectionné — Suppr : supprimer | Clic droit : menu' : 'Prêt'),
             style: TextStyle(
               color: state.lastError != null ? AppTheme.error : AppTheme.textTertiary,
               fontSize: 12,
@@ -188,4 +208,10 @@ class _SaveIntent extends Intent {
 }
 class _MarkdownIntent extends Intent {
   const _MarkdownIntent();
+}
+class _FitIntent extends Intent {
+  const _FitIntent();
+}
+class _AutoLayoutIntent extends Intent {
+  const _AutoLayoutIntent();
 }

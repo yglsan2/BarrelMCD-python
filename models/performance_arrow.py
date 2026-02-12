@@ -4,7 +4,7 @@
 """
 Système de flèches flexibles performant pour BarrelMCD
 Optimisé pour des performances fluides même avec de nombreux éléments
-Style moderne inspiré de Looping, Draw.io et Lucidchart
+Style moderne inspiré de Barrel, Draw.io et Lucidchart
 """
 
 import math

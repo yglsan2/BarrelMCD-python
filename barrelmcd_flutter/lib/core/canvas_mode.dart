@@ -49,4 +49,13 @@ class CanvasModeState extends ChangeNotifier {
     _showGrid = !_showGrid;
     notifyListeners();
   }
+
+  /// Mode Précision (Aimant/Flex) : bras rotatifs visibles, liens courbes ancrés sur les bras.
+  /// Désactivé = mode Simple : liens droits centre assoc ↔ entité.
+  bool _linkPrecisionMode = false;
+  bool get linkPrecisionMode => _linkPrecisionMode;
+  void toggleLinkPrecisionMode() {
+    _linkPrecisionMode = !_linkPrecisionMode;
+    notifyListeners();
+  }
 }

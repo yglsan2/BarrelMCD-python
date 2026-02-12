@@ -11,22 +11,28 @@ class EntityBox extends StatelessWidget {
     this.selected = false,
     this.isWeak = false,
     this.isFictive = false,
+    this.width,
     this.onTap,
+    this.onAttributesAreaTap,
   });
 
   final String name;
   final List<Map<String, dynamic>> attributes;
   final bool selected;
+  /// Largeur du rectangle (défaut 200). Permet le redimensionnement.
+  final double? width;
   final bool isWeak;
   final bool isFictive;
   final VoidCallback? onTap;
+  /// Clic droit sur la zone sous le nom (attributs) → ouvre la fenêtre d'attributs (créer, modifier, typages, quantités, etc.).
+  final VoidCallback? onAttributesAreaTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200,
+        width: width ?? 200,
         constraints: const BoxConstraints(minHeight: 80),
         decoration: BoxDecoration(
           color: AppTheme.entityBg,
@@ -99,41 +105,118 @@ class EntityBox extends StatelessWidget {
               ),
             ),
             const Divider(height: 1, color: AppTheme.entityBorder),
-            ...attributes.take(5).map((a) {
-              final name = a['name']?.toString() ?? '';
-              final type = a['type']?.toString() ?? 'varchar';
-              final oblig = a['nullable'] == false;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            GestureDetector(
+              onSecondaryTap: onAttributesAreaTap,
+              behavior: HitTestBehavior.opaque,
+              child: Tooltip(
+                message: 'Clic droit pour ajouter ou modifier les attributs',
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+            if (attributes.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Text(
+                  'Clic droit pour ajouter ou modifier les attributs',
+                  style: const TextStyle(
+                    color: AppTheme.textTertiary,
+                    fontSize: 10,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              )
+            else ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 child: Row(
                   children: [
-                    if (a['is_primary_key'] == true)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(Icons.key, size: 12, color: AppTheme.secondary),
-                      ),
-                    Expanded(
-                      child: Tooltip(
-                        message: (a['description']?.toString() ?? '').trim().isEmpty ? '$name — $type' : '${a['description']}',
-                        child: Text(
-                          name.isEmpty ? '(sans nom)' : '$name ($type)${oblig ? ' *' : ''}',
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    const SizedBox(
+                      width: 36,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Tooltip(
+                            message: 'Clé primaire. Voir Aide → Lexique.',
+                            child: SizedBox(width: 8, child: Text('PK', style: TextStyle(color: AppTheme.textTertiary, fontSize: 9), textAlign: TextAlign.center)),
+                          ),
+                          Tooltip(
+                            message: 'Clé secondaire / Unique. Voir Aide → Lexique.',
+                            child: SizedBox(width: 10, child: Text('U', style: TextStyle(color: AppTheme.textTertiary, fontSize: 9), textAlign: TextAlign.center)),
+                          ),
+                        ],
                       ),
                     ),
+                    const Expanded(child: Text('Attributs', style: TextStyle(color: AppTheme.textTertiary, fontSize: 9))),
                   ],
                 ),
-              );
-            }),
-            if (attributes.length > 5)
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: Text(
-                  '+${attributes.length - 5} autres',
-                  style: const TextStyle(color: AppTheme.textTertiary, fontSize: 10),
+              ),
+              const Divider(height: 8),
+              ...attributes.map((a) {
+                final attrName = a['name']?.toString() ?? '';
+                final type = a['type']?.toString() ?? 'varchar';
+                final oblig = a['nullable'] == false;
+                final isPk = a['is_primary_key'] == true;
+                final isUnique = a['is_unique'] == true;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 36,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: Checkbox(
+                                value: isPk,
+                                onChanged: null,
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                fillColor: WidgetStateProperty.resolveWith((_) => AppTheme.secondary),
+                                checkColor: Colors.white,
+                                tristate: false,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: Checkbox(
+                                value: isUnique,
+                                onChanged: null,
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                fillColor: WidgetStateProperty.resolveWith((_) => AppTheme.primary),
+                                checkColor: Colors.white,
+                                tristate: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Tooltip(
+                          message: (a['description']?.toString() ?? '').trim().isEmpty
+                              ? '${isPk ? 'Clé primaire. ' : ''}${isUnique ? 'Clé sec. / Unique. ' : ''}$attrName — $type${oblig ? ' (obligatoire)' : ''}. Voir Aide → Lexique pour les définitions.'
+                              : '${a['description']}. Voir Aide → Lexique pour clé primaire, clé secondaire, etc.',
+                          child: Text(
+                            attrName.isEmpty ? '(sans nom)' : '$attrName ($type)${oblig ? ' *' : ''}',
+                            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),

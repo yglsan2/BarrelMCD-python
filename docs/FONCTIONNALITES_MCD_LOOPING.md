@@ -1,4 +1,4 @@
-# Fonctionnalités MCD – État par rapport à la liste type Looping
+# Fonctionnalités MCD – État par rapport à la liste type Barrel
 
 | # | Fonctionnalité | État BarrelMCD (Flutter + API) |
 |---|----------------|-------------------------------|
@@ -10,8 +10,8 @@
 | 6 | **Contraintes d'intégrité fonctionnelle (CIF) et inter-associations** | **Non** – Côté Python : `cif_constraints.py`, `CIFManager`. Non exposé dans l’API ni dans Flutter. |
 | 7 | **Règles de gestion avec possibilité de spécifier du code SQL** | **Non** – Côté Python : `business_rules.py`. Non exposé dans l’API ni dans Flutter. |
 | 8 | **Insertion de textes, graphiques et images connectables par flux** | **Non** – Canvas limité aux entités, associations et liens. |
-| 9 | **MLD affiché en temps réel** | **Partiel** – Panneau MLD/SQL à la demande (bouton « MLD/SQL »). Pas de mise à jour automatique en continu. |
-| 10 | **Requêtes SQL DDL en temps réel** | **Partiel** – Même panneau, SQL généré à l’ouverture. Pas de rafraîchissement automatique. |
+| 9 | **MLD affiché en temps réel** | **Oui** – Panneau MLD/SQL ; cache invalidé à chaque modification MCD ; rafraîchissement en arrière-plan (transposition instantanée) ; bouton Rafraîchir. |
+| 10 | **Requêtes SQL DDL en temps réel** | **Oui** – Même panneau ; MLD/MPD/SQL régénérés à l’ouverture si besoin, précalcul en arrière-plan après édition MCD. |
 | 11 | **Exportation de scripts SQL pour les principaux SGBD** | **Oui** – Panneau MLD/SQL : choix SGBD (MySQL, PostgreSQL, SQLite). API `to-sql` avec paramètre `dbms`. |
 | 12 | **Possibilité de paramétrer un SGBD personnalisé** | **Non** – Pas de moteur SGBD personnalisé (seulement les 3 prédéfinis). |
 | 13 | **Exportation des MCD aux formats images et presse-papier** | **Oui** – Export image PNG ; bouton « Copier MCD » (JSON) et « Copier SQL » / « Copier MLD » dans le panneau MLD/SQL. |
@@ -25,3 +25,7 @@
 - **Absent dans l’app** : 7 (entités fictives, transformation assoc→entité, CIF, règles de gestion, textes/images, SGBD personnalisé, personnalisation présentation).
 
 Ce document peut être mis à jour au fur et à mesure des évolutions.
+
+---
+
+**Voir aussi** : [ANALYSE_LOGIQUE_METIER_LOOPING.md](ANALYSE_LOGIQUE_METIER_LOOPING.md) — analyse détaillée de la logique métier Barrel (entités, attributs, cardinalités MCD/MLD, CIF, règles de gestion, MPD, SQL) et roadmap pour atteindre le même niveau dans Barrel MCD.

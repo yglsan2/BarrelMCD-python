@@ -1,3 +1,4 @@
+import re
 from typing import Dict, List, Any, Optional
 from enum import Enum
 
@@ -113,11 +114,12 @@ class ModelConverter:
                 column = {
                     "name": attr["name"],
                     "type": self._convert_type_to_sql(attr["type"]),
-                    "nullable": attr.get("is_nullable", True),
+                    "nullable": attr.get("nullable", attr.get("is_nullable", True)),
                     "size": attr.get("size"),
                     "precision": attr.get("precision"),
                     "scale": attr.get("scale"),
-                    "default": attr.get("default_value")
+                    "default": attr.get("default_value"),
+                    "auto_increment": attr.get("auto_increment", False),
                 }
                 
                 # Détecter les clés primaires (explicite ou par convention)
@@ -129,6 +131,16 @@ class ModelConverter:
                     has_primary_key = True
                 
                 table["columns"].append(column)
+                
+                # Contrainte d'unicité (clé secondaire)
+                if attr.get("is_unique", False):
+                    constraint_name = f"uq_{entity['name'].lower()}_{attr['name'].lower()}"
+                    if not any(c.get("constraint_name") == constraint_name for c in mld["constraints"]):
+                        mld["constraints"].append({
+                            "table": entity["name"].lower(),
+                            "constraint_name": constraint_name,
+                            "columns": [attr["name"]],
+                        })
             
             # Si aucune clé primaire n'a été trouvée, en créer une automatiquement
             if not has_primary_key:
@@ -172,7 +184,7 @@ class ModelConverter:
         return "1,n"
 
     def _convert_association_to_foreign_keys(self, association: Dict, mld: Dict) -> None:
-        """Convertit une association MCD en clés étrangères MLD (style Looping/Merise)."""
+        """Convertit une association MCD en clés étrangères MLD (style Barrel/Merise)."""
         entity1 = association["entity1"].lower()
         entity2 = association["entity2"].lower()
         # MCD Merise : 4 cardinalités uniquement — 0,1 | 1,1 | 0,n | 1,n
@@ -182,27 +194,28 @@ class ModelConverter:
         many_side = ("0,n", "1,n")  # max = n
 
         if c1 in one_side and c2 in many_side:
-            self._add_foreign_key(mld, entity2, entity1, association["name"])
+            # FK côté entity2 (côté n) ; nullable si 0,n (Merise/Barrel)
+            self._add_foreign_key(mld, entity2, entity1, association["name"], cardinality_source=c2)
         elif c1 in many_side and c2 in one_side:
-            self._add_foreign_key(mld, entity1, entity2, association["name"])
+            self._add_foreign_key(mld, entity1, entity2, association["name"], cardinality_source=c1)
         elif c1 in many_side and c2 in many_side:
             self._create_junction_table(mld, entity1, entity2, association)
         else:
-            self._add_foreign_key(mld, entity1, entity2, association["name"])
+            self._add_foreign_key(mld, entity1, entity2, association["name"], cardinality_source=c1)
     
-    def _add_foreign_key(self, mld: Dict, source_table: str, target_table: str, association_name: str) -> None:
-        """Ajoute une clé étrangère au MLD."""
+    def _add_foreign_key(self, mld: Dict, source_table: str, target_table: str, association_name: str, *, cardinality_source: str = "1,n") -> None:
+        """Ajoute une clé étrangère au MLD. FK nullable si cardinalité côté source = 0,n (Merise/Barrel)."""
         if source_table not in mld["tables"] or target_table not in mld["tables"]:
             return
         
-        # Nom de la colonne clé étrangère
         fk_column_name = f"{target_table}_id"
+        # Règle Merise/Barrel : 0,n côté porteur de la FK → nullable ; 1,n → NOT NULL
+        nullable = self._norm_card(cardinality_source) == "0,n"
         
-        # Ajouter la colonne clé étrangère à la table source
         fk_column = {
             "name": fk_column_name,
             "type": "INTEGER",
-            "nullable": False
+            "nullable": nullable
         }
         
         mld["tables"][source_table]["columns"].append(fk_column)
@@ -219,8 +232,16 @@ class ModelConverter:
         mld["foreign_keys"].append(foreign_key)
     
     def _create_junction_table(self, mld: Dict, entity1: str, entity2: str, association: Dict) -> None:
-        """Crée une table de liaison pour une relation n,n."""
-        junction_table_name = f"{entity1}_{entity2}"
+        """Crée une table de liaison pour une relation n,n (style Barrel : nom = nom de l'association si possible)."""
+        raw_name = (association.get("name") or "").strip()
+        if raw_name:
+            safe = re.sub(r"[^\w\s]", "", raw_name).strip().lower().replace(" ", "_")
+            if safe and safe not in mld["tables"]:
+                junction_table_name = safe
+            else:
+                junction_table_name = f"{entity1}_{entity2}"
+        else:
+            junction_table_name = f"{entity1}_{entity2}"
         
         junction_table = {
             "name": junction_table_name,
@@ -269,15 +290,15 @@ class ModelConverter:
         ])
     
     def _convert_inheritance_to_foreign_keys(self, child: str, parent: str, mld: Dict) -> None:
-        """Convertit l'héritage en clés étrangères."""
+        """Convertit l'héritage en clés étrangères (enfant 1,1 vers parent)."""
         child_table = child.lower()
         parent_table = parent.lower()
         
         if child_table not in mld["tables"] or parent_table not in mld["tables"]:
             return
         
-        # Ajouter une clé étrangère de l'enfant vers le parent
-        self._add_foreign_key(mld, child_table, parent_table, "inheritance")
+        # Enfant 1,1 vers parent : FK NOT NULL
+        self._add_foreign_key(mld, child_table, parent_table, "inheritance", cardinality_source="1,1")
         
         # Ajouter une contrainte d'unicité pour simuler l'héritage
         unique_constraint = {
@@ -288,19 +309,41 @@ class ModelConverter:
         mld["constraints"].append(unique_constraint)
     
     def _convert_type_to_sql(self, mcd_type: str) -> str:
-        """Convertit un type MCD en type SQL."""
+        """Convertit un type MCD en type SQL (alignement Barrel : types courants SGBD)."""
+        if not mcd_type or not isinstance(mcd_type, str):
+            return "VARCHAR(255)"
+        t = mcd_type.strip().upper()
+        # Déjà typé avec taille/précision (ex. VARCHAR(100), DECIMAL(10,2))
+        if "(" in t and ")" in t:
+            return mcd_type.strip()
+        # Mapping Barrel / SGBD courants (MySQL, PostgreSQL, SQLite, SQL Server)
         type_mapping = {
-            "integer": "INTEGER",
-            "varchar": "VARCHAR(255)",
-            "text": "TEXT",
-            "date": "DATE",
-            "datetime": "DATETIME",
-            "decimal": "DECIMAL(10,2)",
-            "boolean": "BOOLEAN",
-            "char": "CHAR(1)",
-            "blob": "BLOB"
+            "INT": "INTEGER",
+            "INTEGER": "INTEGER",
+            "BIGINT": "BIGINT",
+            "TINYINT": "TINYINT",
+            "SMALLINT": "SMALLINT",
+            "VARCHAR": "VARCHAR(255)",
+            "VARCHAR2": "VARCHAR(255)",
+            "NVARCHAR": "NVARCHAR(255)",
+            "CHAR": "CHAR(1)",
+            "TEXT": "TEXT",
+            "DATE": "DATE",
+            "DATETIME": "DATETIME",
+            "DATETIME2": "DATETIME",
+            "TIMESTAMP": "TIMESTAMP",
+            "DECIMAL": "DECIMAL(10,2)",
+            "NUMERIC": "DECIMAL(10,2)",
+            "BOOLEAN": "BOOLEAN",
+            "BOOL": "BOOLEAN",
+            "BLOB": "BLOB",
+            "FLOAT": "FLOAT",
+            "DOUBLE": "DOUBLE",
+            "REAL": "REAL",
+            "SERIAL": "SERIAL",
+            "BIGSERIAL": "BIGSERIAL",
         }
-        return type_mapping.get(mcd_type.lower(), "VARCHAR(255)")
+        return type_mapping.get(t, "VARCHAR(255)")
         
     def _convert_to_sql(self, mld: Dict) -> str:
         """Convertit un MLD en script SQL robuste."""
@@ -359,20 +402,102 @@ class ModelConverter:
         
         return "\n\n".join(sql_script)
     
+    def _translate_type_for_dbms(self, type_str: str, dbms: str, size: Optional[int] = None,
+                                  precision: Optional[int] = None, scale: Optional[int] = None) -> tuple:
+        """
+        Traduit un type SQL pour le SGBD cible (types non reconnus → équivalent).
+        Retourne (type_traduit, was_changed).
+        """
+        if not type_str or not isinstance(type_str, str):
+            return ("VARCHAR(255)", False)
+        t = type_str.strip().upper()
+        size = size or (255 if "VARCHAR" in t or "CHAR" in t else None)
+        out = type_str.strip()
+        changed = False
+        
+        # Extraire taille / précision du type s'il est entre parenthèses
+        if "(" in t and ")" in t:
+            len_match = re.match(r"(\w+)\s*\(\s*(\d+)\s*\)", t)
+            dec_match = re.match(r"(\w+)\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)", t)
+            if dec_match:
+                precision = precision or int(dec_match.group(2))
+                scale = scale or int(dec_match.group(3))
+            elif len_match and size is None:
+                size = int(len_match.group(2))
+        
+        # Mapping par SGBD : type source (début de chaîne) → type cible
+        if dbms == "mysql":
+            if t.startswith("VARCHAR2"):
+                out = f"VARCHAR({size or 255})"
+                changed = True
+            elif t.startswith("NVARCHAR"):
+                if "MAX" in t or (size and size > 16383):
+                    out = "TEXT"
+                else:
+                    out = f"VARCHAR({min(size or 255, 16383)})"
+                changed = True
+            elif t.startswith("NCHAR"):
+                out = f"CHAR({size or 1})"
+                changed = True
+            elif "DATETIME2" in t:
+                out = "DATETIME"
+                changed = True
+            elif "SERIAL" in t or "BIGSERIAL" in t:
+                out = "BIGINT" if "BIG" in t else "INT"
+                changed = True
+            elif "IDENTITY" in t:
+                out = "INT"
+                changed = True
+        elif dbms == "postgresql":
+            if t.startswith("VARCHAR2"):
+                out = f"VARCHAR({size or 255})"
+                changed = True
+            elif t.startswith("NVARCHAR"):
+                out = f"VARCHAR({size or 255})"
+                changed = True
+            elif "DATETIME2" in t:
+                out = "TIMESTAMP"
+                changed = True
+            elif "IDENTITY" in t:
+                out = "SERIAL" if "BIG" not in t else "BIGSERIAL"
+                changed = True
+        elif dbms == "sqlite":
+            if t.startswith("VARCHAR2") or t.startswith("NVARCHAR") or t.startswith("NCHAR"):
+                out = f"TEXT" if (size or 255) > 255 else f"VARCHAR({size or 255})"
+                changed = True
+            elif "DATETIME2" in t or "DATETIME" in t:
+                out = "TEXT"
+                changed = True
+            elif "SERIAL" in t or "BIGSERIAL" in t or "IDENTITY" in t:
+                out = "INTEGER"
+                changed = True
+        elif dbms == "sqlserver":
+            if t.startswith("VARCHAR2"):
+                out = f"NVARCHAR({size or 255})"
+                changed = True
+            elif t.startswith("SERIAL") or t.startswith("BIGSERIAL"):
+                out = "INT" if "BIG" not in t else "BIGINT"
+                changed = True
+        
+        if precision is not None and scale is not None and ("DECIMAL" in out or "NUMERIC" in out):
+            out = re.sub(r"DECIMAL\s*\(\s*\d+\s*,\s*\d+\s*\)", f"DECIMAL({precision},{scale})", out, flags=re.I)
+            out = re.sub(r"NUMERIC\s*\(\s*\d+\s*,\s*\d+\s*\)", f"NUMERIC({precision},{scale})", out, flags=re.I)
+        return (out, changed)
+    
     def generate_mpd(self, mld: Dict, dbms: str = "mysql") -> Dict:
-        """Génère un MPD (Modèle Physique de Données) à partir du MLD."""
+        """Génère un MPD (Modèle Physique de Données) à partir du MLD. Enregistre type_original et type_translations si des types sont traduits pour le SGBD."""
         if not mld:
-            return {"tables": {}, "indexes": [], "triggers": [], "procedures": [], "dbms": dbms}
+            return {"tables": {}, "indexes": [], "triggers": [], "procedures": [], "dbms": dbms, "type_translations": []}
             
         mpd = {
             "tables": {},
             "indexes": [],
             "triggers": [],
             "procedures": [],
-            "dbms": dbms
+            "dbms": dbms,
+            "type_translations": []
         }
         
-        # Convertir les tables MLD en tables MPD
         for table_name, table in mld["tables"].items():
             mpd_table = {
                 "name": table_name,
@@ -382,38 +507,84 @@ class ModelConverter:
                 "triggers": []
             }
             
-            # Convertir les colonnes avec optimisations spécifiques au SGBD
             for column in table["columns"]:
                 mpd_column = column.copy()
+                type_orig = mpd_column["type"]
+                mpd_column["type_original"] = type_orig
                 
-                # Optimisations spécifiques au SGBD
+                # Traduction du type si non reconnu par le SGBD
+                translated, type_changed = self._translate_type_for_dbms(
+                    type_orig, dbms,
+                    size=mpd_column.get("size"),
+                    precision=mpd_column.get("precision"),
+                    scale=mpd_column.get("scale")
+                )
+                if type_changed:
+                    mpd_column["type"] = translated
+                    mpd["type_translations"].append({
+                        "table": table_name,
+                        "column": mpd_column["name"],
+                        "original_type": type_orig,
+                        "translated_type": translated,
+                    })
+                
+                # Optimisations spécifiques au SGBD (auto_increment, etc.)
                 if dbms == "mysql":
                     if mpd_column.get("auto_increment"):
+                        prev = mpd_column["type"]
                         mpd_column["type"] = "INT AUTO_INCREMENT"
+                        if prev != mpd_column["type"]:
+                            mpd["type_translations"].append({
+                                "table": table_name,
+                                "column": mpd_column["name"],
+                                "original_type": type_orig,
+                                "translated_type": mpd_column["type"],
+                            })
                     if mpd_column["type"].startswith("VARCHAR") and (mpd_column.get("size") or 255) <= 255:
                         mpd_column["index"] = "BTREE"
-                
                 elif dbms == "postgresql":
                     if mpd_column.get("auto_increment"):
+                        prev = mpd_column["type"]
                         mpd_column["type"] = "SERIAL"
+                        if prev != mpd_column["type"]:
+                            mpd["type_translations"].append({
+                                "table": table_name,
+                                "column": mpd_column["name"],
+                                "original_type": type_orig,
+                                "translated_type": mpd_column["type"],
+                            })
                     if mpd_column["type"].startswith("VARCHAR"):
                         mpd_column["index"] = "BTREE"
-                
                 elif dbms == "sqlite":
                     if mpd_column.get("auto_increment"):
+                        prev = mpd_column["type"]
                         mpd_column["type"] = "INTEGER PRIMARY KEY AUTOINCREMENT"
+                        if prev != mpd_column["type"]:
+                            mpd["type_translations"].append({
+                                "table": table_name,
+                                "column": mpd_column["name"],
+                                "original_type": type_orig,
+                                "translated_type": mpd_column["type"],
+                            })
+                elif dbms == "sqlserver":
+                    if mpd_column.get("auto_increment"):
+                        prev = mpd_column["type"]
+                        mpd_column["type"] = "INT IDENTITY(1,1)"
+                        if prev != mpd_column["type"]:
+                            mpd["type_translations"].append({
+                                "table": table_name,
+                                "column": mpd_column["name"],
+                                "original_type": type_orig,
+                                "translated_type": mpd_column["type"],
+                            })
                 
                 mpd_table["columns"].append(mpd_column)
             
-            # Ajouter des index automatiques
             self._add_automatic_indexes(mpd_table, dbms)
-            
             mpd["tables"][table_name] = mpd_table
         
-        # Ajouter les clés étrangères du MLD
         mpd["foreign_keys"] = mld["foreign_keys"]
         mpd["constraints"] = mld["constraints"]
-        
         return mpd
     
     def _add_automatic_indexes(self, table: Dict, dbms: str) -> None:
@@ -441,21 +612,21 @@ class ModelConverter:
                     "type": "BTREE"
                 })
     
-    def generate_sql_from_mpd(self, mpd: Dict) -> str:
-        """Génère du SQL optimisé à partir du MPD."""
+    def generate_sql_from_mpd(self, mpd: Dict, use_original: bool = False) -> str:
+        """Génère du SQL à partir du MPD. Si use_original=True, utilise type_original (version non traduite pour le SGBD)."""
         if not mpd:
             return ""
             
         sql_script = []
         dbms = mpd.get("dbms", "mysql")
         
-        # Créer les tables avec optimisations
         for table_name, table in mpd["tables"].items():
             sql = f"CREATE TABLE {table_name} (\n"
             
             columns = []
             for column in table["columns"]:
-                col_def = f"    {column['name']} {column['type']}"
+                col_type = column.get("type_original", column["type"]) if use_original else column["type"]
+                col_def = f"    {column['name']} {col_type}"
                 
                 if not column.get("nullable", True):
                     col_def += " NOT NULL"
@@ -475,12 +646,14 @@ class ModelConverter:
             sql += ",\n".join(columns)
             sql += "\n)"
             
-            # Options spécifiques au SGBD
+            # Options spécifiques au SGBD (meilleur des deux : Barrel + Barrel SQL Server)
             if dbms == "mysql":
                 sql += " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
             elif dbms == "postgresql":
                 sql += ""
             elif dbms == "sqlite":
+                sql += ""
+            elif dbms == "sqlserver":
                 sql += ""
             
             sql += ";"
