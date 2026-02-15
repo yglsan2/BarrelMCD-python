@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /opt/barrelmcd-flutter/barrelmcd_flutter "$@"

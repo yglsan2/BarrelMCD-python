@@ -1,0 +1,32 @@
+# Paquet Arch binaire (bundle pré-construit). Pour CI / itch.io.
+# Ne pas utiliser pour l'AUR (l'AUR utilise PKGBUILD.aur qui build depuis la source).
+
+pkgname=barrelmcd-flutter
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Interface Flutter pour BarrelMCD - Modélisation conceptuelle de données (MCD)"
+arch=('x86_64')
+url="https://github.com/yglsan2/BarrelMCD-python"
+license=('GPL3')
+depends=('gtk3' 'gcc-libs')
+source=("barrelmcd-flutter_${pkgver}_linux-x64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  install -dm755 "$pkgdir/opt/barrelmcd-flutter"
+  cp -r "$srcdir/bundle"/* "$pkgdir/opt/barrelmcd-flutter/"
+  install -dm755 "$pkgdir/usr/bin"
+  echo '#!/bin/sh
+exec /opt/barrelmcd-flutter/barrelmcd_flutter "$@"' > "$pkgdir/usr/bin/barrelmcd-flutter"
+  chmod 755 "$pkgdir/usr/bin/barrelmcd-flutter"
+  install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/barrelmcd-flutter.desktop" << 'DESKTOP'
+[Desktop Entry]
+Name=BarrelMCD Flutter
+Comment=Modélisation conceptuelle de données (MCD)
+Exec=/opt/barrelmcd-flutter/barrelmcd_flutter
+Icon=/opt/barrelmcd-flutter/data/flutter_assets/assets/images/logo.png
+Terminal=false
+Type=Application
+Categories=Development;Office;
+DESKTOP
+}

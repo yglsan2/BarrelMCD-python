@@ -50,8 +50,6 @@ drawdb-ref/
 *.log
 logs/
 
-# Sortie analyse radare2 (Looping)
-docs/analysis_output/
-
-# Sortie analyse radare2 (Looping)
-docs/analysis_output/ 
+# Sortie analyse radare2 (Looping) — on garde le README
+docs/analysis_output/*
+!docs/analysis_output/README.md

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../core/api_client.dart';
 import '../core/mcd_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/main_toolbar.dart';
@@ -20,28 +19,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _canvasRepaintKey = GlobalKey();
   final GlobalKey<McdCanvasState> _canvasKey = GlobalKey<McdCanvasState>();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkApiHealth());
-  }
-
-  /// Consomme GET /health pour vérifier que l'API Python est joignable ; avertit l'utilisateur sinon.
-  Future<void> _checkApiHealth() async {
-    if (!mounted) return;
-    final api = context.read<ApiClient>();
-    final ok = await api.health();
-    if (!mounted) return;
-    if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('API BarrelMCD injoignable. Lancez le serveur Python (./run_api.sh sur le port 8000) pour Valider, MLD/SQL, Import.'),
-          duration: Duration(seconds: 5),
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

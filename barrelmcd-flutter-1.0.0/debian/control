@@ -1,0 +1,14 @@
+Source: barrelmcd-flutter
+Section: devel
+Priority: optional
+Maintainer: DesertYGL
+Build-Depends: debhelper-compat (= 10)
+Standards-Version: 4.6.2
+Homepage: https://github.com/yglsan2/BarrelMCD-python
+
+Package: barrelmcd-flutter
+Architecture: amd64
+Depends: ${misc:Depends}, libgtk-3-0, libgcc-s1
+Description: Interface Flutter pour BarrelMCD - Modélisation conceptuelle de données (MCD)
+ Dessin d'entités, associations, liens avec cardinalités.
+ Export MLD, MPD, SQL. Licence GPL-3.0.

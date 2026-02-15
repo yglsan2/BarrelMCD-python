@@ -3,6 +3,10 @@
 ## 🎯 Objectif
 Rendre BarrelMCD au moins aussi performant que Looping, le logiciel de référence en modélisation MCD.
 
+**Référence comportement Looping** : analyse radare2 du binaire (souris, drag, pan, hit-test) documentée dans  
+`docs/COMPORTEMENT_LOOPING_ANALYSE_RADARE2.md`. Script d’extraction des chaînes : `scripts/radare2_looping_behavior.sh`  
+(à lancer avec `~/Téléchargements/Looping.exe`).
+
 ## 📋 Fonctionnalités à Implémenter/Améliorer
 
 ### 1. ✅ Associations Réflexives avec Rôles

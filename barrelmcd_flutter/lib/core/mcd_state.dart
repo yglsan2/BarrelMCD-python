@@ -178,13 +178,18 @@ class McdState extends ChangeNotifier {
   }
 
   /// Rafraîchit MLD/MPD/SQL en arrière-plan après invalidation (transposition instantanée).
+  /// Toutes les exceptions (ex. API indisponible) sont capturées pour éviter l'écran rouge.
   void _scheduleMldMpdSqlRefresh() {
     Future.microtask(() async {
       if (_entities.isEmpty) return;
-      await generateMld();
-      for (final dbms in supportedDbms) {
-        generateMpd(dbms: dbms);
-        generateSql(dbms: dbms);
+      try {
+        await generateMld();
+        for (final dbms in supportedDbms) {
+          await generateMpd(dbms: dbms);
+          await generateSql(dbms: dbms);
+        }
+      } catch (e, st) {
+        if (kDebugMode) debugPrint('[McdState._scheduleMldMpdSqlRefresh] API indisponible: $e\n$st');
       }
     });
   }
@@ -349,12 +354,13 @@ class McdState extends ChangeNotifier {
 
   /// Garantit card_entity, card_assoc, arm_index, entity_side (left|right|top|bottom), arrow_tip, entity_ratio, locks.
   static Map<String, dynamic> _normalizeLink(Map<String, dynamic> l) {
+    try {
     final out = Map<String, dynamic>.from(l);
     final legacy = l['cardinality'] as String?;
     out['card_entity'] = l['card_entity'] as String? ?? legacy ?? '1,n';
     out['card_assoc'] = l['card_assoc'] as String? ?? '1,n';
-    if (!out.containsKey('arm_index')) out['arm_index'] = 0;
-    if (!out.containsKey('entity_arm_index')) out['entity_arm_index'] = 0;
+    out['arm_index'] = (l['arm_index'] as num?)?.toInt() ?? 0;
+    out['entity_arm_index'] = (l['entity_arm_index'] as num?)?.toInt() ?? 0;
     if (!out.containsKey('arrow_at_association')) out['arrow_at_association'] = false;
     const sides = ['left', 'right', 'top', 'bottom'];
     if (sides.contains(out['entity_side'])) {} else out.remove('entity_side');
@@ -365,7 +371,7 @@ class McdState extends ChangeNotifier {
     if (ratio == null || ratio < 0 || ratio > 1) out['entity_ratio'] = 0.5;
     if (out['entity_attachment_locked'] != true) out['entity_attachment_locked'] = false;
     if (out['arm_attachment_locked'] != true) out['arm_attachment_locked'] = false;
-    const lineStyles = ['straight', 'elbow_h', 'elbow_v', 'curved'];
+    const lineStyles = ['straight', 'elbow_h', 'elbow_v'];
     if (!lineStyles.contains(out['line_style'])) out['line_style'] = 'straight';
     if (out['arrow_reversed'] != true) out['arrow_reversed'] = false;
     final sw = (out['stroke_width'] as num?)?.toDouble();
@@ -374,14 +380,29 @@ class McdState extends ChangeNotifier {
     if (!arrowHeads.contains(out['arrow_head'])) out['arrow_head'] = 'arrow';
     const startCaps = ['dot', 'diamond', 'square', 'none'];
     if (!startCaps.contains(out['start_cap'])) out['start_cap'] = 'dot';
+    // Point de cassure (style JMerise) : optionnel, pour polyligne from → break → to.
+    final breakX = (out['break_x'] as num?)?.toDouble();
+    final breakY = (out['break_y'] as num?)?.toDouble();
+    if (breakX == null || breakY == null) {
+      out.remove('break_x');
+      out.remove('break_y');
+    } else {
+      out['break_x'] = breakX;
+      out['break_y'] = breakY;
+    }
     return out;
+    } catch (e, st) {
+      debugPrint('[McdState] _normalizeLink ERROR: $e');
+      debugPrint(st.toString());
+      return Map<String, dynamic>.from(l);
+    }
   }
 
   /// Met à jour le style d'affichage d'un lien (coudé, courbe, sens flèche, épaisseur, formes d'extrémité).
   void updateLinkStyle(int index, {String? lineStyle, bool? arrowReversed, double? strokeWidth, String? arrowHead, String? startCap}) {
     if (index < 0 || index >= _associationLinks.length) return;
     final link = Map<String, dynamic>.from(_associationLinks[index]);
-    const lineStyles = ['straight', 'elbow_h', 'elbow_v', 'curved'];
+    const lineStyles = ['straight', 'elbow_h', 'elbow_v'];
     if (lineStyle != null && lineStyles.contains(lineStyle)) link['line_style'] = lineStyle;
     if (arrowReversed != null) link['arrow_reversed'] = arrowReversed;
     if (strokeWidth != null && strokeWidth >= 1 && strokeWidth <= 6) link['stroke_width'] = strokeWidth;
@@ -575,7 +596,7 @@ class McdState extends ChangeNotifier {
     final rawAngles = e['arm_angles'] as List?;
     out['arm_angles'] = rawAngles != null
         ? rawAngles.map((x) => (x as num).toDouble()).toList()
-        : [0.0, 180.0];
+        : [0.0, 90.0, 180.0, 270.0];
     if (e['comment'] != null) out['comment'] = e['comment'];
     if (e['description'] != null) out['description'] = e['description'];
     return out;
@@ -603,7 +624,7 @@ class McdState extends ChangeNotifier {
     final rawAngles = a['arm_angles'] as List?;
     out['arm_angles'] = rawAngles != null
         ? rawAngles.map((x) => (x as num).toDouble()).toList()
-        : [0.0, 180.0];
+        : [0.0, 90.0, 180.0, 270.0];
     out['width'] = (a['width'] as num?)?.toDouble() ?? 260.0;
     out['height'] = (a['height'] as num?)?.toDouble() ?? 260.0;
     return out;
@@ -628,7 +649,7 @@ class McdState extends ChangeNotifier {
         'is_weak': false,
         'is_fictive': false,
         'parent_entity': null,
-        'arm_angles': [0.0, 180.0],
+        'arm_angles': [0.0, 90.0, 180.0, 270.0],
         'width': 200.0,
       });
       addLog("Entité créée: $trimmed");
@@ -661,7 +682,7 @@ class McdState extends ChangeNotifier {
         'attributes': [],
         'entities': [],
         'cardinalities': {},
-        'arm_angles': [0.0, 180.0],
+        'arm_angles': [0.0, 90.0, 180.0, 270.0],
         'width': 260.0,
         'height': 260.0,
       });
@@ -699,10 +720,17 @@ class McdState extends ChangeNotifier {
     final linksForEntity = _associationLinks.where((l) => (l['entity'] as String?) == e).length;
     final assocIndex = _associations.indexWhere((x) => (x['name'] as String?) == a);
     final entityIndex = _entities.indexWhere((x) => (x['name'] as String?) == e);
-    final armAngles = assocIndex >= 0 ? (_associations[assocIndex]['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0] : [0.0, 180.0];
-    final entityArmAngles = entityIndex >= 0 ? (_entities[entityIndex]['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0] : [0.0, 180.0];
-    final armIndex = linksForAssoc % armAngles.length;
-    final entityArmIndex = linksForEntity % entityArmAngles.length;
+    final assocMap = assocIndex >= 0 ? _associations[assocIndex] : null;
+    final entityMap = entityIndex >= 0 ? _entities[entityIndex] : null;
+    final armAngles = assocMap != null ? (assocMap['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0] : [0.0, 90.0, 180.0, 270.0];
+    final entityArmAngles = entityMap != null ? (_entities[entityIndex]['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0] : [0.0, 90.0, 180.0, 270.0];
+    // Bras le plus aligné vers l'entité (droite→gauche ou gauche→droite selon où est l'entité), pas 1er=bras0, 2e=bras1.
+    final armIndex = (assocMap != null && entityMap != null)
+        ? bestArmIndexForLink(assocMap, entityMap)
+        : (linksForAssoc % armAngles.length);
+    final entityArmIndex = (entityMap != null && assocMap != null)
+        ? bestEntityArmIndexForLink(entityMap, assocMap)
+        : (linksForEntity % entityArmAngles.length);
     _pushUndo();
     clearMldMpdSqlCache();
     final linkData = <String, dynamic>{
@@ -722,6 +750,7 @@ class McdState extends ChangeNotifier {
     _associationLinks.add(_normalizeLink(linkData));
     _syncAssociationEntitiesFromLinks(a);
     addLog("Lien: $a — $e (entité: $cEntity, assoc: $cAssoc)");
+    if (kDebugMode) debugPrint('[McdState] addAssociationLink OK: $a — $e armIndex=$armIndex entityArmIndex=$entityArmIndex arrowAtAssoc=$arrowAtAssociation');
     notifyListeners();
   }
 
@@ -1074,6 +1103,58 @@ class McdState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Met à jour le point de cassure d'un lien (polyline from → break → to). Passer null pour supprimer la cassure.
+  void updateAssociationLinkBreakPoint(int index, double? breakX, double? breakY) {
+    try {
+      if (index < 0 || index >= _associationLinks.length) {
+        debugPrint('[McdState] updateAssociationLinkBreakPoint index=$index out of range (length=${_associationLinks.length})');
+        return;
+      }
+      final link = Map<String, dynamic>.from(_associationLinks[index]);
+      if (breakX == null || breakY == null) {
+        link.remove('break_x');
+        link.remove('break_y');
+      } else {
+        link['break_x'] = breakX;
+        link['break_y'] = breakY;
+      }
+      _associationLinks[index] = _normalizeLink(link);
+      notifyListeners();
+    } catch (e, st) {
+      debugPrint('[McdState] updateAssociationLinkBreakPoint ERROR: $e');
+      debugPrint(st.toString());
+    }
+  }
+
+  /// Milieu du segment du lien (pour placer un point de cassure au centre). Retourne null si lien/entité/assoc introuvable.
+  Offset? getLinkSegmentMidpoint(int linkIndex) {
+    try {
+      if (linkIndex < 0 || linkIndex >= _associationLinks.length) return null;
+      final link = _associationLinks[linkIndex];
+      final assocName = link['association'] as String?;
+      final entityName = link['entity'] as String?;
+      if (assocName == null || entityName == null) return null;
+      Map<String, dynamic>? assoc;
+      Map<String, dynamic>? entity;
+      for (final a in _associations) {
+        if (a['name'] == assocName) { assoc = a; break; }
+      }
+      for (final e in _entities) {
+        if (e['name'] == entityName) { entity = e; break; }
+      }
+      if (assoc == null || entity == null) {
+        debugPrint('[McdState] getLinkSegmentMidpoint: assoc=$assocName found=${assoc != null} entity=$entityName found=${entity != null}');
+        return null;
+      }
+      final seg = getLinkSegment(assoc, entity, link);
+      return Offset((seg.from.dx + seg.to.dx) / 2, (seg.from.dy + seg.to.dy) / 2);
+    } catch (e, st) {
+      debugPrint('[McdState] getLinkSegmentMidpoint($linkIndex) ERROR: $e');
+      debugPrint(st.toString());
+      return null;
+    }
+  }
+
   void addInheritanceLink(String parentName, String childName) {
     if (parentName == childName) return;
     if (_inheritanceLinks.any((l) => (l['child'] as String?) == childName)) return;
@@ -1183,7 +1264,7 @@ class McdState extends ChangeNotifier {
     final a = _associations[index];
     final locked = (a['arm_locked'] as List?)?.cast<bool>();
     if (locked != null && armIndex < locked.length && locked[armIndex]) return;
-    final angles = List<double>.from((a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    final angles = List<double>.from((a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 90.0, 180.0, 270.0]);
     if (armIndex < 0 || armIndex >= angles.length) return;
     angles[armIndex] = angleDegrees % 360;
     _associations[index] = {...a, 'arm_angles': angles};
@@ -1194,7 +1275,7 @@ class McdState extends ChangeNotifier {
   void updateEntityArmAngle(int index, int armIndex, double angleDegrees) {
     if (index < 0 || index >= _entities.length) return;
     final ent = _entities[index];
-    final angles = List<double>.from((ent['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    final angles = List<double>.from((ent['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 90.0, 180.0, 270.0]);
     if (armIndex < 0 || armIndex >= angles.length) return;
     angles[armIndex] = angleDegrees % 360;
     _entities[index] = {...ent, 'arm_angles': angles};
@@ -1205,7 +1286,7 @@ class McdState extends ChangeNotifier {
   void setAssociationArmLocked(int index, int armIndex, bool locked) {
     if (index < 0 || index >= _associations.length) return;
     final a = _associations[index];
-    final angles = (a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 180.0];
+    final angles = (a['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 90.0, 180.0, 270.0];
     if (armIndex < 0 || armIndex >= angles.length) return;
     List<bool> locks = List<bool>.from((a['arm_locked'] as List?)?.cast<bool>() ?? List.filled(angles.length, false));
     if (locks.length != angles.length) locks = List.filled(angles.length, false);
@@ -1234,7 +1315,7 @@ class McdState extends ChangeNotifier {
   /// Supprime un bras. Les liens qui utilisaient un arm_index >= nouvelle longueur utilisent le dernier bras.
   void removeAssociationArm(int index, int armIndex) {
     if (index < 0 || index >= _associations.length) return;
-    final angles = List<double>.from((_associations[index]['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    final angles = List<double>.from((_associations[index]['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 90.0, 180.0, 270.0]);
     if (armIndex < 0 || armIndex >= angles.length || angles.length <= 1) return;
     _pushUndo();
     angles.removeAt(armIndex);
@@ -1275,7 +1356,7 @@ class McdState extends ChangeNotifier {
     copy['attributes'] = (src['attributes'] as List?)?.map((a) => Map<String, dynamic>.from(a as Map)).toList() ?? [];
     copy['entities'] = [];
     copy['cardinalities'] = {};
-    copy['arm_angles'] = List<double>.from((src['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 180.0]);
+    copy['arm_angles'] = List<double>.from((src['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()) ?? [0.0, 90.0, 180.0, 270.0]);
     copy['width'] = (src['width'] as num?)?.toDouble() ?? 260.0;
     copy['height'] = (src['height'] as num?)?.toDouble() ?? 260.0;
     _associations.add(copy);
@@ -1393,6 +1474,10 @@ class McdState extends ChangeNotifier {
     } on ApiException catch (e) {
       setError(e.body);
       return null;
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.parseMarkdown] API indisponible: $e\n$st');
+      setError(null);
+      return null;
     }
   }
 
@@ -1404,6 +1489,10 @@ class McdState extends ChangeNotifier {
       return r;
     } on ApiException catch (e) {
       setError(e.body);
+      return null;
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.parseMotsCodes] API indisponible: $e\n$st');
+      setError(null);
       return null;
     }
   }
@@ -1417,6 +1506,10 @@ class McdState extends ChangeNotifier {
       return List<String>.from((r['errors'] as List?) ?? []);
     } on ApiException catch (e) {
       setError(e.body);
+      return [];
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.validateMcd] API indisponible: $e\n$st');
+      setError(null);
       return [];
     }
   }
@@ -1435,7 +1528,22 @@ class McdState extends ChangeNotifier {
     } on ApiException catch (e) {
       setError(e.body);
       return null;
+    } catch (e, st) {
+      if (kDebugMode) {
+        if (_isConnectionRefused(e)) {
+          debugPrint('[McdState.generateSql] API indisponible: connexion refusée');
+        } else {
+          debugPrint('[McdState.generateSql] ERROR: $e\n$st');
+        }
+      }
+      setError(null);
+      return null;
     }
+  }
+
+  static bool _isConnectionRefused(Object e) {
+    final s = e.toString();
+    return s.contains('Connexion refusée') || s.contains('Connection refused') || s.contains('SocketException');
   }
 
   Future<Map<String, dynamic>?> generateMld() async {
@@ -1454,8 +1562,14 @@ class McdState extends ChangeNotifier {
       setError(e.body);
       return null;
     } catch (e, st) {
-      if (kDebugMode) debugPrint('[McdState.generateMld] ERROR: $e\n$st');
-      setError(e.toString());
+      if (kDebugMode) {
+        if (_isConnectionRefused(e)) {
+          debugPrint('[McdState.generateMld] API indisponible: connexion refusée');
+        } else {
+          debugPrint('[McdState.generateMld] ERROR: $e\n$st');
+        }
+      }
+      setError(null);
       return null;
     }
   }
@@ -1476,13 +1590,20 @@ class McdState extends ChangeNotifier {
       setError(e.body);
       return null;
     } catch (e, st) {
-      if (kDebugMode) debugPrint('[McdState.generateMpd] ERROR: $e\n$st');
-      setError(e.toString());
+      if (kDebugMode) {
+        if (_isConnectionRefused(e)) {
+          debugPrint('[McdState.generateMpd] API indisponible: connexion refusée');
+        } else {
+          debugPrint('[McdState.generateMpd] ERROR: $e\n$st');
+        }
+      }
+      setError(null);
       return null;
     }
   }
 
   /// Valide la création d'une association. Retourne la liste des erreurs (vide si OK).
+  /// Si l'API est indisponible, retourne [] pour autoriser la création.
   Future<List<String>> validateCreateAssociation(String name) async {
     setError(null);
     try {
@@ -1491,10 +1612,15 @@ class McdState extends ChangeNotifier {
     } on ApiException catch (e) {
       setError(e.body);
       return [e.body];
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.validateCreateAssociation] API indisponible: $e\n$st');
+      setError(null);
+      return [];
     }
   }
 
   /// Valide l'ajout d'un lien association–entité. Retourne la liste des erreurs (vide si OK).
+  /// Si l'API est indisponible (ex. connexion refusée), retourne [] pour autoriser le lien.
   Future<List<String>> validateAddLink(
     String associationName,
     String entityName,
@@ -1514,6 +1640,10 @@ class McdState extends ChangeNotifier {
     } on ApiException catch (e) {
       setError(e.body);
       return [e.body];
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.validateAddLink] API indisponible: $e\n$st');
+      setError(null);
+      return [];
     }
   }
 
@@ -1533,6 +1663,10 @@ class McdState extends ChangeNotifier {
     } on ApiException catch (e) {
       setError(e.body);
       return [e.body];
+    } catch (e, st) {
+      if (kDebugMode) debugPrint('[McdState.validateAssociationAfterUpdate] API indisponible: $e\n$st');
+      setError(null);
+      return [];
     }
   }
 }

@@ -31,6 +31,8 @@ class AppTheme {
   static const Color associationBg = Color(0xFF4A1E3A);  // "relation_bg"
   static const Color associationBorder = Color(0xFF5A2E4A); // "relation_border"
   static const Color associationSelected = Color(0xFFFF6B35); // "relation_selected"
+  /// Cardinalité côté association (boîte mauve pour différencier du bleu côté entité).
+  static const Color cardinalityAssoc = Color(0xFFB8A0C8);
 
   // Toolbar / Boutons
   static const Color toolbarBg = Color(0xFF1A1A1A);       // "toolbar_bg"

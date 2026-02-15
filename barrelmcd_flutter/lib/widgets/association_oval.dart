@@ -70,7 +70,7 @@ class AssociationOval extends StatelessWidget {
             size: Size(diameter, diameter),
             painter: _AssociationCircleAndArmsPainter(
               selected: selected,
-              armAngles: armAngles ?? const [0.0, 180.0],
+              armAngles: armAngles ?? const [0.0, 90.0, 180.0, 270.0],
             ),
             child: Center(
               child: Padding(
@@ -97,7 +97,7 @@ class AssociationOval extends StatelessWidget {
 
 /// Ovale (ellipse) + bras : forme OVALE allongée (moins ronde, plus ovale).
 class _AssociationCircleAndArmsPainter extends CustomPainter {
-  _AssociationCircleAndArmsPainter({this.selected = false, this.armAngles = const [0.0, 180.0]});
+  _AssociationCircleAndArmsPainter({this.selected = false, this.armAngles = const [0.0, 90.0, 180.0, 270.0]});
   final bool selected;
   final List<double> armAngles;
 

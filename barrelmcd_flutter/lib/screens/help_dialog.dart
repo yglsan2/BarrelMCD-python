@@ -20,7 +20,7 @@ class HelpDialog {
               Text('• E : Entité\n• A : Association\n• L : Lien\n• Ctrl+L : Auto-layout (mise en page)'),
               SizedBox(height: 12),
               Text('Navigation :', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('• Z : Zoom +  • X : Zoom -  • F : Ajuster  • G : Grille'),
+              Text('• Glisser le canevas (fond) pour déplacer la vue\n• Molette : zoom\n• Z : Zoom +  • X : Zoom -  • F : Ajuster  • G : Grille'),
               SizedBox(height: 12),
               Text('Édition :', style: TextStyle(fontWeight: FontWeight.bold)),
               Text('• Suppr : Supprimer  • Ctrl+Z : Annuler  • Ctrl+Y : Répéter'),

@@ -1,0 +1,36 @@
+# Image pour construire le paquet source Debian/PPA (barrelmcd-flutter).
+# Build: docker build -t barrelmcd-deb -f barrelmcd_flutter/packaging/Dockerfile.deb .
+# Run:  ./barrelmcd_flutter/packaging/docker-build-deb.sh
+
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/flutter/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    clang \
+    cmake \
+    ninja-build \
+    pkg-config \
+    libgtk-3-dev \
+    libstdc++-12-dev \
+    liblzma-dev \
+    devscripts \
+    build-essential \
+    debhelper \
+    && rm -rf /var/lib/apt/lists/*
+
+# Flutter (stable)
+# TAR_OPTIONS évite "Cannot change ownership" dans les conteneurs rootless (Podman)
+ENV TAR_OPTIONS="--no-same-owner"
+RUN git clone https://github.com/flutter/flutter.git -b stable --depth 1 /flutter \
+    && flutter config --no-analytics \
+    && flutter precache --linux
+
+WORKDIR /workspace

@@ -181,6 +181,7 @@ Pour éviter qu’**une ou plusieurs flèches “bouffent” le dessin** (décal
 
 - **Binaire** : `~/Téléchargements/Looping.exe` (PE32+ x86-64).
 - **Analyse r2** : `docs/ANALYSE_RADARE2_LOOPING.md`, `barrelmcd_flutter/doc/INSPIRATION_LOOPING_LIENS.md`.
+- **Analyse JMerise** : `docs/ANALYSE_JMERISE_LIENS_ASSOCIATIONS.md` (modèle Lien/Relation, IhmLien, cassure, cardinalités).
 - **Code Flutter** : `barrelmcd_flutter/lib/widgets/link_arrow.dart`, `mcd_canvas.dart` (`_LinksPainter`, `_getLinkSegment`), `lib/utils/link_geometry.dart`.
 
 *Document généré à partir de l’analyse radare2 de Looping.exe et du code Barrel MCD (février 2026).*

@@ -127,7 +127,12 @@ const bool _kCanvasDebug = false;
 /// Toujours activer les logs des clics souris (pointer down/up, tap, exceptions) pour débogage.
 const bool _kClicksLog = true;
 /// Mode ultra verbose : log à chaque décision (early return, isTap, mode, branche prise) pour corriger les bugs de clic.
-const bool _kVerboseCanvas = true;
+const bool _kVerboseCanvas = false;
+const bool _kLinkPaintLog = true; // Log erreurs et infos utiles pour déboguer les liens.
+/// Logs diagnostic : hit-test, segment des liens, raisons des fallbacks. À garder true tant que des bugs canvas persistent.
+const bool _kDiagnosticLog = false;
+/// Log détaillé création de lien (down + up) pour identifier précisément où ça casse.
+const bool _kLinkCreateLog = true;
 
 /// Dimensions partagées avec EntityBox et AssociationDiamond pour que les liens visent le centre des formes.
 const double _entityWidth = 200;
@@ -253,6 +258,12 @@ class McdCanvasState extends State<McdCanvas> {
   bool _draggingLinkSegment = false;
   int? _draggingLinkSegmentIndex;
 
+  /// Cycle de sélection en mode Sélection : quand plusieurs formes sont empilées, clics successifs au même endroit font défiler.
+  static const double _selectCyclePosSlop = 25.0;
+  Offset? _lastSelectCycleScenePos;
+  List<({String type, int index})>? _lastSelectCycleStack;
+  int _lastSelectCycleCurrent = 0;
+
   /// Drag « en attente » : on ne commit qu'après un déplacement > _dragCommitSlop (tap = pas de drag, donc dialogue/modifier).
   static const double _dragCommitSlop = 18.0;
   int? _pendingDragEntityIndex;
@@ -370,27 +381,143 @@ class McdCanvasState extends State<McdCanvas> {
     return _viewportToScene(Offset(_lastViewportW / 2, _lastViewportH / 2));
   }
 
-  /// Ouvre le dialogue « Nouvelle entité » en plaçant l'entité au centre de la vue. Appelé depuis le menu Fichier.
+  /// Ouvre le dialogue « Nouvelle entité » (position calculée automatiquement). Appelé depuis le menu Fichier.
   void addNewEntityAtViewCenter() {
     if (!mounted) return;
-    final center = _getViewCenterScene();
-    _showNewEntityDialog(center.dx, center.dy);
+    final state = context.read<McdState>();
+    final pos = _suggestNewEntityPosition(state);
+    _showNewEntityDialog(pos.dx, pos.dy);
   }
 
-  /// Ouvre le dialogue « Nouvelle association » au centre de la vue. Appelé depuis le menu Fichier.
+  /// Ouvre le dialogue « Nouvelle association » (position calculée automatiquement). Appelé depuis le menu Fichier.
   void addNewAssociationAtViewCenter() {
     if (!mounted) return;
-    final center = _getViewCenterScene();
-    _showNewAssociationDialog(center.dx, center.dy);
+    final state = context.read<McdState>();
+    final pos = _suggestNewAssociationPosition(state);
+    _showNewAssociationDialog(pos.dx, pos.dy);
+  }
+
+  /// Espacement du placement : plus grand que la boîte association (~260) pour ne pas les chevaucher.
+  static const double _layoutGapBetweenColumns = 120.0;
+  static const double _layoutRowStride = 280.0;
+  /// Décalage de la 1re entité par rapport au centre de la vue (pour laisser la place à l'assoc à droite).
+  static const double _layoutFirstEntityOffsetLeft = 250.0;
+
+  /// Position suggérée pour la prochaine entité : 1re au centre de la vue, suivantes en colonne en dessous.
+  Offset _suggestNewEntityPosition(McdState state) {
+    final count = state.entities.length;
+    if (count == 0) {
+      final center = _getViewCenterScene();
+      return Offset(center.dx - _layoutFirstEntityOffsetLeft, center.dy);
+    }
+    final first = state.entities[0];
+    final pos = first['position'] as Map<String, dynamic>?;
+    final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+    final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+    return Offset(x, y + count * _layoutRowStride);
+  }
+
+  /// Position suggérée pour la prochaine association : 1re à droite de la 1re entité, suivantes en colonne en dessous.
+  Offset _suggestNewAssociationPosition(McdState state) {
+    final count = state.associations.length;
+    if (count == 0) {
+      final center = _getViewCenterScene();
+      if (state.entities.isNotEmpty) {
+        final first = state.entities[0];
+        final pos = first['position'] as Map<String, dynamic>?;
+        final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+        final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+        return Offset(x + _entityWidth + _layoutGapBetweenColumns, y);
+      }
+      return Offset(center.dx + 80, center.dy);
+    }
+    final first = state.associations[0];
+    final pos = first['position'] as Map<String, dynamic>?;
+    final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+    final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+    return Offset(x, y + count * _layoutRowStride);
   }
 
   /// Hauteur approximative par ligne d'attribut dans EntityBox (padding + texte).
   static const double _entityAttrLineHeight = 24.0;
 
-  /// Retourne l'index de l'entité dont la boîte contient [scenePos], ou null.
-  /// La hauteur de la zone cliquable tient compte des attributs affichés (sinon les clics
-  /// sur la zone « attributs » tombaient à côté et ne sélectionnaient pas l'entité).
+  /// Hit-test unifié (ordre de dessin = priorité) : un seul élément « au-dessus » (comme Looping / draw.io).
+  /// Associations dessinées au-dessus des entités → testées en premier. Plus de friction entité/association.
+  ({int? entityIndex, int? assocIndex}) _hitTestTopmostAtScene(McdState state, Offset scenePos) {
+    for (int i = state.associations.length - 1; i >= 0; i--) {
+      final a = state.associations[i];
+      final pos = a['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final diam = (a['width'] as num?)?.toDouble() ?? 260.0;
+      final boxSize = diam + 2 * AssociationOval.armExtensionLength;
+      if (scenePos.dx >= x && scenePos.dx <= x + boxSize && scenePos.dy >= y && scenePos.dy <= y + boxSize) {
+        return (entityIndex: null, assocIndex: i);
+      }
+    }
+    for (int i = state.entities.length - 1; i >= 0; i--) {
+      final e = state.entities[i];
+      final pos = e['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final w = (e['width'] as num?)?.toDouble() ?? _entityWidth;
+      final attrs = (e['attributes'] as List?) ?? [];
+      final attrCount = attrs.every((a) => a is Map) ? attrs.length : 0;
+      final h = (e['height'] as num?)?.toDouble() ??
+          (_entityMinHeight + (attrCount > 0 ? attrCount * _entityAttrLineHeight : 0));
+      if (scenePos.dx >= x && scenePos.dx <= x + w && scenePos.dy >= y && scenePos.dy <= y + h) {
+        return (entityIndex: i, assocIndex: null);
+      }
+    }
+    return (entityIndex: null, assocIndex: null);
+  }
+
   int? _entityIndexAtScene(McdState state, Offset scenePos) {
+    return _hitTestTopmostAtScene(state, scenePos).entityIndex;
+  }
+
+  int? _associationIndexAtScene(McdState state, Offset scenePos) {
+    return _hitTestTopmostAtScene(state, scenePos).assocIndex;
+  }
+
+  /// Retourne l'index de l'entité contenant [scenePos], sans priorité association (pour relâchement lien sur zone chevauchante).
+  int? _entityIndexAtSceneOnly(McdState state, Offset scenePos) {
+    for (int i = state.entities.length - 1; i >= 0; i--) {
+      final e = state.entities[i];
+      final pos = e['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final w = (e['width'] as num?)?.toDouble() ?? _entityWidth;
+      final attrs = (e['attributes'] as List?) ?? [];
+      final attrCount = attrs.every((a) => a is Map) ? attrs.length : 0;
+      final h = (e['height'] as num?)?.toDouble() ??
+          (_entityMinHeight + (attrCount > 0 ? attrCount * _entityAttrLineHeight : 0));
+      if (scenePos.dx >= x && scenePos.dx <= x + w && scenePos.dy >= y && scenePos.dy <= y + h) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  /// Retourne l'index de l'association contenant [scenePos], sans priorité (pour relâchement lien sur zone chevauchante).
+  int? _associationIndexAtSceneOnly(McdState state, Offset scenePos) {
+    for (int i = state.associations.length - 1; i >= 0; i--) {
+      final a = state.associations[i];
+      final pos = a['position'] as Map<String, dynamic>?;
+      final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+      final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+      final diam = (a['width'] as num?)?.toDouble() ?? 260.0;
+      final boxSize = diam + 2 * AssociationOval.armExtensionLength;
+      if (scenePos.dx >= x && scenePos.dx <= x + boxSize && scenePos.dy >= y && scenePos.dy <= y + boxSize) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  /// Tous les indices d'entités contenant [scenePos] (ordre dessin : index 0 à n).
+  List<int> _allEntityIndicesAtScene(McdState state, Offset scenePos) {
+    final list = <int>[];
     for (int i = 0; i < state.entities.length; i++) {
       final e = state.entities[i];
       final pos = e['position'] as Map<String, dynamic>?;
@@ -401,13 +528,16 @@ class McdCanvasState extends State<McdCanvas> {
       final attrCount = attrs.every((a) => a is Map) ? attrs.length : 0;
       final h = (e['height'] as num?)?.toDouble() ??
           (_entityMinHeight + (attrCount > 0 ? attrCount * _entityAttrLineHeight : 0));
-      if (scenePos.dx >= x && scenePos.dx <= x + w && scenePos.dy >= y && scenePos.dy <= y + h) return i;
+      if (scenePos.dx >= x && scenePos.dx <= x + w && scenePos.dy >= y && scenePos.dy <= y + h) {
+        list.add(i);
+      }
     }
-    return null;
+    return list;
   }
 
-  /// Retourne l'index de l'association dont la boîte (cercle + bras) contient [scenePos], ou null.
-  int? _associationIndexAtScene(McdState state, Offset scenePos) {
+  /// Tous les indices d'associations contenant [scenePos] (ordre dessin : index 0 à n).
+  List<int> _allAssocIndicesAtScene(McdState state, Offset scenePos) {
+    final list = <int>[];
     for (int i = 0; i < state.associations.length; i++) {
       final a = state.associations[i];
       final pos = a['position'] as Map<String, dynamic>?;
@@ -415,19 +545,52 @@ class McdCanvasState extends State<McdCanvas> {
       final y = (pos?['y'] as num?)?.toDouble() ?? 0;
       final diam = (a['width'] as num?)?.toDouble() ?? 260.0;
       final boxSize = diam + 2 * AssociationOval.armExtensionLength;
-      if (scenePos.dx >= x && scenePos.dx <= x + boxSize && scenePos.dy >= y && scenePos.dy <= y + boxSize) return i;
+      if (scenePos.dx >= x && scenePos.dx <= x + boxSize && scenePos.dy >= y && scenePos.dy <= y + boxSize) {
+        list.add(i);
+      }
     }
-    return null;
+    return list;
+  }
+
+  /// Index de l'entité dont le centre est le plus proche de [scenePos], si distance <= [maxDistance] (sinon null).
+  int? _nearestEntityIndexToScene(McdState state, Offset scenePos, double maxDistance) {
+    int? best;
+    double bestDist = maxDistance + 1;
+    for (int i = 0; i < state.entities.length; i++) {
+      final c = entityCenterOffset(state.entities[i]);
+      final d = (scenePos - c).distance;
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  /// Index de l'association dont le centre est le plus proche de [scenePos], si distance <= [maxDistance] (sinon null).
+  int? _nearestAssociationIndexToScene(McdState state, Offset scenePos, double maxDistance) {
+    int? best;
+    double bestDist = maxDistance + 1;
+    for (int i = 0; i < state.associations.length; i++) {
+      final c = associationCenter(state.associations[i]);
+      final d = (scenePos - c).distance;
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
   }
 
   static const double _armTipHitRadius = 18.0;
 
   /// Retourne (index association, index bras) si [scenePos] est sur une pointe de bras, sinon null.
+  /// On parcourt de la fin pour prendre l'association dessinée au-dessus.
   ({int assocIndex, int armIndex})? _armTipHitAtScene(McdState state, Offset scenePos) {
-    for (int i = 0; i < state.associations.length; i++) {
+    for (int i = state.associations.length - 1; i >= 0; i--) {
       final a = state.associations[i];
       final center = _sceneAssociationCenter(a);
-      final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
+      final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
       final diam = (a['width'] as num?)?.toDouble() ?? 260.0;
       final armRadius = diam / 2 + AssociationOval.armExtensionLength;
       for (int j = 0; j < angles.length; j++) {
@@ -476,22 +639,9 @@ class McdCanvasState extends State<McdCanvas> {
     return Offset(anchor.dx + ux * _previewMargin, anchor.dy + uy * _previewMargin);
   }
 
-  /// Point d'accroche sur l'entité pour le drag de lien (centre du bord qui fait face à [towardPoint]).
+  /// Point d'accroche sur l'entité (centre du bord qui fait face à [towardPoint]). Même logique que link_geometry.
   Offset _sceneEntityLinkEndpoint(Map<String, dynamic> e, Offset towardPoint) {
-    final pos = e['position'] as Map<String, dynamic>?;
-    final x = (pos?['x'] as num?)?.toDouble() ?? 0;
-    final y = (pos?['y'] as num?)?.toDouble() ?? 0;
-    final w = (e['width'] as num?)?.toDouble() ?? _entityWidth;
-    final attrs = (e['attributes'] as List?) ?? [];
-    final attrCount = attrs.every((a) => a is Map) ? attrs.length : 0;
-    final h = (e['height'] as num?)?.toDouble() ??
-        (_entityMinHeight + (attrCount > 0 ? attrCount * _entityAttrLineHeight : 0));
-    final cx = x + w / 2;
-    final cy = y + h / 2;
-    final dx = towardPoint.dx - cx;
-    final dy = towardPoint.dy - cy;
-    if (dx.abs() >= dy.abs()) return Offset(dx > 0 ? x + w : x, cy);
-    return Offset(cx, dy > 0 ? y + h : y);
+    return entityLinkEndpoint(e, towardPoint, entityWidth: _entityWidth);
   }
 
   /// Centre de l'association (pour point de départ du drag de lien).
@@ -504,24 +654,9 @@ class McdCanvasState extends State<McdCanvas> {
     return Offset(x + boxSize / 2, y + boxSize / 2);
   }
 
-  /// Accroche entité avec entity_side (left/right/top/bottom) si présent dans le lien.
+  /// Accroche entité : entity_side si présent, sinon bord le plus proche de [towardPoint] (link_geometry).
   Offset _sceneEntityLinkEndpointWithSide(Map<String, dynamic> e, Map<String, dynamic> link, Offset towardPoint) {
-    final side = link['entity_side'] as String?;
-    final pos = e['position'] as Map<String, dynamic>?;
-    final x = (pos?['x'] as num?)?.toDouble() ?? 0;
-    final y = (pos?['y'] as num?)?.toDouble() ?? 0;
-    final w = (e['width'] as num?)?.toDouble() ?? _entityWidth;
-    final attrs = (e['attributes'] as List?) ?? [];
-    final attrCount = attrs.every((a) => a is Map) ? attrs.length : 0;
-    final h = (e['height'] as num?)?.toDouble() ??
-        (_entityMinHeight + (attrCount > 0 ? attrCount * _entityAttrLineHeight : 0));
-    final cx = x + w / 2;
-    final cy = y + h / 2;
-    if (side == 'left') return Offset(x, cy);
-    if (side == 'right') return Offset(x + w, cy);
-    if (side == 'top') return Offset(cx, y);
-    if (side == 'bottom') return Offset(cx, y + h);
-    return _sceneEntityLinkEndpoint(e, towardPoint);
+    return entityLinkEndpoint(e, towardPoint, link: link, entityWidth: _entityWidth);
   }
 
   Offset _sceneAssociationSimpleAttachment(Map<String, dynamic> a, Offset entityPoint) {
@@ -538,15 +673,16 @@ class McdCanvasState extends State<McdCanvas> {
   Offset _sceneAssociationArmPosition(Map<String, dynamic> a, Map<String, dynamic> link) {
     final center = _sceneAssociationCenter(a);
     final w = (a['width'] as num?)?.toDouble() ?? 260.0;
-    final h = (a['height'] as num?)?.toDouble() ?? 260.0;
-    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
-    final armIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
+    final rawArmIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final armIndex = angles.isEmpty ? 0 : rawArmIndex.clamp(0, angles.length - 1);
     final angle = (armIndex < angles.length ? angles[armIndex].toDouble() : 0.0) * math.pi / 180;
     final radius = w / 2 + AssociationOval.armExtensionLength;
     return Offset(center.dx + radius * math.cos(angle), center.dy + radius * math.sin(angle));
   }
 
-  /// Retourne (from, to) en scène pour le lien à [linkIndex], même logique que _LinksPainter (arrow_tip = point de relâchement).
+  /// Retourne (from, to) en scène pour le lien à [linkIndex], même logique que _LinksPainter :
+  /// point d'accroche = pointe du bras (arm_index), pas le point « simple » sur le cercle.
   ({Offset from, Offset to}) _getLinkSegment(McdState state, int linkIndex, bool precisionMode) {
     if (linkIndex < 0 || linkIndex >= state.associationLinks.length) {
       return (from: Offset.zero, to: Offset.zero);
@@ -560,19 +696,18 @@ class McdCanvasState extends State<McdCanvas> {
     if (assocIndex < 0 || entityIndex < 0) return (from: Offset.zero, to: Offset.zero);
     final assoc = state.associations[assocIndex];
     final ent = state.entities[entityIndex];
-    final center = _sceneAssociationCenter(assoc);
-    final entityPt = _sceneEntityLinkEndpointWithSide(ent, link, center);
-    final assocPt = _sceneAssociationSimpleAttachment(assoc, entityPt);
+    final assocPt = _sceneAssociationArmPosition(assoc, link);
+    Offset entityPt = entityLinkEndpoint(ent, assocPt, link: link, entityWidth: _entityWidth);
     final arrowAtAssociation = link['arrow_at_association'] == true;
     final tipX = (link['arrow_tip_x'] as num?)?.toDouble();
     final tipY = (link['arrow_tip_y'] as num?)?.toDouble();
     final hasStoredTip = tipX != null && tipY != null;
     if (hasStoredTip) {
-      final arrowTip = Offset(tipX!, tipY!);
+      final arrowTip = Offset(tipX, tipY);
       if (arrowAtAssociation) {
         return (from: entityPt, to: arrowTip);
       } else {
-        return (from: _sceneAssociationSimpleAttachment(assoc, arrowTip), to: arrowTip);
+        return (from: assocPt, to: arrowTip);
       }
     }
     if (arrowAtAssociation) return (from: entityPt, to: assocPt);
@@ -750,24 +885,127 @@ class McdCanvasState extends State<McdCanvas> {
                 _outerHitEntityIndex = null;
                 _outerHitAssocIndex = null;
               } else {
-                _outerHitEntityIndex = _entityIndexAtScene(state, scenePos);
-                _outerHitAssocIndex = _associationIndexAtScene(state, scenePos);
+                // En mode Entité/Association, privilégier l'élément qu'on vient d'ajouter (sinon association toujours au-dessus = entité indéplaçable).
+                if (modeState.mode == CanvasMode.addEntity) {
+                  _outerHitEntityIndex = _entityIndexAtSceneOnly(state, scenePos);
+                  _outerHitAssocIndex = _outerHitEntityIndex != null ? null : _associationIndexAtSceneOnly(state, scenePos);
+                } else if (modeState.mode == CanvasMode.addAssociation) {
+                  _outerHitAssocIndex = _associationIndexAtSceneOnly(state, scenePos);
+                  _outerHitEntityIndex = _outerHitAssocIndex != null ? null : _entityIndexAtSceneOnly(state, scenePos);
+                } else if (modeState.mode == CanvasMode.createLink) {
+                  // Lien : si empilés, privilégier l'entité au départ (sinon segment assoc→même point = dégénéré = arc/cercle).
+                  _outerHitEntityIndex = _entityIndexAtSceneOnly(state, scenePos);
+                  _outerHitAssocIndex = _associationIndexAtSceneOnly(state, scenePos);
+                  if (_outerHitEntityIndex != null && _outerHitAssocIndex != null) {
+                    _outerHitAssocIndex = null;
+                  }
+                } else if (modeState.mode == CanvasMode.select) {
+                  // Sélection : cycle quand plusieurs formes empilées. Entités et associations (récentes en tête) entrelacés, puis liens.
+                  final assocIndices = _allAssocIndicesAtScene(state, scenePos).reversed.toList();
+                  final entityIndices = _allEntityIndicesAtScene(state, scenePos).reversed.toList();
+                  final stack = <({String type, int index})>[];
+                  final n = math.max(entityIndices.length, assocIndices.length);
+                  for (int i = 0; i < n; i++) {
+                    if (i < entityIndices.length) stack.add((type: 'entity', index: entityIndices[i]));
+                    if (i < assocIndices.length) stack.add((type: 'assoc', index: assocIndices[i]));
+                  }
+                  final linkIdx = _linkIndexAtScene(state, scenePos, modeState.linkPrecisionMode || _ctrlHeld);
+                  if (linkIdx != null) stack.add((type: 'link', index: linkIdx));
+                  if (stack.isEmpty) {
+                    _outerHitEntityIndex = null;
+                    _outerHitAssocIndex = null;
+                    _lastSelectCycleScenePos = null;
+                    _lastSelectCycleStack = null;
+                  } else if (stack.length == 1) {
+                    _lastSelectCycleScenePos = null;
+                    _lastSelectCycleStack = null;
+                    final cur = stack[0];
+                    if (cur.type == 'entity') {
+                      _outerHitEntityIndex = cur.index;
+                      _outerHitAssocIndex = null;
+                    } else if (cur.type == 'assoc') {
+                      _outerHitEntityIndex = null;
+                      _outerHitAssocIndex = cur.index;
+                    } else {
+                      _outerHitEntityIndex = null;
+                      _outerHitAssocIndex = null;
+                    }
+                  } else {
+                    final samePos = _lastSelectCycleScenePos != null &&
+                        (scenePos - _lastSelectCycleScenePos!).distance <= _selectCyclePosSlop;
+                    final sameStack = _lastSelectCycleStack != null &&
+                        _lastSelectCycleStack!.length == stack.length &&
+                        List.generate(stack.length, (i) => _lastSelectCycleStack![i].type == stack[i].type && _lastSelectCycleStack![i].index == stack[i].index).every((e) => e);
+                    if (samePos && sameStack) {
+                      _lastSelectCycleCurrent = (_lastSelectCycleCurrent + 1) % stack.length;
+                    } else {
+                      _lastSelectCycleScenePos = scenePos;
+                      _lastSelectCycleStack = stack;
+                      _lastSelectCycleCurrent = 0;
+                    }
+                    final cur = stack[_lastSelectCycleCurrent];
+                    if (cur.type == 'entity') {
+                      _outerHitEntityIndex = cur.index;
+                      _outerHitAssocIndex = null;
+                    } else if (cur.type == 'assoc') {
+                      _outerHitEntityIndex = null;
+                      _outerHitAssocIndex = cur.index;
+                    } else {
+                      _outerHitEntityIndex = null;
+                      _outerHitAssocIndex = null;
+                    }
+                  }
+                } else {
+                  _outerHitEntityIndex = _entityIndexAtScene(state, scenePos);
+                  _outerHitAssocIndex = _associationIndexAtScene(state, scenePos);
+                }
               }
               final isRightButton = _outerPointerDownButton != 0 && (_outerPointerDownButton & kPrimaryMouseButton) == 0;
               // Mode Lien : tirer un trait depuis l'entité ou l'association (drag vers l'autre).
               if (!isRightButton && modeState.mode == CanvasMode.createLink) {
+                if (_kLinkCreateLog) {
+                  debugPrint('[LINK_CREATE] DOWN scenePos=(${scenePos.dx.toStringAsFixed(0)}, ${scenePos.dy.toStringAsFixed(0)}) '
+                      'hitEntity=$_outerHitEntityIndex hitAssoc=$_outerHitAssocIndex '
+                      'entities=${state.entities.length} assocs=${state.associations.length}');
+                }
                 if (_outerHitEntityIndex != null) {
                   _linkDragFromEntity = true;
                   _linkDragSourceIndex = _outerHitEntityIndex;
-                  _linkDragStartScenePos = _sceneEntityLinkEndpoint(state.entities[_outerHitEntityIndex!], scenePos);
+                  try {
+                    _linkDragStartScenePos = _sceneEntityLinkEndpoint(state.entities[_outerHitEntityIndex!], scenePos);
+                  } catch (err, st) {
+                    if (_kLinkCreateLog) {
+                      debugPrint('[LINK_CREATE] DOWN ERROR _sceneEntityLinkEndpoint: $err');
+                      debugPrint(st.toString());
+                    }
+                    _linkDragStartScenePos = scenePos;
+                  }
                   _linkDragCurrentScenePos = scenePos;
+                  if (_kLinkCreateLog) {
+                    final name = state.getEntityNameByIndex(_outerHitEntityIndex!);
+                    debugPrint('[LINK_CREATE] DOWN START from ENTITY index=$_outerHitEntityIndex name=$name startPos=(${_linkDragStartScenePos!.dx.toStringAsFixed(0)}, ${_linkDragStartScenePos!.dy.toStringAsFixed(0)})');
+                  }
                   setState(() {});
                 } else if (_outerHitAssocIndex != null) {
                   _linkDragFromEntity = false;
                   _linkDragSourceIndex = _outerHitAssocIndex;
-                  _linkDragStartScenePos = _sceneAssociationCenter(state.associations[_outerHitAssocIndex!]);
+                  try {
+                    _linkDragStartScenePos = _sceneAssociationCenter(state.associations[_outerHitAssocIndex!]);
+                  } catch (err, st) {
+                    if (_kLinkCreateLog) {
+                      debugPrint('[LINK_CREATE] DOWN ERROR _sceneAssociationCenter: $err');
+                      debugPrint(st.toString());
+                    }
+                    _linkDragStartScenePos = scenePos;
+                  }
                   _linkDragCurrentScenePos = scenePos;
+                  if (_kLinkCreateLog) {
+                    final name = state.getAssociationNameByIndex(_outerHitAssocIndex!);
+                    debugPrint('[LINK_CREATE] DOWN START from ASSOC index=$_outerHitAssocIndex name=$name startPos=(${_linkDragStartScenePos!.dx.toStringAsFixed(0)}, ${_linkDragStartScenePos!.dy.toStringAsFixed(0)})');
+                  }
                   setState(() {});
+                } else if (_kLinkCreateLog) {
+                  debugPrint('[LINK_CREATE] DOWN no hit: neither entity nor assoc under pointer -> link drag NOT started');
                 }
               }
               // Mode Sélection : démarrer le drag d'une poignée de lien si on clique sur une poignée du lien sélectionné.
@@ -811,6 +1049,7 @@ class McdCanvasState extends State<McdCanvas> {
                   _pendingDragScenePos = scenePos;
                   _pendingDragEntityStartPos = Offset(x, y);
                   if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerDown: pending entity drag index=$_outerHitEntityIndex');
+                  setState(() {}); // Rebuild tout de suite pour désactiver le pan (panEnabled = false) avant le premier move.
                 } else if (_outerHitAssocIndex != null) {
                   final assoc = state.associations[_outerHitAssocIndex!];
                   final pos = assoc['position'] as Map<String, dynamic>?;
@@ -820,6 +1059,7 @@ class McdCanvasState extends State<McdCanvas> {
                   _pendingDragScenePos = scenePos;
                   _pendingDragAssocStartPos = Offset(x, y);
                   if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerDown: pending assoc drag index=$_outerHitAssocIndex');
+                  setState(() {}); // Rebuild tout de suite pour désactiver le pan (panEnabled = false) avant le premier move.
                 } else {
                   // Glisser un lien (segment) : dès qu'on ne clique ni sur entité ni sur association.
                   final linkIdx = _linkIndexAtScene(state, scenePos, modeState.linkPrecisionMode || _ctrlHeld);
@@ -827,6 +1067,7 @@ class McdCanvasState extends State<McdCanvas> {
                     _pendingDragLinkSegmentIndex = linkIdx;
                     _pendingDragScenePos = scenePos;
                     if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerDown: pending link segment drag index=$linkIdx');
+                    setState(() {}); // Rebuild pour désactiver le pan avant le premier move.
                   }
                 }
               }
@@ -856,8 +1097,12 @@ class McdCanvasState extends State<McdCanvas> {
                   }
                 }
               }
+              if (_kDiagnosticLog) {
+                debugPrint('[McdCanvas] DIAG down: scenePos=$scenePos hitEntity=$_outerHitEntityIndex hitAssoc=$_outerHitAssocIndex pendingEntity=$_pendingDragEntityIndex pendingAssoc=$_pendingDragAssocIndex pendingLink=$_pendingDragLinkSegmentIndex');
+              }
             } catch (err, st) {
-              debugPrint('[McdCanvas] OUTER Listener.onPointerDown ERROR: $err\n$st');
+              debugPrint('[McdCanvas] OUTER Listener.onPointerDown ERROR: $err');
+              debugPrint(st.toString());
             }
             if (_kClicksLog) debugPrint('[McdCanvas] OUTER Listener.onPointerDown pos=${e.localPosition} buttons=${e.buttons} hitEntity=$_outerHitEntityIndex hitAssoc=$_outerHitAssocIndex');
           },
@@ -890,6 +1135,7 @@ class McdCanvasState extends State<McdCanvas> {
                     } else {
                       _dragEntityStartPositions = {_pendingDragEntityIndex!: _pendingDragEntityStartPos!};
                     }
+                    if (_kDiagnosticLog) debugPrint('[McdCanvas] DIAG move: COMMIT entity drag index=$_pendingDragEntityIndex');
                     if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerMove: commit entity drag index=$_pendingDragEntityIndex positions=${_dragEntityStartPositions?.length}');
                   } else if (_pendingDragAssocIndex != null && _pendingDragAssocStartPos != null) {
                     _draggingAssociationIndex = _pendingDragAssocIndex;
@@ -911,6 +1157,7 @@ class McdCanvasState extends State<McdCanvas> {
                     } else {
                       _dragAssocStartPositions = {_pendingDragAssocIndex!: _pendingDragAssocStartPos!};
                     }
+                    if (_kDiagnosticLog) debugPrint('[McdCanvas] DIAG move: COMMIT assoc drag index=$_pendingDragAssocIndex');
                     if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerMove: commit assoc drag index=$_pendingDragAssocIndex positions=${_dragAssocStartPositions?.length}');
                   } else if (_pendingDragLinkSegmentIndex != null && _pendingDragLinkSegmentIndex! < state.associationLinks.length) {
                     _draggingLinkSegment = true;
@@ -923,6 +1170,7 @@ class McdCanvasState extends State<McdCanvas> {
                       final seg = _getLinkSegment(state, _draggingLinkSegmentIndex!, modeState.linkPrecisionMode || _ctrlHeld);
                       state.updateAssociationLinkAttachment(_draggingLinkSegmentIndex!, arrowTipX: seg.to.dx, arrowTipY: seg.to.dy);
                     }
+                    if (_kDiagnosticLog) debugPrint('[McdCanvas] DIAG move: COMMIT link segment drag index=$_draggingLinkSegmentIndex');
                     if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerMove: commit link segment drag index=$_draggingLinkSegmentIndex');
                   }
                   _pendingDragEntityIndex = null;
@@ -1004,7 +1252,7 @@ class McdCanvasState extends State<McdCanvas> {
                     if (ai >= 0) {
                       final assoc = state.associations[ai];
                       final center = _sceneAssociationCenter(assoc);
-                      final angles = (assoc['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
+                      final angles = (assoc['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
                       if (angles.isNotEmpty) {
                         final dx = scenePos.dx - center.dx;
                         final dy = scenePos.dy - center.dy;
@@ -1088,7 +1336,8 @@ class McdCanvasState extends State<McdCanvas> {
                 setState(() {});
               }
             } catch (err, st) {
-              debugPrint('[McdCanvas] OUTER Listener.onPointerMove ERROR: $err\n$st');
+              debugPrint('[McdCanvas] OUTER Listener.onPointerMove ERROR: $err');
+              debugPrint(st.toString());
             }
           },
           onPointerUp: (e) {
@@ -1118,6 +1367,7 @@ class McdCanvasState extends State<McdCanvas> {
               final wasDraggingLinkSegment = _draggingLinkSegment;
               final wasDraggingInheritanceSymbol = _draggingInheritanceSymbolParent != null;
               final wasDraggingCif = _draggingCifIndex != null;
+              if (_kDiagnosticLog) debugPrint('[McdCanvas] DIAG up: wasDragEntity=$wasDraggingEntity wasDragAssoc=$wasDraggingAssoc wasDragLinkSeg=$wasDraggingLinkSegment hitEntity=$hitEntity hitAssoc=$hitAssoc');
               if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerUp wasDragging: entity=$wasDraggingEntity assoc=$wasDraggingAssoc linkHandle=$wasDraggingLinkHandle linkSeg=$wasDraggingLinkSegment inh=$wasDraggingInheritanceSymbol cif=$wasDraggingCif hitEntity=$hitEntity hitAssoc=$hitAssoc');
               _draggingEntityIndex = null;
               _draggingAssociationIndex = null;
@@ -1141,21 +1391,104 @@ class McdCanvasState extends State<McdCanvas> {
               if (_linkDragSourceIndex != null && _linkDragFromEntity != null && _linkDragStartScenePos != null) {
                 final state = context.read<McdState>();
                 final scenePosUp = _viewportToScene(e.localPosition);
-                final hitEntityUp = _entityIndexAtScene(state, scenePosUp);
-                final hitAssocUp = _associationIndexAtScene(state, scenePosUp);
+                int? hitEntityUp = _entityIndexAtScene(state, scenePosUp);
+                int? hitAssocUp = _associationIndexAtScene(state, scenePosUp);
+                if (_kLinkCreateLog) {
+                  debugPrint('[LINK_CREATE] UP scenePosUp=(${scenePosUp.dx.toStringAsFixed(0)}, ${scenePosUp.dy.toStringAsFixed(0)}) '
+                      'fromEntity=$_linkDragFromEntity sourceIndex=$_linkDragSourceIndex '
+                      'hitEntityUp(topmost)=$hitEntityUp hitAssocUp(topmost)=$hitAssocUp');
+                }
+                // Si éléments empilés ou relâchement entre les deux : récupérer l'autre type (dans la forme, sinon le plus proche).
+                if (_linkDragFromEntity! && hitAssocUp == null) {
+                  hitAssocUp = _associationIndexAtSceneOnly(state, scenePosUp);
+                  if (hitAssocUp == null) {
+                    hitAssocUp = _nearestAssociationIndexToScene(state, scenePosUp, 350);
+                    if (_kLinkCreateLog && hitAssocUp != null) debugPrint('[LINK_CREATE] UP fallback: hitAssocUp=nearestAssoc=$hitAssocUp');
+                  } else if (_kLinkCreateLog) {
+                    debugPrint('[LINK_CREATE] UP fallback: hitAssocUp=associationIndexAtSceneOnly=$hitAssocUp');
+                  }
+                }
+                if (!_linkDragFromEntity! && hitEntityUp == null) {
+                  hitEntityUp = _entityIndexAtSceneOnly(state, scenePosUp);
+                  if (hitEntityUp == null) {
+                    hitEntityUp = _nearestEntityIndexToScene(state, scenePosUp, 350);
+                    if (_kLinkCreateLog && hitEntityUp != null) debugPrint('[LINK_CREATE] UP fallback: hitEntityUp=nearestEntity=$hitEntityUp');
+                  } else if (_kLinkCreateLog) {
+                    debugPrint('[LINK_CREATE] UP fallback: hitEntityUp=entityIndexAtSceneOnly=$hitEntityUp');
+                  }
+                }
                 String? associationName;
                 String? entityName;
                 if (_linkDragFromEntity! && hitAssocUp != null) {
-                  entityName = state.getEntityNameByIndex(_linkDragSourceIndex!);
-                  associationName = state.getAssociationNameByIndex(hitAssocUp);
+                  try {
+                    entityName = state.getEntityNameByIndex(_linkDragSourceIndex!);
+                    associationName = state.getAssociationNameByIndex(hitAssocUp);
+                  } catch (err, st) {
+                    if (_kLinkCreateLog) {
+                      debugPrint('[LINK_CREATE] UP ERROR get names (fromEntity branch): $err');
+                      debugPrint(st.toString());
+                    }
+                  }
+                  if (_kLinkCreateLog) debugPrint('[LINK_CREATE] UP branch fromEntity: entityName=$entityName associationName=$associationName');
                 } else if (!_linkDragFromEntity! && hitEntityUp != null) {
-                  associationName = state.getAssociationNameByIndex(_linkDragSourceIndex!);
-                  entityName = state.getEntityNameByIndex(hitEntityUp);
+                  try {
+                    associationName = state.getAssociationNameByIndex(_linkDragSourceIndex!);
+                    entityName = state.getEntityNameByIndex(hitEntityUp);
+                  } catch (err, st) {
+                    if (_kLinkCreateLog) {
+                      debugPrint('[LINK_CREATE] UP ERROR get names (fromAssoc branch): $err');
+                      debugPrint(st.toString());
+                    }
+                  }
+                  if (_kLinkCreateLog) debugPrint('[LINK_CREATE] UP branch fromAssoc: associationName=$associationName entityName=$entityName');
+                } else {
+                  if (_kLinkCreateLog) {
+                    debugPrint('[LINK_CREATE] UP NO PAIR: fromEntity=$_linkDragFromEntity hitAssocUp=$hitAssocUp hitEntityUp=$hitEntityUp -> associationName and entityName stay null, dialog NOT shown');
+                  }
                 }
                 final arrowAtAssociation = _linkDragFromEntity == true;
-                // Point de relâchement = pointe de flèche exactement où l'utilisateur a relâché (comme Barrel).
-                final arrowTipX = scenePosUp.dx;
-                final arrowTipY = scenePosUp.dy;
+                // Point de relâchement = pointe de flèche. Si départ et relâche au même endroit (ou tirage court), étendre dans la direction de l'autre élément (évite arc/flèche minuscule pour le 2e lien droite→gauche).
+                double arrowTipX = scenePosUp.dx;
+                double arrowTipY = scenePosUp.dy;
+                final start = _linkDragStartScenePos!;
+                final dragDx = scenePosUp.dx - start.dx;
+                final dragDy = scenePosUp.dy - start.dy;
+                final dragDist = math.sqrt(dragDx * dragDx + dragDy * dragDy);
+                if (dragDist < 30 && associationName != null && entityName != null) {
+                  double ux = dragDist >= 1e-6 ? dragDx / dragDist : 0.0;
+                  double uy = dragDist >= 1e-6 ? dragDy / dragDist : 0.0;
+                  if (ux == 0 && uy == 0) {
+                    final assocIdx = state.associations.indexWhere((a) => (a['name'] as String?) == associationName);
+                    final entIdx = state.entities.indexWhere((e) => (e['name'] as String?) == entityName);
+                    if (assocIdx >= 0 && entIdx >= 0) {
+                      final ac = _sceneAssociationCenter(state.associations[assocIdx]);
+                      final ent = state.entities[entIdx];
+                      final pos = ent['position'] as Map<String, dynamic>?;
+                      final ex = (pos?['x'] as num?)?.toDouble() ?? 0;
+                      final ey = (pos?['y'] as num?)?.toDouble() ?? 0;
+                      final w = (ent['width'] as num?)?.toDouble() ?? 200;
+                      final h = entityHeight(ent);
+                      final ec = Offset(ex + w / 2, ey + h / 2);
+                      final target = arrowAtAssociation ? ac : ec;
+                      final tdx = target.dx - start.dx;
+                      final tdy = target.dy - start.dy;
+                      final td = math.sqrt(tdx * tdx + tdy * tdy);
+                      if (td >= 1e-6) {
+                        ux = tdx / td;
+                        uy = tdy / td;
+                      } else {
+                        ux = 1.0;
+                        uy = 0.0;
+                      }
+                    } else {
+                      ux = 1.0;
+                      uy = 0.0;
+                    }
+                  }
+                  const minSeg = 80.0;
+                  arrowTipX = start.dx + ux * minSeg;
+                  arrowTipY = start.dy + uy * minSeg;
+                }
                 // Côté entité : bord qui fait face à l'autre extrémité (gauche/droite/haut/bas), même logique dans toutes les directions.
                 String? entitySide;
                 if (entityName != null) {
@@ -1189,6 +1522,7 @@ class McdCanvasState extends State<McdCanvas> {
                 _draggingLinkSegmentIndex = null;
                 setState(() {});
                 if (associationName != null && entityName != null && context.mounted) {
+                  if (_kLinkCreateLog) debugPrint('[LINK_CREATE] UP -> _showCardinalityDialog($associationName, $entityName) arrowAtAssoc=$arrowAtAssociation');
                   _showCardinalityDialog(
                     associationName,
                     entityName,
@@ -1197,6 +1531,8 @@ class McdCanvasState extends State<McdCanvas> {
                     arrowTipY: arrowTipY,
                     entitySide: entitySide,
                   );
+                } else {
+                  if (_kLinkCreateLog) debugPrint('[LINK_CREATE] UP -> dialog NOT shown: associationName=$associationName entityName=$entityName mounted=${context.mounted}');
                 }
                 if (_kVerboseCanvas) debugPrint('[McdCanvas] VERBOSE onPointerUp return: after link drag create');
                 return;
@@ -1329,7 +1665,8 @@ class McdCanvasState extends State<McdCanvas> {
                 debugPrint(tapSt.toString());
               }
             } catch (err, st) {
-              debugPrint('[McdCanvas] OUTER Listener.onPointerUp ERROR: $err\n$st');
+              debugPrint('[McdCanvas] OUTER Listener.onPointerUp ERROR: $err');
+              debugPrint(st.toString());
             }
           },
           onPointerCancel: (_) {
@@ -1361,6 +1698,8 @@ class McdCanvasState extends State<McdCanvas> {
             _dragAssocStartPositions = null;
             _rotatingArmAssocIndex = null;
             _rotatingArmIndex = null;
+            _lastSelectCycleScenePos = null;
+            _lastSelectCycleStack = null;
             setState(() {});
           },
           child: Stack(
@@ -1368,6 +1707,7 @@ class McdCanvasState extends State<McdCanvas> {
             Consumer<CanvasModeState>(
               builder: (context, modeState, _) {
                 final draggingElement = _draggingEntityIndex != null || _draggingAssociationIndex != null;
+                final pendingElementDrag = _pendingDragEntityIndex != null || _pendingDragAssocIndex != null;
                 final draggingLinkHandle = _draggingLinkHandle != null;
                 final draggingLinkSegment = _draggingLinkSegment;
                 final rotatingArm = _rotatingArmAssocIndex != null;
@@ -1376,8 +1716,9 @@ class McdCanvasState extends State<McdCanvas> {
                 minScale: _minScale,
                 maxScale: _maxScale,
                 boundaryMargin: const EdgeInsets.all(2000),
-                panEnabled: modeState.mode != CanvasMode.createLink && !draggingElement && !draggingLinkHandle && !draggingLinkSegment && !rotatingArm,
+                panEnabled: modeState.mode != CanvasMode.createLink && !draggingElement && !pendingElementDrag && !draggingLinkHandle && !draggingLinkSegment && !rotatingArm,
                 scaleEnabled: true,
+                panAxis: PanAxis.free,
                 child: OverflowBox(
                   alignment: Alignment.topLeft,
                   maxWidth: sceneWidth,
@@ -1386,7 +1727,7 @@ class McdCanvasState extends State<McdCanvas> {
                     width: sceneWidth,
                     height: sceneHeight,
                     child: Listener(
-                      behavior: HitTestBehavior.opaque,
+                      behavior: HitTestBehavior.translucent,
                       onPointerDown: (e) {
                         try {
                           _pointerDownPosition = e.localPosition;
@@ -1655,9 +1996,11 @@ class McdCanvasState extends State<McdCanvas> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Une entité "$trimmed" existe déjà.')));
         return;
       }
-      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] appel state.addEntity("$trimmed", $x, $y)');
-      stateAfter.addEntity(trimmed, x, y);
-      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] entité ajoutée "$trimmed" à ($x, $y)');
+      final pos = _suggestNewEntityPosition(stateAfter);
+      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] appel state.addEntity("$trimmed", ${pos.dx}, ${pos.dy})');
+      stateAfter.addEntity(trimmed, pos.dx, pos.dy);
+      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] entité ajoutée "$trimmed" à (${pos.dx}, ${pos.dy})');
+      if (mounted) context.read<CanvasModeState>().setMode(CanvasMode.select);
     } catch (e, st) {
       debugPrint('[McdCanvas] _showNewEntityDialog ERROR: $e');
       debugPrint(st.toString());
@@ -1724,9 +2067,11 @@ class McdCanvasState extends State<McdCanvas> {
         );
         return;
       }
-      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] appel state.addAssociation("$trimmed", $x, $y)');
-      stateAfter.addAssociation(trimmed, x, y);
-      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] association ajoutée "$trimmed" à ($x, $y)');
+      final pos = _suggestNewAssociationPosition(stateAfter);
+      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] appel state.addAssociation("$trimmed", ${pos.dx}, ${pos.dy})');
+      stateAfter.addAssociation(trimmed, pos.dx, pos.dy);
+      if (_kClicksLog || _kCanvasDebug) debugPrint('[McdCanvas] association ajoutée "$trimmed" à (${pos.dx}, ${pos.dy})');
+      if (mounted) context.read<CanvasModeState>().setMode(CanvasMode.select);
     } catch (e, st) {
       debugPrint('[McdCanvas] _showNewAssociationDialog ERROR: $e');
       debugPrint(st.toString());
@@ -1815,7 +2160,7 @@ class McdCanvasState extends State<McdCanvas> {
                 children: [
                   DropdownButtonFormField<String>(
                     key: ValueKey('card_entity_$vEntity'),
-                    value: McdCanvas.mcdCardinalities.contains(vEntity) ? vEntity : '1,n',
+                    initialValue: McdCanvas.mcdCardinalities.contains(vEntity) ? vEntity : '1,n',
                     decoration: const InputDecoration(
                       labelText: 'Côté entité',
                       hintText: '0,1 | 1,1 | 0,n | 1,n',
@@ -1830,7 +2175,7 @@ class McdCanvasState extends State<McdCanvas> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     key: ValueKey('card_assoc_$vAssoc'),
-                    value: McdCanvas.mcdCardinalities.contains(vAssoc) ? vAssoc : '1,n',
+                    initialValue: McdCanvas.mcdCardinalities.contains(vAssoc) ? vAssoc : '1,n',
                     decoration: const InputDecoration(
                       labelText: 'Côté association',
                       hintText: '0,1 | 1,1 | 0,n | 1,n',
@@ -1890,7 +2235,7 @@ class McdCanvasState extends State<McdCanvas> {
         final armIndex = bestArmIndexForLink(assoc, ent);
         final fromAssoc = associationArmPosition(assoc, {'arm_index': armIndex});
         final fromEntity = entityLinkEndpoint(ent, fromAssoc, link: entitySide != null ? {'entity_side': entitySide} : null);
-        final tip = Offset(arrowTipX!, arrowTipY!);
+        final tip = Offset(arrowTipX, arrowTipY);
         final tipMargin = state.arrowTipMargin;
         if (arrowAtAssociation) {
           final snapped = snapTipToAssociationBoundary(fromEntity, tip, assoc, arrowTipMargin: tipMargin);
@@ -2052,7 +2397,6 @@ class McdCanvasState extends State<McdCanvas> {
         PopupMenuItem(value: 'style_straight', child: ListTile(leading: Icon(lineStyle == 'straight' ? Icons.check : null, size: 20), title: const Text('Ligne droite'))),
         PopupMenuItem(value: 'style_elbow_h', child: ListTile(leading: Icon(lineStyle == 'elbow_h' ? Icons.check : null, size: 20), title: const Text('Ligne coudée (horizontal)'))),
         PopupMenuItem(value: 'style_elbow_v', child: ListTile(leading: Icon(lineStyle == 'elbow_v' ? Icons.check : null, size: 20), title: const Text('Ligne coudée (verticale)'))),
-        PopupMenuItem(value: 'style_curved', child: ListTile(leading: Icon(lineStyle == 'curved' ? Icons.check : null, size: 20), title: const Text('Courbe (Bézier)'))),
         PopupMenuItem(value: 'arrow_reverse', child: ListTile(leading: Icon(arrowReversed ? Icons.check : null, size: 20), title: Text(arrowReversed ? 'Sens de la flèche : inversé' : 'Inverser la pointe de la flèche'))),
         const PopupMenuItem(value: 'stroke', child: ListTile(leading: Icon(Icons.line_weight), title: Text('Épaisseur du trait…'))),
         const PopupMenuDivider(),
@@ -2073,8 +2417,6 @@ class McdCanvasState extends State<McdCanvas> {
         state.updateLinkStyle(linkIndex, lineStyle: 'elbow_h');
       } else if (value == 'style_elbow_v') {
         state.updateLinkStyle(linkIndex, lineStyle: 'elbow_v');
-      } else if (value == 'style_curved') {
-        state.updateLinkStyle(linkIndex, lineStyle: 'curved');
       } else if (value == 'arrow_reverse') {
         state.updateLinkStyle(linkIndex, arrowReversed: !arrowReversed);
       } else if (value == 'stroke') {
@@ -2192,7 +2534,7 @@ class McdCanvasState extends State<McdCanvas> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: McdCanvas.mcdCardinalities.contains(value) ? value : '1,n',
+                    initialValue: McdCanvas.mcdCardinalities.contains(value) ? value : '1,n',
                     decoration: InputDecoration(
                       labelText: whichAssoc ? 'Côté association' : 'Côté entité',
                       border: const OutlineInputBorder(),
@@ -2266,6 +2608,7 @@ class McdCanvasState extends State<McdCanvas> {
   }
 
   Widget _buildInheritanceLinks(McdState state, double sceneWidth, double sceneHeight) {
+    if (state.inheritanceLinks.isEmpty) return const SizedBox.shrink();
     final layout = _getInheritanceSymbolLayout(state);
     if (layout.isEmpty) return const SizedBox.shrink();
     return CustomPaint(
@@ -2838,7 +3181,7 @@ class McdCanvasState extends State<McdCanvas> {
     final centerX = boxSize / 2;
     final centerY = boxSize / 2;
     final armRadius = diameter / 2 + armExt;
-    final armAngles = (association['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 180.0];
+    final armAngles = (association['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 90.0, 180.0, 270.0];
     final selected = state.isAssociationSelected(index);
 
     return Positioned(
@@ -3327,15 +3670,17 @@ class _LinksPainter extends CustomPainter {
     final center = _associationCenter(a);
     final w = (a['width'] as num?)?.toDouble() ?? 260.0;
     final h = (a['height'] as num?)?.toDouble() ?? 260.0;
-    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
-    final armIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
+    final rawArmIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final armIndex = angles.isEmpty ? 0 : rawArmIndex.clamp(0, angles.length - 1);
     final angle = (armIndex < angles.length ? angles[armIndex].toDouble() : 0.0);
     return armPositionFromCenter(center, angle, w, h);
   }
 
   double _associationArmAngle(Map<String, dynamic> a, Map<String, dynamic> link) {
-    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
-    final armIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
+    final rawArmIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+    final armIndex = angles.isEmpty ? 0 : rawArmIndex.clamp(0, angles.length - 1);
     return (armIndex < angles.length ? angles[armIndex].toDouble() : 0.0);
   }
 
@@ -3359,28 +3704,46 @@ class _LinksPainter extends CustomPainter {
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
     for (int i = 0; i < links.length; i++) {
+      try {
       final link = links[i];
       final assocName = link['association'] as String?;
       final entityName = link['entity'] as String?;
-      if (assocName == null || entityName == null) continue;
+      if (assocName == null || entityName == null) {
+        if (_kDiagnosticLog) debugPrint('[McdCanvas] LINK $i SKIP: assocName=$assocName entityName=$entityName (nom manquant)');
+        continue;
+      }
       final assoc = _findAssociation(assocName);
       final ent = _findEntity(entityName);
-      if (assoc == null || ent == null) continue;
-      final center = _associationCenter(assoc);
-      final entityPt = _entityLinkEndpoint(ent, center, link);
-      final assocPt = _associationSimpleAttachment(assoc, entityPt);
+      if (assoc == null || ent == null) {
+        if (_kDiagnosticLog) debugPrint('[McdCanvas] LINK $i SKIP: assoc="$assocName" found=${assoc != null} entity="$entityName" found=${ent != null}');
+        continue;
+      }
+      // Point d'accroche association = pointe du bras (arm_index), comme Looping — évite que les liens se chevauchent.
+      Offset assocPt;
+      Offset entityPt;
+      try {
+        assocPt = _associationArmPosition(assoc, link);
+        entityPt = _entityLinkEndpoint(ent, assocPt, link);
+      } catch (err, st) {
+        if (_kLinkPaintLog) {
+          debugPrint('[McdCanvas] LINK $i ($assocName—$entityName) accroche ERROR: $err');
+          debugPrint(st.toString());
+        }
+        continue;
+      }
       final cardEntity = link['card_entity'] as String? ?? link['cardinality'] as String? ?? '1,n';
       final cardAssoc = link['card_assoc'] as String? ?? '1,n';
       final arrowAtAssociation = link['arrow_at_association'] == true;
       final tipX = (link['arrow_tip_x'] as num?)?.toDouble();
       final tipY = (link['arrow_tip_y'] as num?)?.toDouble();
       final hasStoredTip = tipX != null && tipY != null;
-      final arrowTip = hasStoredTip ? Offset(tipX!, tipY!) : null;
-      // Pointe de flèche = point de relâchement (là où l'utilisateur a relâché), pas un point calculé sur la forme.
-      final Offset from;
-      final Offset to;
-      final String cardFrom;
-      final String cardTo;
+      Offset? arrowTip = hasStoredTip ? Offset(tipX, tipY) : null;
+      final Offset defaultFrom = arrowAtAssociation ? entityPt : assocPt;
+      final Offset defaultTo = arrowAtAssociation ? assocPt : entityPt;
+      Offset from = defaultFrom;
+      Offset to = defaultTo;
+      String cardFrom = arrowAtAssociation ? cardEntity : cardAssoc;
+      String cardTo = arrowAtAssociation ? cardAssoc : cardEntity;
       if (arrowTip != null) {
         if (arrowAtAssociation) {
           from = entityPt;
@@ -3388,89 +3751,123 @@ class _LinksPainter extends CustomPainter {
           cardFrom = cardEntity;
           cardTo = cardAssoc;
         } else {
-          from = _associationSimpleAttachment(assoc, arrowTip);
+          // Toujours partir du bras du lien (assocPt), pas d'un point sur le cercle — sinon 2e lien dessine un "arc" inutile.
+          from = assocPt;
           to = arrowTip;
           cardFrom = cardAssoc;
           cardTo = cardEntity;
         }
-      } else {
-        if (arrowAtAssociation) {
-          from = entityPt;
-          to = assocPt;
-          cardFrom = cardEntity;
-          cardTo = cardAssoc;
-        } else {
-          from = assocPt;
-          to = entityPt;
-          cardFrom = cardAssoc;
-          cardTo = cardEntity;
-        }
       }
-      // Début = ancre (centre du bord). Fin = snap au bord cible + marge (link_geometry).
-      final Offset effectiveFrom = from;
-      Offset effectiveTo = (arrowAtAssociation)
-          ? snapTipToAssociationBoundary(from, to, assoc, arrowTipMargin: arrowTipMargin)
-          : snapTipToEntityBoundary(from, to, ent, entityWidth: _entityWidth, arrowTipMargin: arrowTipMargin);
-      // Secours uniquement pour flèche vers l'entité : si la pointe est derrière [from], segment minimal.
-      // Pour flèche vers l'association (droite→gauche) : ne jamais remplacer la pointe snapée, sinon elle "remonte".
-      if (!arrowAtAssociation) {
-        final dx = to.dx - from.dx;
-        final dy = to.dy - from.dy;
-        final distTo = math.sqrt(dx * dx + dy * dy);
-        if (distTo >= 1e-6) {
-          final ux = dx / distTo;
-          final uy = dy / distTo;
-          final segDx = effectiveTo.dx - from.dx;
-          final segDy = effectiveTo.dy - from.dy;
-          if (segDx * ux + segDy * uy <= 0) {
-            final minLen = arrowStartMargin + 2.0;
-            effectiveTo = Offset(from.dx + ux * minLen, from.dy + uy * minLen);
-          }
-        }
+      // Pointe snappée pour que la flèche s'arrête avant la forme (ne rentre pas dedans).
+      Offset effFrom = from;
+      Offset effTo;
+      try {
+        effTo = arrowAtAssociation
+            ? snapTipToAssociationBoundary(from, to, assoc, arrowTipMargin: arrowTipMargin)
+            : snapTipToEntityBoundary(from, to, ent, entityWidth: _entityWidth, arrowTipMargin: arrowTipMargin);
+      } catch (err, st) {
+        if (_kLinkPaintLog) debugPrint('[McdCanvas] LINK $i ($assocName—$entityName) snap ERROR: $err');
+        effTo = to;
       }
-      // Longueur minimale du segment : si association et entité sont très proches (ex. lien à droite),
-      // le snap peut écraser le segment et les formes (point, flèche) se superposent en tache.
-      double segDx = effectiveTo.dx - effectiveFrom.dx;
-      double segDy = effectiveTo.dy - effectiveFrom.dy;
+      double segDx = effTo.dx - effFrom.dx;
+      double segDy = effTo.dy - effFrom.dy;
       double segDist = math.sqrt(segDx * segDx + segDy * segDy);
+      // Segment dégénéré ou à l'envers (pointe stockée incohérente) : fallback segment par défaut assoc ↔ entité, puis re-snap (évite arc / flèche minuscule 2e lien).
+      final dirDx = to.dx - from.dx;
+      final dirDy = to.dy - from.dy;
+      final dirLen = math.sqrt(dirDx * dirDx + dirDy * dirDy);
+      final segmentBackwards = segDist >= 1e-6 && dirLen >= 1e-6 && (segDx * dirDx + segDy * dirDy) <= 0;
+      if ((segDist < 30 || segmentBackwards) && (arrowTip != null || segmentBackwards)) {
+        effFrom = defaultFrom;
+        try {
+          effTo = arrowAtAssociation
+              ? snapTipToAssociationBoundary(defaultFrom, defaultTo, assoc, arrowTipMargin: arrowTipMargin)
+              : snapTipToEntityBoundary(defaultFrom, defaultTo, ent, entityWidth: _entityWidth, arrowTipMargin: arrowTipMargin);
+        } catch (_) {
+          effTo = defaultTo;
+        }
+        segDx = effTo.dx - effFrom.dx;
+        segDy = effTo.dy - effFrom.dy;
+        segDist = math.sqrt(segDx * segDx + segDy * segDy);
+        if (segmentBackwards) {
+          cardFrom = arrowAtAssociation ? cardEntity : cardAssoc;
+          cardTo = arrowAtAssociation ? cardAssoc : cardEntity;
+        }
+      }
+      // Longueur minimale pour éviter segment minuscule (cap round = pastille/arc) ; aligné sur link_geometry.
       if (segDist < kMinLinkSegmentLength && segDist >= 1e-6) {
         final scale = kMinLinkSegmentLength / segDist;
-        effectiveTo = Offset(
-          effectiveFrom.dx + segDx * scale,
-          effectiveFrom.dy + segDy * scale,
-        );
+        effTo = Offset(effFrom.dx + segDx * scale, effFrom.dy + segDy * scale);
+        segDx = effTo.dx - effFrom.dx;
+        segDy = effTo.dy - effFrom.dy;
+        segDist = kMinLinkSegmentLength;
+      } else if (segDist < 1e-6) {
+        double dx = 1.0;
+        double dy = 0.0;
+        if (arrowTip != null) {
+          dx = arrowTip.dx - effFrom.dx;
+          dy = arrowTip.dy - effFrom.dy;
+        }
+        if (dx == 0 && dy == 0) {
+          final ac = _associationCenter(assoc);
+          final ec = entityCenterOffset(ent);
+          dx = ec.dx - ac.dx;
+          dy = ec.dy - ac.dy;
+        }
+        double d = math.sqrt(dx * dx + dy * dy);
+        if (d < 1e-6) { dx = 1; dy = 0; d = 1; }
+        effTo = Offset(effFrom.dx + dx / d * kMinLinkSegmentLength, effFrom.dy + dy / d * kMinLinkSegmentLength);
       }
       final displayFrom = showUmlCardinalities ? McdState.mcdToUmlCardinality(cardFrom) : cardFrom;
       final displayTo = showUmlCardinalities ? McdState.mcdToUmlCardinality(cardTo) : cardTo;
       final selected = selectedLinkIndices.contains(i);
       final lineStyle = link['line_style'] as String? ?? 'straight';
-      final curved = lineStyle == 'curved';
+      final breakX = (link['break_x'] as num?)?.toDouble();
+      final breakY = (link['break_y'] as num?)?.toDouble();
       List<Offset> controlPoints = const [];
-      if (lineStyle == 'elbow_h') {
-        controlPoints = [Offset(effectiveTo.dx, effectiveFrom.dy)];
-      } else if (lineStyle == 'elbow_v') {
-        controlPoints = [Offset(effectiveFrom.dx, effectiveTo.dy)];
+      if (true) {
+        if (breakX != null && breakY != null) {
+          controlPoints = [Offset(breakX, breakY)];
+        } else if (lineStyle == 'elbow_h') {
+          controlPoints = [Offset(effTo.dx, effFrom.dy)];
+        } else if (lineStyle == 'elbow_v') {
+          controlPoints = [Offset(effFrom.dx, effTo.dy)];
+        }
       }
       final arrowReversed = link['arrow_reversed'] == true;
       final strokeW = (link['stroke_width'] as num?)?.toDouble() ?? defaultStrokeWidth;
       final arrowHead = link['arrow_head'] as String? ?? 'arrow';
       final startCap = link['start_cap'] as String? ?? 'dot';
-      LinkArrow.paintWithCapsules(
-        canvas,
-        from: effectiveFrom,
-        to: effectiveTo,
-        cardinalityEntity: displayTo,
-        cardinalityAssoc: displayFrom,
-        associationArmAngleDeg: 0,
-        selected: selected,
-        curved: curved,
-        controlPoints: controlPoints,
-        arrowReversed: arrowReversed,
-        strokeWidth: strokeW.clamp(1.0, 6.0),
-        arrowHead: arrowHead,
-        startCap: startCap,
-        arrowStartMargin: arrowStartMargin,
-      );
+      final fromIsAssociation = !arrowAtAssociation;
+      if (_kLinkPaintLog && (segDist < 2 || segmentBackwards)) {
+        debugPrint('[McdCanvas] LINK $i ($assocName—$entityName) segDist=${segDist.toStringAsFixed(1)} backwards=$segmentBackwards break=${breakX != null}');
+      }
+      final assocArmAngleDeg = _associationArmAngle(assoc, link);
+      try {
+        LinkArrow.paintWithCapsules(
+          canvas,
+          from: effFrom,
+          to: effTo,
+          cardinalityEntity: displayTo,
+          cardinalityAssoc: displayFrom,
+          fromIsAssociation: fromIsAssociation,
+          associationArmAngleDeg: assocArmAngleDeg,
+          selected: selected,
+          controlPoints: controlPoints,
+          arrowReversed: arrowReversed,
+          strokeWidth: strokeW.clamp(1.0, 6.0),
+          arrowHead: arrowHead,
+          startCap: startCap,
+          arrowStartMargin: arrowStartMargin,
+          cardinalityAtCenter: false,
+        );
+      } catch (e, st) {
+        debugPrint('[McdCanvas] LINK $i ($assocName—$entityName) PAINT ERROR: $e');
+        debugPrint(st.toString());
+      }
+    } catch (e, st) {
+      if (_kLinkPaintLog) debugPrint('[McdCanvas] LINK $i ERROR: $e');
+    }
     }
     canvas.restore();
   }

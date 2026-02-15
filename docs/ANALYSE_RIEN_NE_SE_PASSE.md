@@ -6,7 +6,7 @@
 |----------------|---------|--------|
 | **1. Code Python** | ❌ Probablement pas | L’API est utilisée seulement pour import/export/validation. La création d’entité au clic ne passe pas par l’API. |
 | **2. Code Flutter** | ✅ **Oui** | Erreur de compilation (doublon `_buildEntity`) et/ou gestes (tap) pas reçus ou pas traités. |
-| **3. Jonction Flutter ↔ API** | ⚠️ Partiel | Port et URLs sont cohérents ; si l’API n’est pas sur 8001, seul import/validation/export sont impactés, pas le clic sur le canvas. |
+| **3. Jonction Flutter ↔ API** | ⚠️ Partiel | Port et URLs sont cohérents ; si l’API n’est pas sur 8000, seul import/validation/export sont impactés, pas le clic sur le canvas. |
 
 ---
 
@@ -52,9 +52,9 @@ Donc le blocage « rien ne se passe » côté interface est **côté Flutter** (
 
 ## 3. Jonction Flutter ↔ API
 
-- **Flutter** : `ApiClient(baseUrl: 'http://127.0.0.1:8001')` (`lib/main.dart`).
+- **Flutter** : `ApiClient(baseUrl: 'http://127.0.0.1:8000')` (`lib/main.dart`).
 - **Python** : lancer l’API sur le **même port** :  
-  `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8001`
+  `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8000`
 - **Routes** : `/api/parse-markdown`, `/api/validate`, `/api/to-mld`, `/api/to-sql`, etc. ; le préfixe `/api` est cohérent avec le routeur Python.
 
 Si l’API est sur **8000** (ou pas démarrée), les appels Flutter (import Markdown, validation, export) échoueront, mais **pas** la création d’entité au clic, qui est purement locale.
@@ -69,7 +69,7 @@ En résumé : la jonction est importante pour tout ce qui passe par l’API ; po
    Supprimer le bloc dupliqué / factice dans `mcd_canvas.dart` (lignes 560–618) pour que le projet compile. Puis vérifier les logs de tap et le flux `_onCanvasTap` → `_showNewEntityDialog` → `addEntity`.
 
 2. **Vérifier la jonction uniquement pour import/export/validation**  
-   Démarrer l’API sur le port **8001** et tester depuis l’app (import Markdown, bouton Valider, export MLD/SQL).
+   Démarrer l’API sur le port **8000** et tester depuis l’app (import Markdown, bouton Valider, export MLD/SQL).
 
 3. **Ne pas chercher la cause « rien ne se passe » côté Python** pour le simple clic de création d’entité : ce chemin n’utilise pas l’API.
 

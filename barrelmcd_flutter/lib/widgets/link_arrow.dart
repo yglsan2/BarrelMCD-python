@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../utils/link_geometry.dart';
@@ -14,12 +15,36 @@ class LinkArrow {
   /// Rattachement des textes de part et d'autre de l'arc.
   static const double cardinalityBoxWidth = 40.0;
   static const double cardinalityBoxHeight = 22.0;
-  /// Distance le long du lien depuis chaque extrémité (évite que la cardinalité rentre dans la forme).
+  /// Distance le long du lien depuis chaque extrémité (mode « proche des extrémités »).
   static const double cardinalityAlongOffset = 44.0;
-  /// Décalage perpendiculaire : cardinalité assoc d'un côté (+norm), cardinalité entité de l'autre (-norm).
-  static const double cardinalityPerpOffset = 24.0;
+  /// 0 = boîtes sur le segment (« traversent » la flèche).
+  static const double cardinalityPerpOffset = 0.0;
 
-  /// Centres des boîtes cardinalités : sur le segment à [cardinalityAlongOffset] px de chaque bout, puis décal perp.
+  /// Centres des boîtes cardinalités **au centre du segment** (comme JMerise cardCentre) : les deux boîtes
+  /// sont de part et d'autre du milieu du segment. Couleurs conservées : mauve côté association, bleu clair côté entité.
+  static ({Offset assocCenter, Offset entityCenter}) cardinalityBoxCentersAtCenter(Offset from, Offset to) {
+    try {
+      final dx = to.dx - from.dx;
+      final dy = to.dy - from.dy;
+      final dist = math.sqrt(dx * dx + dy * dy);
+      if (dist < 1) return (assocCenter: from, entityCenter: to);
+      final ux = dx / dist;
+      final uy = dy / dist;
+      final midX = (from.dx + to.dx) / 2;
+      final midY = (from.dy + to.dy) / 2;
+      final normX = uy;
+      final normY = -ux;
+      return (
+        assocCenter: Offset(midX + cardinalityPerpOffset * normX, midY + cardinalityPerpOffset * normY),
+        entityCenter: Offset(midX - cardinalityPerpOffset * normX, midY - cardinalityPerpOffset * normY),
+      );
+    } catch (e, st) {
+      debugPrint('[LinkArrow] cardinalityBoxCentersAtCenter ERROR: $e');
+      return (assocCenter: from, entityCenter: to);
+    }
+  }
+
+  /// Centres des boîtes cardinalités : proche de chaque extrémité (max 25 % du segment) puis décal perp.
   static ({Offset assocCenter, Offset entityCenter}) cardinalityBoxCenters(Offset from, Offset to) {
     final dx = to.dx - from.dx;
     final dy = to.dy - from.dy;
@@ -27,11 +52,12 @@ class LinkArrow {
     if (dist < 1) return (assocCenter: from, entityCenter: to);
     final ux = dx / dist;
     final uy = dy / dist;
+    final along = math.min(cardinalityAlongOffset, dist * 0.25);
     final normX = uy;
     final normY = -ux;
     return (
-      assocCenter: Offset(from.dx + cardinalityAlongOffset * ux + cardinalityPerpOffset * normX, from.dy + cardinalityAlongOffset * uy + cardinalityPerpOffset * normY),
-      entityCenter: Offset(to.dx - cardinalityAlongOffset * ux - cardinalityPerpOffset * normX, to.dy - cardinalityAlongOffset * uy - cardinalityPerpOffset * normY),
+      assocCenter: Offset(from.dx + along * ux + cardinalityPerpOffset * normX, from.dy + along * uy + cardinalityPerpOffset * normY),
+      entityCenter: Offset(to.dx - along * ux - cardinalityPerpOffset * normX, to.dy - along * uy - cardinalityPerpOffset * normY),
     );
   }
 
@@ -56,20 +82,22 @@ class LinkArrow {
   /// [arrowHead] forme de la pointe : 'arrow', 'diamond', 'block', 'none'.
   /// [startCap] forme du départ : 'dot', 'diamond', 'square', 'none'.
   /// [arrowStartMargin] marge au début du trait (px). Défaut [kArrowStartMargin].
+  /// [cardinalityAtCenter] true = boîtes cardinalités au centre du segment (plus propre, style JMerise).
   static void paintWithCapsules(Canvas canvas, {
     required Offset from,
     required Offset to,
     required String cardinalityEntity,
     required String cardinalityAssoc,
+    bool fromIsAssociation = false,
     required double associationArmAngleDeg,
     bool selected = false,
-    bool curved = false,
     List<Offset> controlPoints = const [],
     bool arrowReversed = false,
     double strokeWidth = 2.5,
     String arrowHead = 'arrow',
     String startCap = 'dot',
     double? arrowStartMargin,
+    bool cardinalityAtCenter = false,
   }) {
     paintWithStyle(
       canvas,
@@ -77,15 +105,17 @@ class LinkArrow {
       to: to,
       cardinalityEntity: cardinalityEntity,
       cardinalityAssoc: cardinalityAssoc,
+      fromIsAssociation: fromIsAssociation,
       associationArmAngleDeg: associationArmAngleDeg,
       selected: selected,
-      barrelStyle: !curved,
+      barrelStyle: true,
       controlPoints: controlPoints,
       arrowReversed: arrowReversed,
       strokeWidth: strokeWidth,
       arrowHead: arrowHead,
       startCap: startCap,
       arrowStartMargin: arrowStartMargin,
+      cardinalityAtCenter: cardinalityAtCenter,
     );
   }
 
@@ -94,11 +124,13 @@ class LinkArrow {
   /// [arrowReversed] flèche au départ (sens inverse). [strokeWidth] épaisseur du trait.
   /// [arrowHead] 'arrow' | 'diamond' | 'block' | 'none'. [startCap] 'dot' | 'diamond' | 'square' | 'none'.
   /// [arrowStartMargin] marge au début du trait (px). Défaut [kArrowStartMargin].
+  /// [cardinalityAtCenter] true = cardinalités au centre du segment (boîtes colorées : mauve assoc, bleu clair entité).
   static void paintWithStyle(Canvas canvas, {
     required Offset from,
     required Offset to,
     required String cardinalityEntity,
     required String cardinalityAssoc,
+    bool fromIsAssociation = false,
     required double associationArmAngleDeg,
     bool selected = false,
     bool barrelStyle = false,
@@ -108,29 +140,30 @@ class LinkArrow {
     String arrowHead = 'arrow',
     String startCap = 'dot',
     double? arrowStartMargin,
+    bool cardinalityAtCenter = false,
   }) {
-    final marginStart = arrowStartMargin ?? kArrowStartMargin;
-    final dx = to.dx - from.dx;
-    final dy = to.dy - from.dy;
-    final dist = math.sqrt(dx * dx + dy * dy);
-    if (dist < 1 && controlPoints.isEmpty) return;
+    try {
+      final marginStart = arrowStartMargin ?? kArrowStartMargin;
+      final dx = to.dx - from.dx;
+      final dy = to.dy - from.dy;
+      final dist = math.sqrt(dx * dx + dy * dy);
+      if (dist < 1 && controlPoints.isEmpty) return;
 
-    final ux = dist >= 1 ? dx / dist : 1.0;
-    final uy = dist >= 1 ? dy / dist : 0.0;
-    // Si le segment est plus court que la marge de départ, partir de [from] pour ne pas inverser le trait.
-    final startOffset = dist >= marginStart ? marginStart : 0.0;
-    final start = Offset(from.dx + ux * startOffset, from.dy + uy * startOffset);
-    final end = to;
+      final ux = dist >= 1 ? dx / dist : 1.0;
+      final uy = dist >= 1 ? dy / dist : 0.0;
+      final startOffset = dist >= marginStart ? marginStart : 0.0;
+      final start = Offset(from.dx + ux * startOffset, from.dy + uy * startOffset);
+      final end = to;
 
-    if (barrelStyle) {
+      // Toujours en ligne droite : _paintBarrelCurvedStyle (Bézier/cloche) désactivé car il
+      // provoquait une trajectoire en arc incohérente sur le 2e lien (droite→gauche).
       _paintBarrelStyle(canvas, start: start, end: end, from: from, to: to, ux: ux, uy: uy, dist: dist,
-          cardinalityEntity: cardinalityEntity, cardinalityAssoc: cardinalityAssoc, selected: selected,
-          controlPoints: controlPoints, arrowReversed: arrowReversed, strokeWidth: strokeWidth,
-          arrowHead: arrowHead, startCap: startCap);
-    } else {
-      _paintBarrelCurvedStyle(canvas, start: start, end: end, from: from, to: to, ux: ux, uy: uy, dist: dist,
-          cardinalityEntity: cardinalityEntity, cardinalityAssoc: cardinalityAssoc,
-          associationArmAngleDeg: associationArmAngleDeg, selected: selected);
+          cardinalityEntity: cardinalityEntity, cardinalityAssoc: cardinalityAssoc, fromIsAssociation: fromIsAssociation,
+          selected: selected, controlPoints: controlPoints, arrowReversed: arrowReversed, strokeWidth: strokeWidth,
+          arrowHead: arrowHead, startCap: startCap, cardinalityAtCenter: cardinalityAtCenter);
+    } catch (e, st) {
+      debugPrint('[LinkArrow] paintWithStyle ERROR: $e');
+      debugPrint(st.toString());
     }
   }
 
@@ -144,6 +177,7 @@ class LinkArrow {
     required double uy,
     required String cardinalityEntity,
     required String cardinalityAssoc,
+    required bool fromIsAssociation,
     required bool selected,
     List<Offset> controlPoints = const [],
     bool arrowReversed = false,
@@ -151,6 +185,7 @@ class LinkArrow {
     double dist = 1.0,
     String arrowHead = 'arrow',
     String startCap = 'dot',
+    bool cardinalityAtCenter = false,
   }) {
     final effectiveStroke = selected ? 3.0 : strokeWidth.clamp(1.0, 6.0);
     final paint = Paint()
@@ -197,12 +232,13 @@ class LinkArrow {
       _drawSquareAt(canvas, startCapPoint, startCapDirX, startCapDirY, paint.color, size);
     }
 
-    final normX = uy;
-    final normY = -ux;
-    final assocBoxCenter = Offset(from.dx + cardinalityAlongOffset * ux + cardinalityPerpOffset * normX, from.dy + cardinalityAlongOffset * uy + cardinalityPerpOffset * normY);
-    final entityBoxCenter = Offset(end.dx - cardinalityAlongOffset * ux - cardinalityPerpOffset * normX, end.dy - cardinalityAlongOffset * uy - cardinalityPerpOffset * normY);
-    _drawCardinalityBox(canvas, assocBoxCenter, cardinalityAssoc, selected);
-    _drawCardinalityBox(canvas, entityBoxCenter, cardinalityEntity, selected);
+    try {
+      final centers = cardinalityAtCenter ? cardinalityBoxCentersAtCenter(from, to) : cardinalityBoxCenters(from, to);
+      _drawCardinalityBox(canvas, centers.assocCenter, cardinalityAssoc, selected, isAssociationSide: fromIsAssociation);
+      _drawCardinalityBox(canvas, centers.entityCenter, cardinalityEntity, selected, isAssociationSide: !fromIsAssociation);
+    } catch (e, st) {
+      debugPrint('[LinkArrow] _paintBarrelStyle cardinality ERROR: $e');
+    }
   }
 
   /// Dessine un chevron (flèche) à [point], dans la direction (ux, uy) — pointe à l'arrivée du lien.
@@ -270,69 +306,14 @@ class LinkArrow {
     canvas.drawPath(path, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 1.5);
   }
 
-  /// Style Barrel courbe : courbe de Bézier lisse, flèche, capsules pour les cardinalités.
-  static void _paintBarrelCurvedStyle(Canvas canvas, {
-    required Offset start,
-    required Offset end,
-    required Offset from,
-    required Offset to,
-    required double ux,
-    required double uy,
-    required double dist,
-    required String cardinalityEntity,
-    required String cardinalityAssoc,
-    required double associationArmAngleDeg,
-    required bool selected,
-  }) {
-    const strokeWidth = 2.2;
-    final paint = Paint()
-      ..color = selected ? AppTheme.primary : AppTheme.primary.withValues(alpha: 0.85)
-      ..strokeWidth = selected ? 2.8 : strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final mid = Offset((start.dx + end.dx) / 2, (start.dy + end.dy) / 2);
-    final perpX = -uy;
-    final perpY = ux;
-    final bulge = dist * 0.18;
-    final control = Offset(mid.dx + perpX * bulge, mid.dy + perpY * bulge);
-    final path = Path()
-      ..moveTo(start.dx, start.dy)
-      ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
-    canvas.drawPath(path, paint);
-
-    const arrowSize = 9.0;
-    final angle = math.atan2(end.dy - control.dy, end.dx - control.dx);
-    final arrowTip = Offset(end.dx - arrowSize * math.cos(angle), end.dy - arrowSize * math.sin(angle));
-    final arrowLeft = Offset(
-      arrowTip.dx + arrowSize * math.cos(angle - 2.5) - arrowSize * 0.5 * math.sin(angle - 2.5),
-      arrowTip.dy + arrowSize * math.sin(angle - 2.5) + arrowSize * 0.5 * math.cos(angle - 2.5),
-    );
-    final arrowRight = Offset(
-      arrowTip.dx + arrowSize * math.cos(angle + 2.5) + arrowSize * 0.5 * math.sin(angle + 2.5),
-      arrowTip.dy + arrowSize * math.sin(angle + 2.5) - arrowSize * 0.5 * math.cos(angle + 2.5),
-    );
-    canvas.drawPath(
-      Path()..moveTo(end.dx, end.dy)..lineTo(arrowLeft.dx, arrowLeft.dy)..lineTo(arrowRight.dx, arrowRight.dy)..close(),
-      Paint()..color = paint.color..style = PaintingStyle.fill,
-    );
-    canvas.drawPath(
-      Path()..moveTo(end.dx, end.dy)..lineTo(arrowLeft.dx, arrowLeft.dy)..lineTo(arrowRight.dx, arrowRight.dy)..close(),
-      Paint()..color = paint.color..style = PaintingStyle.stroke..strokeWidth = strokeWidth,
-    );
-
-    final normX = uy;
-    final normY = -ux;
-    final assocBoxCenter = Offset(from.dx + cardinalityAlongOffset * ux + cardinalityPerpOffset * normX, from.dy + cardinalityAlongOffset * uy + cardinalityPerpOffset * normY);
-    final entityBoxCenter = Offset(to.dx - cardinalityAlongOffset * ux - cardinalityPerpOffset * normX, to.dy - cardinalityAlongOffset * uy - cardinalityPerpOffset * normY);
-    _drawCardinalityBox(canvas, assocBoxCenter, cardinalityAssoc, selected);
-    _drawCardinalityBox(canvas, entityBoxCenter, cardinalityEntity, selected);
-  }
-
-  /// Boîte à cardinalité bleue (couleur des bras), texte blanc, toujours lisible.
-  static void _drawCardinalityBox(Canvas canvas, Offset center, String text, bool selected) {
+  /// Boîte à cardinalité : bleu clair côté entité, mauve pâle côté association (pour les distinguer).
+  static void _drawCardinalityBox(Canvas canvas, Offset center, String text, bool selected, {bool isAssociationSide = false}) {
+    try {
     final w = cardinalityBoxWidth;
     final h = cardinalityBoxHeight;
+    final fillColor = isAssociationSide
+        ? (selected ? AppTheme.cardinalityAssoc : AppTheme.cardinalityAssoc.withValues(alpha: 0.95))
+        : (selected ? AppTheme.primary : AppTheme.primary.withValues(alpha: 0.95));
     final rect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: w, height: h),
       const Radius.circular(6),
@@ -340,7 +321,7 @@ class LinkArrow {
     canvas.drawRRect(
       rect,
       Paint()
-        ..color = selected ? AppTheme.primary : AppTheme.primary.withValues(alpha: 0.95)
+        ..color = fillColor
         ..style = PaintingStyle.fill,
     );
     canvas.drawRRect(
@@ -365,6 +346,9 @@ class LinkArrow {
       canvas,
       Offset(center.dx - textPainter.width / 2, center.dy - textPainter.height / 2),
     );
+    } catch (e, st) {
+      debugPrint('[LinkArrow] _drawCardinalityBox ERROR: $e');
+    }
   }
 
   static void _drawCapsule(Canvas canvas, Offset center, String text, bool selected) {

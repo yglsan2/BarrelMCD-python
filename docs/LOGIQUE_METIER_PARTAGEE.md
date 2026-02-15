@@ -21,7 +21,7 @@ Pour gagner du temps, la logique métier « lourde » est centralisée côté **
 
 ## Démarrage
 
-- API : `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8001`
+- API : `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8000`
 - Flutter : `cd barrelmcd_flutter && flutter run`
 
-Flutter doit pointer vers `http://127.0.0.1:8001` (voir `lib/main.dart`).
+Flutter doit pointer vers `http://127.0.0.1:8000` (voir `lib/main.dart`).

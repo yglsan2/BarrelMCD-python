@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=BarrelMCD Flutter
+Comment=Modélisation conceptuelle de données (MCD)
+Exec=barrelmcd-flutter
+Icon=${SNAP}/meta/gui/barrelmcd-flutter.png
+Terminal=false
+Type=Application
+Categories=Development;Office;

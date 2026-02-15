@@ -1,0 +1,29 @@
+Format: 1.8
+Date: Thu, 12 Feb 2025 12:00:00 +0100
+Source: barrelmcd-flutter
+Built-For-Profiles: noudeb
+Architecture: source
+Version: 1.0.0-1
+Distribution: unstable
+Urgency: medium
+Maintainer: DesertYGL
+Changed-By: DesertYGL <noreply@github.com>
+Changes:
+ barrelmcd-flutter (1.0.0-1) unstable; urgency=medium
+ .
+   * Release 1.0.0.
+Checksums-Sha1:
+ f90fea35a35be481733bef6ecc2f56536fa0854e 907 barrelmcd-flutter_1.0.0-1.dsc
+ 76e4b47123ec81a77027190aa489e5d4d3a77252 19408862 barrelmcd-flutter_1.0.0.orig.tar.gz
+ dbec7d7a10248c9839875b39a93c1d5f2a69b6a5 1052 barrelmcd-flutter_1.0.0-1.debian.tar.xz
+ 885380df74928031b10ac6cf2dd7e76cd8846e3d 7587 barrelmcd-flutter_1.0.0-1_source.buildinfo
+Checksums-Sha256:
+ 92e3ceaaef63d47c701f7c6cae4297ef37b69b34be1e1dc56b7f3d9e114c034e 907 barrelmcd-flutter_1.0.0-1.dsc
+ d7a83cfc960af910bb4d2064ca5f0cb5f2a56e239f9c540f2101e038e2c42b0c 19408862 barrelmcd-flutter_1.0.0.orig.tar.gz
+ 0cd39f9cf2ba7be036dc2249cce1ce3e77fdaaf8d1a1bf7819b16a608a0f0eb0 1052 barrelmcd-flutter_1.0.0-1.debian.tar.xz
+ 9818e9d78cb542dd31e33a4f9ae46c720115547dd0e88c074ec7579ca26d92e5 7587 barrelmcd-flutter_1.0.0-1_source.buildinfo
+Files:
+ d458404710b785102cacf77ce48a7dd8 907 devel optional barrelmcd-flutter_1.0.0-1.dsc
+ 5310506b48eccbb5ff0550b6474f7ef9 19408862 devel optional barrelmcd-flutter_1.0.0.orig.tar.gz
+ e60dc50b6b149402a6d5269531a4bce1 1052 devel optional barrelmcd-flutter_1.0.0-1.debian.tar.xz
+ 793c3159edfe629c651a496ecbe586b4 7587 devel optional barrelmcd-flutter_1.0.0-1_source.buildinfo

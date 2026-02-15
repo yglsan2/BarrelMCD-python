@@ -1,0 +1,10 @@
+# Réduire le contexte envoyé à "docker build" (Dockerfile.deb n’utilise pas ces fichiers)
+.git
+.cursor
+build
+aur-barrelmcd
+barrelmcd-flutter-1.0.0
+*.deb
+*.dsc
+*.changes
+*.orig.tar.gz

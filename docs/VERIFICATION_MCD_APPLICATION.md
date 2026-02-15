@@ -45,8 +45,8 @@ Rapport d'analyse et corrections effectuées pour rendre le logiciel MCD utilisa
 
 ### 2.4 Jonction Flutter ↔ API
 
-- **Base URL** : `http://127.0.0.1:8001` dans `main.dart`.
-- **Lancement API** : `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8001`
+- **Base URL** : `http://127.0.0.1:8000` dans `main.dart`.
+- **Lancement API** : `cd BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8000` (ou `./run_api.sh`)
 - Les appels Flutter (`parseMarkdown`, `validateMcd`, `mcdToSql`, `mcdToMld`) utilisent le préfixe `/api` ; côté Python le routeur est monté avec `prefix="/api"`.
 
 ### 2.5 Barre d’outils
@@ -91,7 +91,7 @@ else:
 
 **Terminal 1 – API :**
 ```bash
-cd /home/benjisan/BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8001
+cd /home/benjisan/BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app --reload --port 8000
 ```
 
 **Terminal 2 – Flutter :**
@@ -99,4 +99,4 @@ cd /home/benjisan/BarrelMCD-python && .venv/bin/python -m uvicorn api.main:app -
 cd /home/benjisan/BarrelMCD-python/barrelmcd_flutter && flutter run
 ```
 
-Sans l’API, la création d’entités/associations et les liens fonctionnent en local ; l’import Markdown, la validation MCD et l’export MLD/SQL nécessitent l’API sur le port 8001.
+Sans l’API, la création d’entités/associations et les liens fonctionnent en local ; l’import Markdown, la validation MCD et l’export MLD/SQL nécessitent l’API sur le port 8000.

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/mcd_state.dart';
@@ -8,12 +9,11 @@ import '../theme/app_theme.dart';
 class LinksPanel extends StatelessWidget {
   const LinksPanel({super.key});
 
-  static const List<String> lineStyles = ['straight', 'elbow_h', 'elbow_v', 'curved'];
+  static const List<String> lineStyles = ['straight', 'elbow_h', 'elbow_v'];
   static const Map<String, String> lineStyleLabels = {
     'straight': 'Droite',
     'elbow_h': 'Coudé (H)',
     'elbow_v': 'Coudé (V)',
-    'curved': 'Courbe',
   };
   static const List<String> arrowHeads = ['arrow', 'diamond', 'block', 'none'];
   static const Map<String, String> arrowHeadLabels = {
@@ -132,6 +132,7 @@ class _LinkOptions extends StatelessWidget {
     final strokeW = (link['stroke_width'] as num?)?.toDouble() ?? 2.5;
     final arrowHead = link['arrow_head'] as String? ?? 'arrow';
     final startCap = link['start_cap'] as String? ?? 'dot';
+    final hasBreak = (link['break_x'] as num?) != null && (link['break_y'] as num?) != null;
 
     return Card(
       color: AppTheme.surfaceLight,
@@ -209,6 +210,56 @@ class _LinkOptions extends StatelessWidget {
                   ),
                 ),
                 Text('${strokeW.toStringAsFixed(1)}', style: const TextStyle(fontSize: 11)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text('Point de cassure (ligne brisée)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  icon: const Icon(Icons.gesture, size: 18),
+                  label: Text(hasBreak ? 'Déplacer au centre' : 'Ajouter au centre'),
+                  onPressed: () {
+                    try {
+                      final mid = state.getLinkSegmentMidpoint(linkIndex);
+                      if (mid != null) {
+                        state.updateAssociationLinkBreakPoint(linkIndex, mid.dx, mid.dy);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Point de cassure mis à jour.')));
+                        }
+                      } else if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Impossible de calculer le centre du segment.')));
+                      }
+                    } catch (e, st) {
+                      debugPrint('[LinksPanel] getLinkSegmentMidpoint/updateAssociationLinkBreakPoint: $e');
+                      debugPrint(st.toString());
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                      }
+                    }
+                  },
+                ),
+                if (hasBreak)
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.remove_circle_outline, size: 18),
+                    label: const Text('Supprimer la cassure'),
+                    onPressed: () {
+                      try {
+                        state.updateAssociationLinkBreakPoint(linkIndex, null, null);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cassure supprimée.')));
+                        }
+                      } catch (e, st) {
+                        debugPrint('[LinksPanel] updateAssociationLinkBreakPoint(null): $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                        }
+                      }
+                    },
+                  ),
               ],
             ),
             const SizedBox(height: 16),

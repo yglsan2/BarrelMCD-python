@@ -41,8 +41,8 @@ En résumé : la logique métier (validation, parsing, conversion) reste dans le
 
 ## 4. Port et baseUrl
 
-- Flutter : `ApiClient(baseUrl: 'http://127.0.0.1:8001')` (défini dans `main.dart`).
-- API Python : par défaut `api/main.py` lance uvicorn sur le port 8000. Pour que Flutter atteigne l’API, lancer le serveur sur le port 8001, par exemple :  
-  `uvicorn api.main:app --host 0.0.0.0 --port 8001`
+- Flutter : `ApiClient(baseUrl: 'http://127.0.0.1:8000')` (défini dans `main.dart`).
+- API Python : par défaut `api/main.py` lance uvicorn sur le port 8000. Pour que Flutter atteigne l’API, lancer le serveur sur le port 8000, par exemple :  
+  `uvicorn api.main:app --host 0.0.0.0 --port 8000`
 
 Si le port diffère, adapter `baseUrl` dans `main.dart` pour qu’il pointe vers l’URL du serveur Python.

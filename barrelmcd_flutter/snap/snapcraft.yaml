@@ -1,0 +1,24 @@
+name: barrelmcd-flutter
+version: "1.0.1"
+summary: Modélisation conceptuelle de données (MCD) avec BarrelMCD
+description: |
+  Interface Flutter pour BarrelMCD. Dessin d'entités, associations et liens
+  avec cardinalités. Export MLD, MPD, SQL. Licence GPL-3.0.
+
+confinement: strict
+base: core22
+grade: stable
+
+apps:
+  barrelmcd-flutter:
+    command: barrelmcd_flutter
+    extensions: [gnome]
+    plugs:
+      - network
+      - home
+
+parts:
+  barrelmcd-flutter:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart

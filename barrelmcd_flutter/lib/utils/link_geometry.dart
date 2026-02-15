@@ -1,10 +1,12 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart' show Offset, Rect;
 import '../widgets/association_oval.dart';
 
 /// Géométrie des liens MCD (Barrel + DrawDB).
 /// Un lien = un arc entre une association et une entité.
 /// Une seule source de vérité pour les points d'accroche : association (pointe du bras) et entité (bras ou bord).
+/// Aligné sur Looping (CDrawArc/trait/flèche) et JMerise (IhmLien, segment + cardinalité + cassure).
 /// Utilisé par le canvas (hit-test, segment, drag) et par le painter des liens.
 
 const double kEntityWidth = 200.0;
@@ -31,8 +33,9 @@ Offset associationCenter(Map<String, dynamic> a) {
 Offset associationArmPosition(Map<String, dynamic> a, Map<String, dynamic> link) {
   final center = associationCenter(a);
   final w = effectiveAssociationWidth(a);
-  final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
-  final armIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+  final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
+  final rawArmIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+  final armIndex = angles.isEmpty ? 0 : rawArmIndex.clamp(0, angles.length - 1);
   final angle = (armIndex < angles.length ? angles[armIndex].toDouble() : 0.0);
   return armPositionFromCenter(center, angle, w, w);
 }
@@ -124,17 +127,23 @@ Offset entityLinkEndpoint(
   if (armAngles != null && armAngles.isNotEmpty && entityArmIndex != null && entityArmIndex >= 0 && entityArmIndex < armAngles.length) {
     return entityArmTipPosition(e, armAngles[entityArmIndex], entityWidth: entityWidth);
   }
-  // Choisir le bord le plus proche de l'association (même logique dans toutes les directions).
+  // Bord face au point d'accroche : angle depuis le centre entité vers l'association → secteur (right/bottom/left/top).
+  // Détermine un seul bord pour toute direction (droite-gauche, bas-haut, diagonales).
   final dx = associationArmPos.dx - centerX;
   final dy = associationArmPos.dy - centerY;
-  if (dx.abs() >= dy.abs()) return dx < 0 ? Offset(leftX, centerY) : Offset(rightX, centerY);
-  return dy < 0 ? Offset(centerX, topY) : Offset(centerX, bottomY);
+  if (dx.abs() < 1e-6 && dy.abs() < 1e-6) return Offset(rightX, centerY);
+  final angleDeg = math.atan2(dy, dx) * 180 / math.pi; // -180..180, 0 = droite
+  if (angleDeg >= -45 && angleDeg < 45) return Offset(rightX, centerY);
+  if (angleDeg >= 45 && angleDeg < 135) return Offset(centerX, bottomY);
+  if (angleDeg >= -135 && angleDeg < -45) return Offset(centerX, topY);
+  return Offset(leftX, centerY); // 135..180 ou -180..-135
 }
 
 /// Angle du bras en degrés (pour affichage optionnel du lien).
 double associationArmAngle(Map<String, dynamic> a, Map<String, dynamic> link) {
-  final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 180.0];
-  final armIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+  final angles = (a['arm_angles'] as List?)?.cast<num>() ?? [0.0, 90.0, 180.0, 270.0];
+  final rawArmIndex = (link['arm_index'] as num?)?.toInt() ?? 0;
+  final armIndex = angles.isEmpty ? 0 : rawArmIndex.clamp(0, angles.length - 1);
   return (armIndex < angles.length ? angles[armIndex].toDouble() : 0.0);
 }
 
@@ -145,9 +154,15 @@ double associationArmAngle(Map<String, dynamic> a, Map<String, dynamic> link) {
   Map<String, dynamic> entity,
   Map<String, dynamic> link,
 ) {
-  final from = associationArmPosition(assoc, link);
-  final to = entityLinkEndpoint(entity, from, link: link);
-  return (from: from, to: to);
+  try {
+    final from = associationArmPosition(assoc, link);
+    final to = entityLinkEndpoint(entity, from, link: link);
+    return (from: from, to: to);
+  } catch (e, st) {
+    debugPrint('[link_geometry] getLinkSegment ERROR: $e');
+    debugPrint(st.toString());
+    return (from: associationCenter(assoc), to: entityCenterOffset(entity));
+  }
 }
 
 /// Indice du bras d'association le plus aligné avec la direction vers l'entité (pour que le lien parte du bon côté).
@@ -163,7 +178,7 @@ int bestArmIndexForLink(Map<String, dynamic> assoc, Map<String, dynamic> entity)
   final dy = entityCenter.dy - center.dy;
   double angleDeg = math.atan2(dy, dx) * 180 / math.pi;
   if (angleDeg < 0) angleDeg += 360;
-  final angles = (assoc['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 180.0];
+  final angles = (assoc['arm_angles'] as List?)?.cast<num>().map((n) => n.toDouble()).toList() ?? [0.0, 90.0, 180.0, 270.0];
   int best = 0;
   double bestDiff = 360;
   for (int i = 0; i < angles.length; i++) {
@@ -212,7 +227,7 @@ Offset entityCenterOffset(Map<String, dynamic> e) {
 
 /// Marge au début du trait (départ depuis l'ancre), utilisée par LinkArrow.
 const double kArrowStartMargin = 10.0;
-/// Marge pour que la pointe et le chevron s'arrêtent juste avant la forme (jamais dedans).
+/// Marge pour que la pointe s'arrête avant la forme (sans débordement excessif).
 const double kArrowTipMargin = 12.0;
 /// Longueur minimale du segment affiché pour éviter un lien « écrasé » (tache) quand association et entité sont très proches.
 const double kMinLinkSegmentLength = 48.0;
@@ -302,6 +317,7 @@ Rect entityRect(Map<String, dynamic> e, {double? entityWidth}) {
 /// puis marge le long du rayon (extérieur si [from] dans le rect, sinon recul avant le bord).
 /// [arrowTipMargin] optionnel : marge en px (défaut [kArrowTipMargin]).
 Offset snapTipToEntityBoundary(Offset from, Offset tip, Map<String, dynamic> entity, {double? entityWidth, double? arrowTipMargin}) {
+  try {
   final margin = arrowTipMargin ?? kArrowTipMargin;
   final rect = entityRect(entity, entityWidth: entityWidth);
   final dir = Offset(tip.dx - from.dx, tip.dy - from.dy);
@@ -328,6 +344,10 @@ Offset snapTipToEntityBoundary(Offset from, Offset tip, Map<String, dynamic> ent
     return Offset(tip.dx - ux * margin, tip.dy - uy * margin);
   }
   return Offset(hit.point.dx - ux * margin, hit.point.dy - uy * margin);
+  } catch (e, st) {
+    debugPrint('[link_geometry] snapTipToEntityBoundary ERROR: $e');
+    return tip;
+  }
 }
 
 /// Cercle d'association : centre et rayon effectif (demi-largeur + extension).
@@ -342,41 +362,82 @@ Offset snapTipToEntityBoundary(Offset from, Offset tip, Map<String, dynamic> ent
   return (center: center, radius: radius);
 }
 
-/// Retourne le point où doit finir la flèche : intersection rayon (from→tip) avec le cercle d'association,
-/// puis marge. Intersection la plus proche de [from]. La pointe ne dépasse jamais [tip] (même longueur max).
+/// Même ratio que AssociationOval (_ovalRadiusYRatio) pour cohérence dessin ↔ liens.
+const double kAssociationOvalRadiusYRatio = 0.68;
+
+/// Ellipse d'association (ovale dessiné à l'écran) : centre et demi-axes.
+({Offset center, double radiusX, double radiusY}) associationEllipse(Map<String, dynamic> a) {
+  final pos = a['position'] as Map<String, dynamic>?;
+  final x = (pos?['x'] as num?)?.toDouble() ?? 0;
+  final y = (pos?['y'] as num?)?.toDouble() ?? 0;
+  final w = (a['width'] as num?)?.toDouble() ?? 260.0;
+  final boxSize = w + 2 * AssociationOval.armExtensionLength;
+  final center = Offset(x + boxSize / 2, y + boxSize / 2);
+  final radiusX = w / 2 + AssociationOval.armExtensionLength;
+  final radiusY = radiusX * kAssociationOvalRadiusYRatio;
+  return (center: center, radiusX: radiusX, radiusY: radiusY);
+}
+
+/// Intersection rayon [origin] + t*[dir] (t>0) avec l'ellipse (centre, demi-axes radiusX, radiusY).
+({Offset point, Offset normal})? rayEllipseIntersection(Offset origin, Offset dir, Offset center, double radiusX, double radiusY) {
+  final dx = dir.dx;
+  final dy = dir.dy;
+  final len = math.sqrt(dx * dx + dy * dy);
+  if (len < 1e-6) return null;
+  final ux = dx / len;
+  final uy = dy / len;
+  final ex = origin.dx - center.dx;
+  final ey = origin.dy - center.dy;
+  final a = (ux / radiusX) * (ux / radiusX) + (uy / radiusY) * (uy / radiusY);
+  final b = 2 * (ex * ux / (radiusX * radiusX) + ey * uy / (radiusY * radiusY));
+  final c = (ex / radiusX) * (ex / radiusX) + (ey / radiusY) * (ey / radiusY) - 1;
+  final disc = b * b - 4 * a * c;
+  if (disc < 0) return null;
+  final sqrtDisc = math.sqrt(disc);
+  double t = (-b - sqrtDisc) / (2 * a);
+  if (t <= 0) t = (-b + sqrtDisc) / (2 * a);
+  if (t <= 0) return null;
+  final px = origin.dx + t * ux;
+  final py = origin.dy + t * uy;
+  final nx = (px - center.dx) / (radiusX * radiusX);
+  final ny = (py - center.dy) / (radiusY * radiusY);
+  final nlen = math.sqrt(nx * nx + ny * ny);
+  if (nlen < 1e-9) return null;
+  return (point: Offset(px, py), normal: Offset(nx / nlen, ny / nlen));
+}
+
+/// Retourne le point où doit finir la flèche : intersection rayon (from→tip) avec l'**ellipse** d'association
+/// (même forme que dessinée à l'écran), puis marge. La pointe ne rentre jamais dans l'ovale.
 /// [arrowTipMargin] optionnel : marge en px (défaut [kArrowTipMargin]).
 Offset snapTipToAssociationBoundary(Offset from, Offset tip, Map<String, dynamic> assoc, {double? arrowTipMargin}) {
+  try {
   final margin = arrowTipMargin ?? kArrowTipMargin;
-  final circle = associationCircle(assoc);
+  final ellipse = associationEllipse(assoc);
   final dir = Offset(tip.dx - from.dx, tip.dy - from.dy);
   final len = math.sqrt(dir.dx * dir.dx + dir.dy * dir.dy);
   if (len < 1e-6) return tip;
   final ux = dir.dx / len;
   final uy = dir.dy / len;
-  final ex = from.dx - circle.center.dx;
-  final ey = from.dy - circle.center.dy;
-  final a = ux * ux + uy * uy;
-  final b = 2 * (ex * ux + ey * uy);
-  final c = ex * ex + ey * ey - circle.radius * circle.radius;
-  final disc = b * b - 4 * a * c;
-  if (disc < 0) {
+  final hit = rayEllipseIntersection(from, dir, ellipse.center, ellipse.radiusX, ellipse.radiusY);
+  if (hit == null) {
     return Offset(tip.dx - ux * margin, tip.dy - uy * margin);
   }
-  final sqrtDisc = math.sqrt(disc);
-  final t1 = (-b - sqrtDisc) / (2 * a);
-  final t2 = (-b + sqrtDisc) / (2 * a);
-  double t = t1 > 0 ? t1 : (t2 > 0 ? t2 : -1);
-  if (t <= 0) return Offset(tip.dx - ux * margin, tip.dy - uy * margin);
-  if (t > len) {
+  final hitDist = math.sqrt(
+    (hit.point.dx - from.dx) * (hit.point.dx - from.dx) +
+    (hit.point.dy - from.dy) * (hit.point.dy - from.dy),
+  );
+  if (hitDist > len + 1) {
     return Offset(tip.dx - ux * margin, tip.dy - uy * margin);
   }
-  final hitX = from.dx + t * ux;
-  final hitY = from.dy + t * uy;
-  final result = Offset(hitX - ux * margin, hitY - uy * margin);
+  final result = Offset(hit.point.dx - ux * margin, hit.point.dy - uy * margin);
   if ((result.dx - from.dx) * dir.dx + (result.dy - from.dy) * dir.dy <= 0) {
     return Offset(from.dx + ux * margin, from.dy + uy * margin);
   }
   return result;
+  } catch (e, st) {
+    debugPrint('[link_geometry] snapTipToAssociationBoundary ERROR: $e');
+    return tip;
+  }
 }
 
 /// Début de flèche côté entité : place [start] au bord du rect + marge (rayon [to] → [start]), pour que le trait ne rentre pas dans l'entité.
@@ -395,13 +456,13 @@ Offset snapStartToEntityBoundary(Offset to, Offset start, Map<String, dynamic> e
   );
 }
 
-/// Début de flèche côté association : place [start] au bord du cercle + marge (rayon [to] → [start]).
+/// Début de flèche côté association : place [start] au bord de l'ellipse + marge (rayon [to] → [start]).
 /// [arrowTipMargin] optionnel : marge en px (défaut [kArrowTipMargin]).
 Offset snapStartToAssociationBoundary(Offset to, Offset start, Map<String, dynamic> assoc, {double? arrowTipMargin}) {
   final margin = arrowTipMargin ?? kArrowTipMargin;
-  final circle = associationCircle(assoc);
+  final ellipse = associationEllipse(assoc);
   final dir = Offset(start.dx - to.dx, start.dy - to.dy);
-  final hit = rayCircleIntersection(to, dir, circle.center, circle.radius);
+  final hit = rayEllipseIntersection(to, dir, ellipse.center, ellipse.radiusX, ellipse.radiusY);
   if (hit == null) return start;
   return Offset(
     hit.point.dx + hit.normal.dx * margin,
