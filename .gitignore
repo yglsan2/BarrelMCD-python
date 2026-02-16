@@ -53,3 +53,16 @@ logs/
 # Sortie analyse radare2 (Looping) — on garde le README
 docs/analysis_output/*
 !docs/analysis_output/README.md
+
+# Builds et artifacts (publier via GitHub Releases)
+artifacts/
+aur-barrelmcd/
+barrelmcd-flutter-1.0.0/
+barrelmcd-flutter_1.0.0.orig.tar.gz
+barrelmcd_flutter/packaging/out/
+deb-artifact/
+docs/jmerise_analysis/
+installeurs-bureau/
+packaging/
+*.pkg.tar.zst
+*.deb
